@@ -1,2 +1,2 @@
-# sdd-tic-tac-toe
-An exercise on Spec-Driven Development
+# web-uno
+This is a Multiplayer Uno game.
