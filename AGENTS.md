@@ -3,7 +3,18 @@
 This document provides guidelines for AI agents working on the Web Uno multiplayer game project.
 
 ## Project Overview
-Web Uno is a multiplayer card game implementation built as a modern web application. The project uses contemporary JavaScript/TypeScript tooling for development, testing, and deployment.
+Web Uno is a multiplayer card game implementation built as a modern web application using **spec-driven development**. All features and components are thoroughly specified in the `specs/` directory before implementation. The project uses contemporary JavaScript/TypeScript tooling for development, testing, and deployment.
+
+### Development Workflow
+1. **Review Specs**: Check the `specs/` directory for existing specifications
+2. **Create/Update Specs**: Use the spec template for new features or updates
+3. **Implement**: Build according to approved specifications
+4. **Test & Validate**: Ensure implementation meets all acceptance criteria
+5. **Archive**: Move completed specs to `specs/_archive/`
+
+### Key Resources
+- **[📁 specs/](specs/)** - Feature and component specifications
+- **[📝 Spec Template](specs/templates/spec-template.md)** - Template for creating specifications
 
 ## Build System & Commands
 
