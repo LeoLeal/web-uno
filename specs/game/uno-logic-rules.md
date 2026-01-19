@@ -14,7 +14,7 @@
 
 **Date Created**: 2026-01-19
 
-**Last Updated**: 2024-01-XX
+**Last Updated**: 2026-01-19
 
 ### Description
 Implement the core Uno game logic, rules, and turn management system. This includes card playing validation, scoring, special card effects, and win conditions.

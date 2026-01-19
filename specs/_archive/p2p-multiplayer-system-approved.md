@@ -14,7 +14,7 @@
 
 **Date Created**: 2026-01-19
 
-**Last Updated**: 2024-01-XX
+**Last Updated**: 2026-01-19
 
 ### Description
 Implement peer-to-peer (P2P) multiplayer functionality for the Web Uno game using WebRTC technology. This allows players to connect directly without requiring a centralized game server, enabling cost-effective multiplayer gaming with low latency.
