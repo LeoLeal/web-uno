@@ -1,6 +1,15 @@
 # web-uno
 
-This is a Multiplayer Uno game built using spec-driven development.
+This is a Multiplayer Uno game built using spec-driven development with modern web technologies.
+
+## Technology Stack
+
+- **Framework**: Next.js 16 (React 19)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Testing**: Vitest + Testing Library
+- **Build Tool**: Vite (via Next.js)
 
 ## Development Approach
 

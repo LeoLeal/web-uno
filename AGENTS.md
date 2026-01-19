@@ -3,7 +3,16 @@
 This document provides guidelines for AI agents working on the Web Uno multiplayer game project.
 
 ## Project Overview
-Web Uno is a multiplayer card game implementation built as a modern web application using **spec-driven development**. All features and components are thoroughly specified in the `specs/` directory before implementation. The project uses contemporary JavaScript/TypeScript tooling for development, testing, and deployment.
+Web Uno is a multiplayer card game implementation built as a modern web application using **spec-driven development**. All features and components are thoroughly specified in the `specs/` directory before implementation.
+
+### Technology Stack
+- **Framework**: Next.js 16 with React 19
+- **Language**: TypeScript (strict mode enabled)
+- **Styling**: Tailwind CSS with emotion/styled-components
+- **State Management**: React Context API with hooks
+- **Testing**: Vitest for unit tests, Playwright for E2E tests
+- **Build Tool**: Vite (via Next.js)
+- **Real-time Features**: WebSocket integration for multiplayer gameplay
 
 ### Development Workflow
 1. **Review Specs**: Check the `specs/` directory for existing specifications
@@ -57,9 +66,9 @@ npm run serve      # Serve built application
 
 ### Language & Framework
 - **Primary Language**: TypeScript (strict mode enabled)
-- **Framework**: React with Vite for build tooling
-- **State Management**: React hooks with Context API for global state
-- **Styling**: CSS-in-JS with emotion/styled-components or Tailwind CSS
+- **Framework**: Next.js 16 with React 19
+- **State Management**: React Context API with hooks
+- **Styling**: Tailwind CSS with emotion/styled-components
 
 ### File Structure
 ```
