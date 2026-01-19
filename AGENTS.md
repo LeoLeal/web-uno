@@ -77,9 +77,9 @@ src/
 ### Naming Conventions
 
 #### Components
-- Use PascalCase for component names: `GameBoard.tsx`, `PlayerHand.tsx`
-- File names match component names: `GameBoard.tsx` exports `GameBoard`
-- Hook files use camelCase with `use` prefix: `useGameState.ts`
+- Use PascalCase for component names: `GameBoard`, `PlayerHand`
+- File names use kebab-case: `game-board.tsx` exports `GameBoard`
+- Hook files use kebab-case with `use` prefix: `use-game-state.ts`
 
 #### Variables & Functions
 - camelCase for variables and functions: `playerCards`, `calculateScore()`
@@ -87,9 +87,9 @@ src/
 - SCREAMING_SNAKE_CASE for constants: `MAX_PLAYERS`, `CARD_COLORS`
 
 #### Files
-- Component files: `PascalCase.tsx`
-- Utility files: `camelCase.ts`
-- Test files: `componentName.test.ts` or `componentName.spec.ts`
+- Component files: `kebab-case.tsx`
+- Utility files: `kebab-case.ts`
+- Test files: `component-name.test.ts` or `component-name.spec.ts`
 
 ### Imports & Dependencies
 
