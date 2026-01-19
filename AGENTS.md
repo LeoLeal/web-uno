@@ -10,9 +10,9 @@ Web Uno is a multiplayer card game implementation built as a modern web applicat
 - **Language**: TypeScript (strict mode enabled)
 - **Styling**: Tailwind CSS with emotion/styled-components
 - **State Management**: React Context API with hooks
+- **P2P Communication**: WebRTC with Yjs CRDTs for multiplayer gameplay
 - **Testing**: Vitest for unit tests, Playwright for E2E tests
 - **Build Tool**: Vite (via Next.js)
-- **Real-time Features**: WebSocket integration for multiplayer gameplay
 
 ### Development Workflow
 1. **Review Specs**: Check the `specs/` directory for existing specifications
