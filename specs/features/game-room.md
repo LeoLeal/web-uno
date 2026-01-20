@@ -31,7 +31,7 @@ The game room is the waiting area where players who have joined a room gather be
 - P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) - Real-time synchronization and room state management
 - Game State Types (specs/types/game-state-types.md) - Player and room data structures
 - Uno Game Logic and Rules (specs/game/uno-logic-rules.md) - Game initialization with configured settings
-- UI Components (specs/components/ui-components.md) - Shared UI elements for player lists and controls
+- Player List (specs/components/player-list.md) - Component for displaying room players
 
 ## Requirements
 
@@ -266,7 +266,7 @@ stateDiagram-v2
 - [P2P Multiplayer System](specs/_archive/p2p-multiplayer-system-approved.md)
 - [Game State Types](specs/types/game-state-types.md)
 - [Uno Logic Spec](specs/game/uno-logic-rules.md)
-- [UI Components Spec](specs/components/ui-components.md)
+- [Player List Spec](specs/components/player-list.md)
 - [Uno Game Rules](https://en.wikipedia.org/wiki/Uno_(card_game))
 - [P2P Synchronization Patterns](https://docs.yjs.dev/)
 - [React Real-time Hooks](https://react.dev/learn/you-might-not-need-an-effect)

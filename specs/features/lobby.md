@@ -29,7 +29,7 @@ The lobby serves as the homepage and entry point for the Web Uno multiplayer app
 ### Dependencies
 - None (This is the initial entry feature)
 - Future dependencies: P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) for room listing and management
-- UI Components (specs/components/ui-components.md) for shared form elements
+- Form validation utilities (to be specified) for input handling
 - Game Room (separate spec to be created) for the waiting area and game board display
 
 ## Requirements
