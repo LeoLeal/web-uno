@@ -27,7 +27,7 @@ Define the React component for games listing and room management in the lobby, a
 
 ### Dependencies
 - Game State Types (specs/types/game-state-types.md) - Room and player structures
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) - Room management
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md) - Room management
 - Coding Standards (specs/coding-standards.md) - Implementation guidelines
 
 ## Requirements
@@ -195,7 +195,7 @@ const GamesListing: React.FC<GamesListingProps> = ({ room, player, onCreateRoom,
 ## References
 
 - [Game State Types](specs/types/game-state-types.md)
-- [P2P Multiplayer System](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 - [Lobby Spec](specs/features/lobby.md)
 - [Form Validation Patterns](https://react-hook-form.com/)
 

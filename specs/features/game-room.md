@@ -28,7 +28,7 @@ The game room is the waiting area where players who have joined a room gather be
 
 ### Dependencies
 - Lobby (specs/features/lobby.md) - Navigation source to game room
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) - Real-time synchronization and room state management
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md) - Real-time synchronization and room state management
 - Game State Types (specs/types/game-state-types.md) - Player and room data structures
 - Uno Game Logic and Rules (specs/game/uno-logic-rules.md) - Game initialization with configured settings
 - Player List (specs/components/player-list.md) - Component for displaying room players
@@ -263,7 +263,7 @@ stateDiagram-v2
 ## References
 
 - [Lobby Spec](specs/features/lobby.md)
-- [P2P Multiplayer System](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 - [Game State Types](specs/types/game-state-types.md)
 - [Uno Logic Spec](specs/game/uno-logic-rules.md)
 - [Player List Spec](specs/components/player-list.md)

@@ -26,7 +26,7 @@ Define the core TypeScript types and interfaces for the Uno game state, includin
 - Enable proper game rule validation
 
 ### Dependencies
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md)
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md)
 
 ## Requirements
 
@@ -278,7 +278,7 @@ export type GameEvent =
 - [Uno Official Rules](https://en.wikipedia.org/wiki/Uno_(card_game))
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Yjs Documentation](https://yjs.dev/docs/api/shared-types/)
-- [P2P Multiplayer Spec](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 
 ---
 

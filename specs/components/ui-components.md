@@ -27,7 +27,7 @@ This specification has been broken down into separate component specifications f
 ### Dependencies
 - Game State and Types (specs/types/game-state-types.md)
 - Uno Game Logic and Rules (specs/game/uno-logic-rules.md)
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md)
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md)
 
 ## Component Specifications
 

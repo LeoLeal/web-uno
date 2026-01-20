@@ -28,7 +28,7 @@ The lobby serves as the homepage and entry point for the Web Uno multiplayer app
 
 ### Dependencies
 - None (This is the initial entry feature)
-- Future dependencies: P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) for room listing and management
+- Future dependencies: P2P Multiplayer System (specs/features/p2p-multiplayer-system.md) for room listing and management
 - Form validation utilities (to be specified) for input handling
 - Game Room (separate spec to be created) for the waiting area and game board display
 
@@ -226,7 +226,7 @@ graph TD
 ## References
 
 - [UI Components Spec](specs/components/ui-components.md)
-- [P2P Multiplayer System](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 - [Coding Standards](specs/coding-standards.md)
 - [Uno Game Rules](https://en.wikipedia.org/wiki/Uno_(card_game))
 - [React Forms Best Practices](https://react.dev/reference/react-dom/components/form)

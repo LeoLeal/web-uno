@@ -26,7 +26,7 @@ Define the React component for displaying P2P connection status and peer informa
 - Support troubleshooting connection issues
 
 ### Dependencies
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md) - Connection data
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md) - Connection data
 - Coding Standards (specs/coding-standards.md) - Implementation guidelines
 
 ## Requirements
@@ -154,7 +154,7 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ state, peers, quali
 
 ## References
 
-- [P2P Multiplayer System](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 - [WebRTC Connection States](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/connectionState)
 - [UI Status Patterns](https://uxdesign.cc/status-indicators-in-ui-design-43c6e5c7e6a8)
 

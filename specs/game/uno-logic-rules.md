@@ -28,7 +28,7 @@ Implement the core Uno game logic, rules, and turn management system. This inclu
 
 ### Dependencies
 - Game State and Types (specs/types/game-state-types.md)
-- P2P Multiplayer System (specs/_archive/p2p-multiplayer-system-approved.md)
+- P2P Multiplayer System (specs/features/p2p-multiplayer-system.md)
 
 ## Requirements
 
@@ -298,7 +298,7 @@ export interface GameConfig {
 - [Official Uno Rules](https://www.unorules.com/)
 - [Uno Wikipedia](https://en.wikipedia.org/wiki/Uno_(card_game))
 - [Game State Types](specs/types/game-state-types.md)
-- [P2P Multiplayer Spec](specs/_archive/p2p-multiplayer-system-approved.md)
+- [P2P Multiplayer System](specs/features/p2p-multiplayer-system.md)
 
 ---
 
