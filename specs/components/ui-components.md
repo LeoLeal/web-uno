@@ -40,7 +40,7 @@ This overview has been divided into the following individual component specifica
 - [Game Actions](game-actions.md) - Action buttons for gameplay
 
 ### Multiplayer Components
-- [Game Room Component](game-room-component.md) - Room creation and joining interface
+- [Games Listing](games-listing.md) - Games listing and room management interface
 - [Connection Status](connection-status.md) - P2P connection indicators
 
 ### Information Display Components

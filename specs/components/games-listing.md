@@ -1,8 +1,8 @@
-# Game Room Component Specification
+# Games Listing Specification
 
 ## Overview
 
-**Title**: Game Room Component
+**Title**: Games Listing
 
 **Type**: Component
 
@@ -17,7 +17,7 @@
 **Last Updated**: 2026-01-20
 
 ### Description
-Define the React component for room creation and joining interface in the lobby, allowing users to enter room IDs or create new rooms.
+Define the React component for games listing and room management in the lobby, allowing users to view available games, enter room IDs, or create new rooms.
 
 ### Goals
 - Provide simple room discovery and creation
@@ -56,7 +56,7 @@ Define the React component for room creation and joining interface in the lobby,
 
 ### API Interface
 ```typescript
-interface GameRoomProps {
+interface GamesListingProps {
   room: GameRoom | null
   player: Player | null
   onCreateRoom: (playerName: string) => Promise<string>
@@ -65,8 +65,8 @@ interface GameRoomProps {
   connectionState: ConnectionState
 }
 
-const GameRoom: React.FC<GameRoomProps> = ({ room, ...props }) => {
-  // Room creation/joining interface
+const GamesListing: React.FC<GamesListingProps> = ({ room, ...props }) => {
+  // Games listing and room creation/joining interface
 }
 ```
 
@@ -90,7 +90,7 @@ type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error'
 
 ### Component Structure
 ```typescript
-const GameRoom: React.FC<GameRoomProps> = ({ room, player, onCreateRoom, onJoinRoom, onLeaveRoom, connectionState }) => {
+const GamesListing: React.FC<GamesListingProps> = ({ room, player, onCreateRoom, onJoinRoom, onLeaveRoom, connectionState }) => {
   const [formData, setFormData] = useState({ playerName: '', roomId: '' })
   const [isCreating, setIsCreating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
