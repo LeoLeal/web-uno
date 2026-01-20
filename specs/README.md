@@ -17,6 +17,7 @@ Spec-driven development ensures that all features, components, and functionality
 ```
 specs/
 ├── README.md              # This file - overview of spec-driven development
+├── coding-standards.md    # Coding standards and guidelines
 ├── features/              # Feature specifications
 ├── components/            # Component specifications
 ├── api/                   # API endpoint specifications
