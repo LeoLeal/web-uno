@@ -1,8 +1,8 @@
-# Game Lobby Specification
+# Lobby Specification
 
 ## Overview
 
-**Title**: Game Lobby
+**Title**: Lobby
 
 **Type**: Feature
 
@@ -17,7 +17,7 @@
 **Last Updated**: 2026-01-20
 
 ### Description
-The game lobby serves as the homepage and entry point for the Web Uno multiplayer application. It welcomes users, allows them to enter or retrieve their name, view a list of available rooms, enter a room ID to join an existing room, or create a new room with a user-provided ID. After successful join or creation, users navigate directly to the game room, a waiting area displaying the game board where they can wait for other players to join before starting the game.
+The lobby serves as the homepage and entry point for the Web Uno multiplayer application. It welcomes users, allows them to enter or retrieve their name, view a list of available rooms, enter a room ID to join an existing room, or create a new room with a user-provided ID. After successful join or creation, users navigate directly to the game room, a waiting area displaying the game board where they can wait for other players to join before starting the game.
 
 ### Goals
 - Provide an intuitive and welcoming entry point for all users
@@ -111,7 +111,7 @@ interface RoomListResponse {
 
 ### Component Structure
 ```typescript
-// Main Game Lobby Component
+// Main Lobby Component
 const GameLobby: React.FC<GameLobbyProps> = ({ onNavigateToRoom, onError }) => {
   // Component implementation with form state, validation, and room listing
 }
