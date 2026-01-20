@@ -83,15 +83,16 @@ interface Card {
 ### Component Structure
 ```typescript
 const UnoCard: React.FC<CardProps> = ({ card, size = 'medium', isPlayable, isSelected, onClick, disabled }) => {
-  const cardStyles = getCardStyles(card, size, isPlayable, isSelected, disabled)
-  const symbol = getCardSymbol(card)
+  const cardStyles = getCardStyles(card, size)
+  const symbol = getCardSymbol(card.value)
 
   return (
     <button
-      className={cardStyles}
+      style={cardStyles}
       onClick={onClick}
       disabled={disabled}
       aria-label={`Uno card: ${card.color} ${card.value}`}
+      className={`${isPlayable ? 'playable' : ''} ${isSelected ? 'selected' : ''}`}
     >
       {symbol}
     </button>
@@ -100,6 +101,7 @@ const UnoCard: React.FC<CardProps> = ({ card, size = 'medium', isPlayable, isSel
 ```
 
 ### Styling and Theming
+
 ```typescript
 const UNO_COLORS = {
   red: '#dc2626',
@@ -110,8 +112,46 @@ const UNO_COLORS = {
   black: '#1f2937',
 } as const
 
-const getCardStyles = (card: Card, size: CardSize, isPlayable: boolean, isSelected: boolean, disabled: boolean): string => {
-  // Dynamic CSS classes based on card properties
+const getCardStyles = (card: Card, size: CardSize): React.CSSProperties => {
+  // Dynamic styling based on card properties
+}
+
+const getCardSymbol = (value: CardValue): string => {
+  // Convert card values to display symbols
+}
+```
+
+### Animation and Interactions
+
+```typescript
+// Card animations
+const CARD_ANIMATIONS = {
+  draw: 'animate-slide-in-from-bottom',
+  play: 'animate-slide-out-to-center',
+  shuffle: 'animate-shuffle',
+  highlight: 'animate-pulse-border',
+} as const
+
+// Interaction handlers
+const useCardInteraction = (card: Card, onSelect: (card: Card) => void) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [isSelected, setIsSelected] = useState(false)
+
+  // Touch and mouse event handlers
+  const handleInteraction = useCallback(() => {
+    onSelect(card)
+    setIsSelected(true)
+  }, [card, onSelect])
+
+  return {
+    isHovered,
+    isSelected,
+    interactionProps: {
+      onClick: handleInteraction,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+    }
+  }
 }
 ```
 
