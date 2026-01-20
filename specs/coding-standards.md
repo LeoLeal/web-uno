@@ -124,7 +124,8 @@ interface Card {
 
 #### Type Safety
 - Enable strict null checks
-- Use `unknown` instead of `any` when type is uncertain
+- The type `any` should be avoided as much as possible; use `unknown` when type is uncertain
+- Never use TypeScript enums; use union types or const assertions instead
 - Avoid `as` type assertions unless absolutely necessary
 - Use utility types: `Partial<T>`, `Pick<T, K>`, `Omit<T, K>`
 
