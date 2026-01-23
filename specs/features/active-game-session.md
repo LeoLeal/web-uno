@@ -175,7 +175,7 @@ const GameControls: React.FC<GameControlsProps> = ({ gameState, ...props }) => {
 
 ### Error Handling
 - Client-side move validation with immediate feedback
-- Server-side validation via P2P consensus
+- P2P majority consensus validation
 - Automatic retry for network-related failures
 - Graceful degradation during connectivity issues
 
@@ -236,7 +236,7 @@ const GameControls: React.FC<GameControlsProps> = ({ gameState, ...props }) => {
 - [ ] Network traffic optimized for real-time play
 
 ### Security Requirements
-- [ ] All actions validated server-side (P2P consensus)
+- [ ] All actions validated via P2P majority consensus
 - [ ] No cheating through client-side manipulation
 - [ ] Game state tamper-proof
 - [ ] Player authentication maintained throughout session

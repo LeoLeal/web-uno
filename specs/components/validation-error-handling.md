@@ -17,7 +17,7 @@
 **Last Updated**: 2026-01-20
 
 ### Description
-Define the comprehensive validation pipeline and error handling system for player actions and game states in the Web Uno application. This component ensures game integrity through client-side pre-validation, server-side consensus validation, cheating prevention measures, and robust network issue handling.
+Define the comprehensive validation pipeline and error handling system for player actions and game states in the Web Uno application. This component ensures game integrity through client-side pre-validation, P2P majority consensus validation, cheating prevention measures, and robust network issue handling.
 
 ### Goals
 - Ensure all player actions are validated against game rules and current state
@@ -37,7 +37,7 @@ Define the comprehensive validation pipeline and error handling system for playe
 
 ### Functional Requirements
 - [FR-001] Implement client-side pre-validation for immediate user feedback
-- [FR-002] Provide server-side validation via P2P consensus for security
+- [FR-002] Provide P2P majority consensus validation for security
 - [FR-003] Validate all player actions against current game state and rules
 - [FR-004] Prevent cheating through action tampering detection and state manipulation prevention
 - [FR-005] Handle network disconnections during validation with recovery mechanisms
@@ -88,6 +88,16 @@ interface ValidationPipeline {
   recoverFromValidationError(error: ValidationError, gameState: ActiveGameState): Promise<ActiveGameState | null>
 }
 
+// Consensus result for majority validation
+interface ConsensusResult {
+  majorityResult: ValidationResult
+  participantCount: number
+  consensusReached: boolean
+  isTie: boolean
+  executionTime: number
+  warningTriggered?: boolean
+}
+
 // Cheating detection interface
 interface CheatDetection {
   detectTampering(action: GameAction, playerHistory: GameAction[]): Promise<CheatResult>
@@ -126,9 +136,21 @@ class GameValidationPipeline implements ValidationPipeline {
       return stateResult
     }
 
-    // 5. P2P consensus validation
+    // 5. P2P majority consensus validation
     const consensusResult = await this.p2pConsensus.validateAction(action, gameState)
-    return consensusResult
+
+    // Handle consensus failures
+    if (!consensusResult.consensusReached) {
+      if (consensusResult.isTie) {
+        // Allow action but warn players of potential cheating
+        await this.broadcastCheatingWarning(gameState)
+        return consensusResult.majorityResult // Allow with warning
+      }
+      // Timeout or other failure - reject
+      return this.createErrorResult('CONSENSUS_TIMEOUT', 'Validation consensus could not be reached')
+    }
+
+    return consensusResult.majorityResult
   }
 
   async recoverFromValidationError(error: ValidationError, gameState: ActiveGameState): Promise<ActiveGameState | null> {
@@ -139,6 +161,11 @@ class GameValidationPipeline implements ValidationPipeline {
         return await this.resolveRaceCondition(gameState)
       case 'STATE_CONFLICT':
         return await this.p2pConsensus.resolveStateConflict(gameState)
+      case 'CONSENSUS_TIMEOUT':
+      case 'CONSENSUS_TIE':
+        // Allow action with warning for consensus issues
+        await this.broadcastCheatingWarning(gameState)
+        return gameState // Continue with action
       default:
         return null // Non-recoverable
     }
@@ -166,13 +193,96 @@ enum ValidationErrorCode {
   NETWORK_DISCONNECT = 'NETWORK_DISCONNECT',
   RACE_CONDITION = 'RACE_CONDITION',
   STATE_CONFLICT = 'STATE_CONFLICT',
-  CONSENSUS_FAILURE = 'CONSENSUS_FAILURE'
+  CONSENSUS_FAILURE = 'CONSENSUS_FAILURE',
+  CONSENSUS_TIMEOUT = 'CONSENSUS_TIMEOUT',
+  CONSENSUS_TIE = 'CONSENSUS_TIE'
 }
 
 // Recovery strategies
 interface RecoveryStrategy {
   canRecover(error: ValidationError): boolean
   executeRecovery(gameState: ActiveGameState, error: ValidationError): Promise<ActiveGameState>
+}
+
+// Majority consensus validator
+class MajorityConsensusValidator {
+  private consensusTimeout = 3000 // 3 seconds
+
+  async validateAction(action: GameAction, gameState: ActiveGameState): Promise<ConsensusResult> {
+    const connectedPeers = this.getConnectedPeers(gameState)
+    const startTime = Date.now()
+
+    if (connectedPeers.length === 0) {
+      // Single player or no peers - allow with warning
+      return {
+        majorityResult: { isValid: true },
+        participantCount: 1,
+        consensusReached: true,
+        isTie: false,
+        executionTime: 0,
+        warningTriggered: true
+      }
+    }
+
+    // Broadcast validation request to peers (no user feedback required)
+    const validationPromises = connectedPeers.map(peer =>
+      this.requestPeerValidation(peer, action, gameState)
+    )
+
+    try {
+      // Wait for all responses with timeout
+      const results = await Promise.race([
+        Promise.all(validationPromises),
+        this.timeoutPromise(this.consensusTimeout)
+      ]) as ValidationResult[]
+
+      // Determine majority
+      const validCount = results.filter(r => r.isValid).length
+      const invalidCount = results.length - validCount
+      const majorityValid = validCount > invalidCount
+      const isTie = validCount === invalidCount
+
+      return {
+        majorityResult: majorityValid ? { isValid: true } : { isValid: false, error: results.find(r => !r.isValid)?.error },
+        participantCount: results.length,
+        consensusReached: !isTie,
+        isTie,
+        executionTime: Date.now() - startTime,
+        warningTriggered: isTie
+      }
+    } catch (error) {
+      // Timeout or network error
+      return {
+        majorityResult: { isValid: false, error: { code: ValidationErrorCode.CONSENSUS_TIMEOUT, message: 'Consensus timeout' } },
+        participantCount: connectedPeers.length,
+        consensusReached: false,
+        isTie: false,
+        executionTime: Date.now() - startTime
+      }
+    }
+  }
+
+  private getConnectedPeers(gameState: ActiveGameState): string[] {
+    // Return IDs of connected players excluding the current player
+    return gameState.players
+      .filter(p => p.id !== gameState.currentPlayerId && p.isConnected)
+      .map(p => p.id)
+  }
+
+  private async requestPeerValidation(peerId: string, action: GameAction, gameState: ActiveGameState): Promise<ValidationResult> {
+    // Send validation request to peer via P2P
+    // Return peer's validation result
+  }
+
+  private timeoutPromise(ms: number): Promise<never> {
+    return new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
+  }
+
+  private async broadcastCheatingWarning(gameState: ActiveGameState): Promise<void> {
+    // Broadcast warning message to all connected players
+    const warningMessage = "Warning: Validation consensus could not be reached. This may indicate cheating attempts."
+    await this.p2pSystem.broadcastMessage('CHEATING_WARNING', warningMessage)
+  }
 }
 ```
 
@@ -234,11 +344,11 @@ class NetworkResilientValidator {
   }
 
   async handleDisconnectRecovery(gameState: ActiveGameState): Promise<ActiveGameState> {
-    // 1. Pause game state
-    // 2. Buffer pending actions
-    // 3. Attempt reconnection with timeout
-    // 4. Replay buffered actions on reconnection
-    // 5. Resolve any state conflicts
+    // 1. Remove disconnected players from consensus
+    // 2. Continue validation with remaining connected players
+    // 3. Update participant counts automatically
+    // 4. When player reconnects, include them in future consensus
+    // 5. No action buffering - disconnected players miss actions
   }
 
   async resolveRaceCondition(gameState: ActiveGameState): Promise<ActiveGameState> {
@@ -273,7 +383,7 @@ interface NetworkState {
 ## Implementation Notes
 
 ### Architecture Decisions
-- Layered validation approach (client → server → consensus)
+- Layered validation approach (client → P2P majority consensus)
 - Immutable validation results for debugging
 - Event-driven error recovery system
 - Separation of business logic from security concerns
