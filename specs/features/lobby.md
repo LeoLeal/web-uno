@@ -162,7 +162,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms, onRoomSelect, loading }) => 
 - Error boundary for lobby-specific errors
 
 ### Code Organization
-- `src/pages/lobby.tsx` - Main lobby page component
+- `src/app/page.tsx` - Main lobby page component
 - `src/components/lobby/` - Lobby-specific components (RoomList, LobbyForm)
 - `src/hooks/useLobbyValidation.ts` - Validation logic
 - `src/utils/lobbyStorage.ts` - localStorage utilities
