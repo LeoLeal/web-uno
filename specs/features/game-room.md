@@ -240,7 +240,7 @@ const PlaceholderGameBoard: React.FC<PlaceholderGameBoardProps> = ({ playerCount
 
 ### Security Requirements
 - [ ] Room access restricted to joined players only
-- [ ] Settings changes validated server-side (future P2P auth)
+- [ ] Settings changes validated via P2P consensus (future auth)
 - [ ] No XSS in player names or room data
 - [ ] Host succession prevents unauthorized control
 

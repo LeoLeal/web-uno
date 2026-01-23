@@ -6,7 +6,7 @@
 
 **Type**: Component Collection
 
-**Status**: Archived
+**Status**: Draft
 
 **Priority**: N/A
 
@@ -58,4 +58,4 @@ This overview has been divided into the following individual component specifica
 
 ---
 
-*Spec Version: 1.0 | Status: Archived | See individual component specs for implementation details*
+*Spec Version: 1.0 | Status: Draft | See individual component specs for implementation details*
