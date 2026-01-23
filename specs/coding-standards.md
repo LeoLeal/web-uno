@@ -46,13 +46,14 @@ This specification defines the coding standards, style guidelines, and best prac
 
 ### Language & Framework
 - **Primary Language**: TypeScript (strict mode enabled)
-- **Framework**: Next.js 16 with React 19
+- **Framework**: Next.js 16 with React 19 (App Router)
 - **State Management**: React Context API with hooks
 - **Styling**: Tailwind CSS with emotion/styled-components
 
 ### File Structure
 ```
 src/
+├── app/           # Next.js App Router pages and layouts
 ├── components/     # Reusable UI components
 ├── hooks/         # Custom React hooks
 ├── utils/         # Utility functions

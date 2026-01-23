@@ -200,7 +200,7 @@ const PlaceholderGameBoard: React.FC<PlaceholderGameBoardProps> = ({ playerCount
 - Compound components for modular room UI sections
 
 ### Code Organization
-- `src/pages/game-room/[roomId].tsx` - Main room page with routing
+- `src/app/game-room/[roomId]/page.tsx` - Main room page with routing
 - `src/components/room/` - Room-specific components (header, player list, settings)
 - `src/hooks/useRoomState.ts` - P2P room state management hook
 - `src/utils/roomSettings.ts` - Settings validation and defaults
