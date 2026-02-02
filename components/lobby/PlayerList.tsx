@@ -44,9 +44,12 @@ export const PlayerList = ({ players, myClientId }: PlayerListProps) => {
               {player.avatar || getAvatar(player.clientId)}
             </div>
 
-            {/* Name */}
+            {/* Name - Show "(Host)" suffix when viewing host from others' perspective */}
             <div className="font-bold text-lg text-white truncate max-w-full">
               {player.name}
+              {player.isHost && !isMe && (
+                <span className="text-yellow-500 text-sm ml-1">(Host)</span>
+              )}
             </div>
 
             {/* Status Badge */}

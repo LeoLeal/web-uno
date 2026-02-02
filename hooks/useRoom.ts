@@ -60,10 +60,11 @@ export const useRoom = (roomId: string) => {
       if (!existingHost && peerCount <= 1) {
         // We're alone or first - claim host!
         console.log("Claiming Host Status (immediate)");
+        // Only set isHost flag, DON'T set name - let user choose via modal
         awareness.setLocalStateField('user', {
-           name: 'Host',
            isHost: true,
            color: '#ff0000'
+           // name will be set by user via JoinGameModal
         });
         hasClaimedHost.current = true;
       }
@@ -71,6 +72,13 @@ export const useRoom = (roomId: string) => {
 
     // Claim host immediately upon connection
     checkAndClaimHost();
+
+    // For solo rooms (first peer), we're immediately "synced" since there's nothing to sync
+    // This ensures the UI shows ready state and modal appears
+    const initialStates = awareness.getStates();
+    if (initialStates.size <= 1) {
+      setIsSynced(true);
+    }
 
     newProvider.on('synced', (synced: boolean) => {
       setIsSynced(synced);

@@ -23,10 +23,12 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     }
   }, [isSynced, initGame]);
 
-  const amIHost = players.find(p => p.clientId === myClientId)?.isHost ?? false;
+  const myPlayer = players.find(p => p.clientId === myClientId);
+  const amIHost = myPlayer?.isHost ?? false;
 
   const handleJoin = (name: string) => {
-    updateMyState({ name, avatar: getAvatar(myClientId || 0) });
+    // Preserve isHost flag if already set
+    updateMyState({ name, avatar: getAvatar(myClientId || 0), isHost: amIHost });
     setHasJoined(true);
   };
 
@@ -85,8 +87,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
             />
         )}
 
-        {/* Modals */}
-        <JoinGameModal isOpen={!hasJoined && isSynced} onJoin={handleJoin} />
+        {/* Modals - Show if synced and hasn't joined yet (works for both host and guests) */}
+        <JoinGameModal isOpen={isSynced && !hasJoined} onJoin={handleJoin} />
 
       </div>
     </main>
