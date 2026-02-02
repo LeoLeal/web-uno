@@ -1,5 +1,7 @@
 # Agentic Coding Guidelines - Web Uno
 
+For product vision and architecture, see /project.md.
+
 This document outlines the development standards, commands, and conventions for the **Web Uno** project. Agents and developers should strictly adhere to these guidelines to maintain codebase consistency and quality.
 
 ## 1. Project Overview & Tech Stack
@@ -9,7 +11,7 @@ This is a peer-to-peer multiplayer Uno game.
 - **Language**: TypeScript (Strict Mode)
 - **Styling**: Tailwind CSS
 - **State**: React Context + Yjs (CRDT for P2P)
-- **Networking**: WebRTC (peerjs or simple-peer)
+- **Networking**: WebRTC (y-webrtc for P2P state sync)
 - **Testing**: Vitest + React Testing Library
 
 ## 2. Operational Commands

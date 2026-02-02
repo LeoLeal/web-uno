@@ -1,20 +1,31 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Workflow settings
+workflow:
+  confirm_before_advance: true
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# Project context
+context: |
+  Web Uno - P2P multiplayer Uno game.
+  Full guidelines: See /AGENTS.md
+  
+  Stack: Next.js 16, TypeScript, Tailwind CSS, Yjs CRDT, WebRTC, Vitest.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - Keep focused and concise
+    - Reference AGENTS.md for conventions
+  
+  tasks:
+    - Follow AGENTS.md guidelines
+    - Include test coverage for new functionality
+  
+  spec:
+    - Follow TypeScript conventions from AGENTS.md
+    - Use explicit types and interfaces
+  
+  implementation:
+    - Run `npm run lint` and `npm run test` before committing
+    - Create tests for new functionality
+    - Reference AGENTS.md for code style
