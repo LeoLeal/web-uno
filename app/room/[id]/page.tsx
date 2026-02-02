@@ -7,6 +7,7 @@ import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/lobby/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
 import { getAvatar } from '@/lib/avatar';
+import { formatRoomId } from '@/lib/room-code';
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -40,10 +41,10 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
               <span className="text-white">Web Uno</span>
               <span className="text-xs bg-slate-800 px-2 py-1 rounded text-slate-500 font-mono border border-slate-700">BETA</span>
             </h1>
-            <div className="text-xs text-slate-500 font-mono mt-1 select-all cursor-pointer hover:text-white transition-colors"
+             <div className="text-xs text-slate-500 font-mono mt-1 select-all cursor-pointer hover:text-white transition-colors"
                  onClick={() => navigator.clipboard.writeText(window.location.href)}>
-               Room: {id} (Click to Copy)
-            </div>
+                Room: {formatRoomId(id)} (Click to Copy)
+             </div>
           </div>
           
           <div className="flex items-center gap-2">

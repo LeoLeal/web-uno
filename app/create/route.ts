@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid';
+import { generateRoomId } from '@/lib/room-code';
 
 export async function GET() {
-  const id = uuidv4();
+  const id = generateRoomId();
   redirect(`/room/${id}`);
 }

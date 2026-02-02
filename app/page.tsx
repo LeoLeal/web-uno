@@ -1,7 +1,23 @@
+'use client';
+
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Gamepad2, Users } from 'lucide-react';
+import { normalizeRoomId } from '@/lib/room-code';
 
 export default function Home() {
+  const router = useRouter();
+  const [roomCode, setRoomCode] = useState('');
+
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (roomCode.trim()) {
+      const normalizedCode = normalizeRoomId(roomCode);
+      router.push(`/room/${normalizedCode}`);
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-slate-900 text-white">
       <div className="z-10 max-w-md w-full items-center justify-between text-sm flex flex-col gap-8">
@@ -37,17 +53,26 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Join Game Input (Placeholder for now) */}
-          <div className="flex gap-2">
+          {/* Join Game Input */}
+          <form onSubmit={handleJoin} className="flex gap-2">
             <input 
               type="text" 
-              placeholder="Enter Room Code..." 
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value)}
+              placeholder="e.g., Happy-Lions-42" 
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
             />
-            <button className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-bold transition-colors">
+            <button 
+              type="submit"
+              disabled={!roomCode.trim()}
+              className="bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-600 text-white px-4 py-2 rounded-lg font-bold transition-colors"
+            >
               <Users className="w-5 h-5" />
             </button>
-          </div>
+          </form>
+          <p className="text-xs text-slate-500 text-center">
+            Tip: You can type with spaces or dashes
+          </p>
         </div>
 
       </div>
