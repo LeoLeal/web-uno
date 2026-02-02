@@ -98,7 +98,7 @@ export const useRoom = (roomId: string) => {
       setIsSynced(true);
     }
 
-    newProvider.on('synced', (synced: boolean) => {
+    newProvider.on('synced', ({ synced }: { synced: boolean }) => {
       setIsSynced(synced);
     });
 
