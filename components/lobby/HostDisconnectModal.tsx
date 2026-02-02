@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface HostDisconnectModalProps {
@@ -8,24 +8,51 @@ interface HostDisconnectModalProps {
 export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasNavigated = useRef(false);
 
+  // Countdown timer effect - only handles state updates
   useEffect(() => {
     if (!isOpen) return;
 
+    // Reset state when modal opens
+    setCountdown(5);
+    hasNavigated.current = false;
+
     // Countdown timer
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          // Redirect to home when countdown reaches 0
-          router.push('/');
+          // Stop at 0, don't navigate here
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [isOpen, router]);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isOpen]);
+
+  // Navigation effect - watches countdown and navigates when it hits 0
+  useEffect(() => {
+    if (!isOpen) return;
+    if (countdown === 0 && !hasNavigated.current) {
+      hasNavigated.current = true;
+      // Small delay to ensure cleanup completes
+      setTimeout(() => {
+        router.push('/');
+      }, 100);
+    }
+  }, [countdown, isOpen, router]);
 
   if (!isOpen) return null;
 
