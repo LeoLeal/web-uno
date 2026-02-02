@@ -1,18 +1,21 @@
 'use client';
 
+'use client';
+
 import { useState, useEffect, use } from 'react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
 import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/lobby/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
+import { HostDisconnectModal } from '@/components/lobby/HostDisconnectModal';
 import { getAvatar } from '@/lib/avatar';
 import { formatRoomId } from '@/lib/room-code';
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   
-  const { players, isSynced, updateMyState, myClientId, amIHost, hostId } = useRoom(id);
+  const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
   const { status, startGame, initGame } = useGameState();
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -85,6 +88,9 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
 
         {/* Modals - Show if synced and hasn't joined yet (works for both host and guests) */}
         <JoinGameModal isOpen={isSynced && !hasJoined} onJoin={handleJoin} />
+        
+        {/* Host Disconnect Modal - Shows when host disconnects */}
+        <HostDisconnectModal isOpen={isHostConnected === false} />
 
       </div>
     </main>

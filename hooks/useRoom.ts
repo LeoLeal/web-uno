@@ -17,6 +17,7 @@ export const useRoom = (roomId: string) => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [myClientId, setMyClientId] = useState<number | null>(null);
   const [hostId, setHostId] = useState<number | null>(null);
+  const [isHostConnected, setIsHostConnected] = useState<boolean | null>(null);
   const hasAttemptedClaim = useRef(false);
 
   // Function to update local player state
@@ -63,9 +64,16 @@ export const useRoom = (roomId: string) => {
     const handleGameStateChange = () => {
       const currentHostId = gameState.get('hostId') as number | null;
       setHostId(currentHostId);
+      
+      // Check if host is still connected
+      if (currentHostId !== null) {
+        const states = awareness.getStates();
+        const hostConnected = states.has(currentHostId);
+        setIsHostConnected(hostConnected);
+      }
     };
 
-    // Handle Awareness Changes (for player list)
+    // Handle Awareness Changes (for player list and host presence)
     const handleAwarenessChange = () => {
       const states = awareness.getStates();
       const activePlayers: Player[] = [];
@@ -90,6 +98,12 @@ export const useRoom = (roomId: string) => {
         return 0;
       });
       setPlayers(activePlayers);
+      
+      // Check host presence on every awareness change
+      if (currentHostId !== null) {
+        const hostConnected = states.has(currentHostId);
+        setIsHostConnected(hostConnected);
+      }
     };
 
     // For solo rooms (first peer), we're immediately "synced"
@@ -133,6 +147,7 @@ export const useRoom = (roomId: string) => {
     myClientId,
     hostId,
     amIHost,
+    isHostConnected,
     updateMyState 
   };
 };
