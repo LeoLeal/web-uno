@@ -41,29 +41,43 @@ export const useRoom = (roomId: string) => {
     const awareness = newProvider.awareness;
     setMyClientId(awareness.clientID);
 
+    // Immediate Host Claim: If we're the only peer, claim host immediately
+    // This fixes the issue where room creators weren't becoming hosts
+    const checkAndClaimHost = () => {
+      if (hasClaimedHost.current) return;
+      
+      const states = awareness.getStates();
+      const peerCount = states.size;
+      
+      // Check if any existing peer is already host
+      let existingHost = false;
+      states.forEach((state, clientId) => {
+        if (clientId !== awareness.clientID && state.user?.isHost) {
+          existingHost = true;
+        }
+      });
+
+      if (!existingHost && peerCount <= 1) {
+        // We're alone or first - claim host!
+        console.log("Claiming Host Status (immediate)");
+        awareness.setLocalStateField('user', {
+           name: 'Host',
+           isHost: true,
+           color: '#ff0000'
+        });
+        hasClaimedHost.current = true;
+      }
+    };
+
+    // Claim host immediately upon connection
+    checkAndClaimHost();
+
     newProvider.on('synced', (synced: boolean) => {
       setIsSynced(synced);
       
-      // Host Claim Logic (Naive: First to sync in an empty room wins)
+      // Backup host claim for late joiners (in case we missed it)
       if (synced && !hasClaimedHost.current) {
-        const states = awareness.getStates();
-        // Check if anyone else is already Host
-        let existingHost = false;
-        states.forEach((state) => {
-            if (state.user?.isHost) existingHost = true;
-        });
-
-        if (!existingHost) {
-          // Claim Host!
-          // We set a default name too if none exists
-          console.log("Claiming Host Status");
-          awareness.setLocalStateField('user', {
-             name: 'Host',
-             isHost: true,
-             color: '#ff0000'
-          });
-          hasClaimedHost.current = true;
-        }
+        checkAndClaimHost();
       }
     });
 

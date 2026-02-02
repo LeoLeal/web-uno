@@ -31,7 +31,7 @@ export const JoinGameModal = ({ isOpen, onJoin }: JoinGameModalProps) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name (e.g. Alice)"
+            placeholder="Your Name (e.g. Alex)"
             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg text-center"
             maxLength={12}
           />
