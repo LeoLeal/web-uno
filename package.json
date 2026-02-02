@@ -1,0 +1,41 @@
+{
+  "name": "web-uno",
+  "version": "1.0.0",
+  "description": "Serverless P2P Uno Game",
+  "scripts": {
+    "dev": "next dev",
+    "signaling": "tsx scripts/signaling.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "simple-peer": "^9.11.1",
+    "tailwind-merge": "^2.2.0",
+    "uuid": "^9.0.1",
+    "ws": "^8.19.0",
+    "y-webrtc": "^10.3.0",
+    "yjs": "^13.6.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@types/simple-peer": "^9.11.8",
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.18.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
