@@ -12,7 +12,7 @@ import { formatRoomId } from '@/lib/room-code';
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   
-  const { players, isSynced, updateMyState, myClientId } = useRoom(id);
+  const { players, isSynced, updateMyState, myClientId, amIHost, hostId } = useRoom(id);
   const { status, startGame, initGame } = useGameState();
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -23,12 +23,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     }
   }, [isSynced, initGame]);
 
-  const myPlayer = players.find(p => p.clientId === myClientId);
-  const amIHost = myPlayer?.isHost ?? false;
-
   const handleJoin = (name: string) => {
-    // Preserve isHost flag if already set
-    updateMyState({ name, avatar: getAvatar(myClientId || 0), isHost: amIHost });
+    updateMyState({ name, avatar: getAvatar(myClientId || 0) });
     setHasJoined(true);
   };
 
@@ -65,7 +61,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                       <h2 className="text-xl font-bold text-white">Lobby <span className="text-slate-500 text-sm ml-2">({players.length} Players)</span></h2>
                       {amIHost && <span className="text-xs text-yellow-500 uppercase font-bold tracking-widest border border-yellow-500/30 px-2 py-1 rounded">You are Host</span>}
                    </div>
-                   <PlayerList players={players} myClientId={myClientId} />
+                   <PlayerList players={players} myClientId={myClientId} hostId={hostId} />
                 </>
             ) : (
                 <div className="flex items-center justify-center h-64 border-2 border-dashed border-slate-700 rounded-xl bg-slate-800/50">

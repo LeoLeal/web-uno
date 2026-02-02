@@ -16,8 +16,8 @@ export const useRoom = (roomId: string) => {
   const [isSynced, setIsSynced] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [myClientId, setMyClientId] = useState<number | null>(null);
-  const isHost = useRef(false);
-  const checkAttempts = useRef(0);
+  const [hostId, setHostId] = useState<number | null>(null);
+  const hasAttemptedClaim = useRef(false);
 
   // Function to update local player state
   const updateMyState = useCallback((state: Partial<Omit<Player, 'clientId'>>) => {
@@ -39,79 +39,33 @@ export const useRoom = (roomId: string) => {
     });
 
     const awareness = newProvider.awareness;
-    setMyClientId(awareness.clientID);
+    const gameState = doc.getMap('gameState');
+    const myId = awareness.clientID;
+    setMyClientId(myId);
 
-    // Host Claim Logic with Race Condition Fix
-    // Key insight: we check multiple times with delays to ensure awareness syncs
-    const checkAndClaimHost = () => {
-      if (isHost.current) return; // Already host
+    // Host Claim via Shared State - Atomic Check-and-Set
+    // If hostId is null/undefined, set it to my ID
+    const claimHostIfEmpty = () => {
+      if (hasAttemptedClaim.current) return;
       
-      const states = awareness.getStates();
-      checkAttempts.current++;
+      const currentHostId = gameState.get('hostId');
       
-      let otherPeers = 0;
-      let otherHosts = 0;
-      
-      states.forEach((state, clientId) => {
-        if (clientId !== awareness.clientID) {
-          otherPeers++;
-          if (state.user?.isHost) {
-            otherHosts++;
-          }
-        }
-      });
-
-      console.log(`Host check #${checkAttempts.current}: ${otherPeers} peers, ${otherHosts} hosts`);
-
-      // If another host exists, we definitely should NOT be host
-      if (otherHosts > 0) {
-        console.log("Another host found, relinquishing host claim");
-        // If we previously claimed host, remove it
-        const myState = awareness.getLocalState() as any;
-        if (myState?.user?.isHost) {
-          awareness.setLocalStateField('user', {
-            ...myState.user,
-            isHost: false
-          });
-        }
-        return;
+      if (currentHostId === undefined || currentHostId === null) {
+        console.log(`Claiming host (hostId was ${currentHostId})`);
+        gameState.set('hostId', myId);
+      } else {
+        console.log(`Host already exists: ${currentHostId}`);
       }
-
-      // If we see other peers but no host, someone should be host
-      // Only claim if we're the lowest client ID (deterministic tie-breaker)
-      if (otherPeers > 0 && otherHosts === 0) {
-        const myId = awareness.clientID;
-        let lowestId = myId;
-        
-        states.forEach((_, clientId) => {
-          if (clientId !== myId && clientId < lowestId) {
-            lowestId = clientId;
-          }
-        });
-
-        if (myId === lowestId) {
-          console.log("Lowest client ID, claiming host");
-          awareness.setLocalStateField('user', {
-            isHost: true,
-            color: '#ff0000'
-          });
-          isHost.current = true;
-        }
-        return;
-      }
-
-      // Solo room - claim host
-      if (otherPeers === 0 && checkAttempts.current >= 3) {
-        console.log("Solo room confirmed, claiming host");
-        awareness.setLocalStateField('user', {
-          isHost: true,
-          color: '#ff0000'
-        });
-        isHost.current = true;
-      }
+      hasAttemptedClaim.current = true;
     };
 
-    // Handle Awareness Changes
+    // Watch for hostId changes in shared state
+    const handleGameStateChange = () => {
+      const currentHostId = gameState.get('hostId') as number | null;
+      setHostId(currentHostId);
+    };
+
+    // Handle Awareness Changes (for player list)
     const handleAwarenessChange = () => {
       const states = awareness.getStates();
       const activePlayers: Player[] = [];
@@ -128,20 +82,17 @@ export const useRoom = (roomId: string) => {
         }
       });
 
-      activePlayers.sort((a, b) => (a.isHost ? -1 : b.isHost ? 1 : 0));
+      // Sort: Host first, then by ClientID
+      const currentHostId = gameState.get('hostId') as number | null;
+      activePlayers.sort((a, b) => {
+        if (a.clientId === currentHostId) return -1;
+        if (b.clientId === currentHostId) return 1;
+        return 0;
+      });
       setPlayers(activePlayers);
-
-      // Check host status on every change
-      checkAndClaimHost();
     };
 
-    // Run multiple checks with increasing delays
-    // This ensures awareness has time to sync before we commit to being host
-    const check1 = setTimeout(() => checkAndClaimHost(), 100);
-    const check2 = setTimeout(() => checkAndClaimHost(), 500);
-    const check3 = setTimeout(() => checkAndClaimHost(), 1000);
-
-    // For solo rooms
+    // For solo rooms (first peer), we're immediately "synced"
     const initialStates = awareness.getStates();
     if (initialStates.size <= 1) {
       setIsSynced(true);
@@ -151,27 +102,37 @@ export const useRoom = (roomId: string) => {
       setIsSynced(synced);
     });
 
+    // Subscribe to changes
+    gameState.observe(handleGameStateChange);
     awareness.on('change', handleAwarenessChange);
     setProvider(newProvider);
 
+    // Initial checks
+    handleGameStateChange();
     handleAwarenessChange();
+    
+    // Claim host if empty - runs immediately, no setTimeout needed
+    // Yjs handles concurrent writes atomically
+    claimHostIfEmpty();
 
     return () => {
-      clearTimeout(check1);
-      clearTimeout(check2);
-      clearTimeout(check3);
+      gameState.unobserve(handleGameStateChange);
       awareness.off('change', handleAwarenessChange);
       newProvider.destroy();
-      isHost.current = false;
-      checkAttempts.current = 0;
+      hasAttemptedClaim.current = false;
     };
   }, [doc, roomId]);
+
+  // Determine if I'm host by comparing hostId with my clientId
+  const amIHost = myClientId !== null && hostId !== null && hostId === myClientId;
 
   return { 
     provider, 
     isSynced, 
     players, 
     myClientId,
+    hostId,
+    amIHost,
     updateMyState 
   };
 };

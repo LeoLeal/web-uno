@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 interface PlayerListProps {
   players: Player[];
   myClientId: number | null;
+  hostId: number | null;
 }
 
-export const PlayerList = ({ players, myClientId }: PlayerListProps) => {
+export const PlayerList = ({ players, myClientId, hostId }: PlayerListProps) => {
   if (players.length === 0) {
     return (
       <div className="col-span-full text-center p-8 text-slate-500 animate-pulse">
@@ -21,6 +22,7 @@ export const PlayerList = ({ players, myClientId }: PlayerListProps) => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
       {players.map((player) => {
         const isMe = player.clientId === myClientId;
+        const isHost = player.clientId === hostId;
         
         return (
           <div 
@@ -29,11 +31,11 @@ export const PlayerList = ({ players, myClientId }: PlayerListProps) => {
               "relative group flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all",
               "bg-slate-800",
               isMe ? "border-blue-500 shadow-lg shadow-blue-500/20" : "border-slate-700",
-              player.isHost && !isMe ? "border-yellow-500/50" : ""
+              isHost && !isMe ? "border-yellow-500/50" : ""
             )}
           >
             {/* Host Crown */}
-            {player.isHost && (
+            {isHost && (
               <div className="absolute -top-3 bg-slate-900 px-2 text-yellow-500">
                 <Crown className="w-6 h-6 fill-current" />
               </div>
@@ -47,7 +49,7 @@ export const PlayerList = ({ players, myClientId }: PlayerListProps) => {
             {/* Name - Show "(Host)" suffix when viewing host from others' perspective */}
             <div className="font-bold text-lg text-white truncate max-w-full">
               {player.name}
-              {player.isHost && !isMe && (
+              {isHost && !isMe && (
                 <span className="text-yellow-500 text-sm ml-1">(Host)</span>
               )}
             </div>
