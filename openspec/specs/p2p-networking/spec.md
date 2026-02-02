@@ -14,17 +14,22 @@ The system SHALL initialize a `y-webrtc` provider using the Room ID as the signa
 - **THEN** the provider connects to the URL specified in `NEXT_PUBLIC_SIGNALING_URL` (defaulting to `ws://localhost:4444`)
 
 ### Requirement: Host Identification
-The system SHALL deterministically identify one peer as the Host. The Host is considered a participating player.
+The system SHALL deterministically identify one peer as the Host. The Host is considered a participating player. The first peer to connect SHALL automatically become Host.
 
-#### Scenario: First peer becomes Host
+#### Scenario: First peer becomes Host immediately
 - **WHEN** a user creates a new room (and is the only peer)
-- **THEN** they identify themselves as the Host
+- **THEN** they immediately identify themselves as the Host upon connection
 - **THEN** they initialize the `GameState` Yjs map
 
-#### Scenario: Late joiner is Guest
-- **WHEN** a user joins an already populated room
+#### Scenario: Late joiner detects existing Host
+- **WHEN** a user joins an already populated room with an existing Host
 - **THEN** they identify themselves as a Guest
 - **THEN** they sync the existing `GameState` from the Host
+
+#### Scenario: Late joiner becomes Host if none exists
+- **WHEN** a user joins a room with peers but no Host (edge case)
+- **THEN** they claim Host status
+- **THEN** they initialize the `GameState` Yjs map
 
 ### Requirement: Connection Status
 The system SHALL track and display the connection status of peers via Yjs Awareness.
