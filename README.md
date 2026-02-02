@@ -1,14 +1,44 @@
-# web-uno
+# Web Uno
 
-This is a **peer-to-peer (P2P) multiplayer Uno game** built using spec-driven development (OpenSpec) with modern web technologies. Players can connect directly without requiring centralized servers for gameplay.
+A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the browser.
 
-## Technology Stack
+## 🚀 How to Run
 
-- **Framework**: Next.js 16 (React 19)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: React Context API
-- **P2P Communication**: WebRTC with Yjs CRDTs
-- **Testing**: Vitest + Testing Library
-- **Build Tool**: Vite (via Next.js)
+To run the development environment, you need two terminal processes:
 
+1.  **Signaling Server** (Handles P2P discovery):
+    ```bash
+    npm run signaling
+    ```
+2.  **Next.js Application** (The Game UI):
+    ```bash
+    npm run dev
+    ```
+
+Open [http://localhost:3000](http://localhost:3000) to start playing.
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Library**: React 19 (Hooks, Context)
+- **Language**: TypeScript (Strict)
+- **Styling**: Tailwind CSS v4
+- **State**: Yjs (CRDT) for P2P synchronization
+- **Networking**: `y-webrtc` + Custom WebSocket Signaling
+
+## 🏗️ Architecture
+
+- **Topology**: Host-Authoritative P2P (Star Network).
+- **Security**: "Trusted Dealer" model. The Host holds the deck state; Guests only receive their own cards via encrypted private channels.
+- **Discovery**: URL-based room sharing (no central lobby listing).
+- **Resilience**: Direct peer-to-peer data sync (requires active signaling connection).
+
+## 📄 Documentation
+
+- **`AGENTS.md`**: Guidelines for AI agents and developers.
+- **`project.md`**: High-level project status and vision.
+- **`openspec/`**: Detailed specifications and change history.
+
+## License
+
+MIT

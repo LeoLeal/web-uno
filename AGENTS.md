@@ -20,6 +20,8 @@ This is a peer-to-peer multiplayer Uno game.
 - Add dev dependency: `npm install -D <package>`
 
 ### Build & Run
+- **Signaling Server**: `npm run signaling`
+  - Required for P2P discovery in dev environment.
 - **Development Server**: `npm run dev`
   - Runs on: `http://localhost:3000`
 - **Production Build**: `npm run build`
