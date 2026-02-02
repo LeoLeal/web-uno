@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { SubmitEventHandler, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gamepad2, Users } from 'lucide-react';
 import { normalizeRoomId } from '@/lib/room-code';
@@ -10,7 +10,7 @@ export default function Home() {
   const router = useRouter();
   const [roomCode, setRoomCode] = useState('');
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (roomCode.trim()) {
       const normalizedCode = normalizeRoomId(roomCode);
