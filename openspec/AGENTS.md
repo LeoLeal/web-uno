@@ -1,1 +1,0 @@
-Refer to the AGENTS.md file located in the parent folder for Agentic Coding Guidelines.
