@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90">
+  <!-- White card base -->
+  <rect width="60" height="90" rx="10" ry="10" x="0" y="0" 
+        style="fill:#ffffff;stroke:#000000;stroke-width:0.5"/>
+  <!-- Black background -->
+  <rect width="50" height="80" rx="5" ry="5" x="5" y="5" 
+        style="fill:#000000"/>
+  <!-- White ellipse (tilted oval shape from original) -->
+  <path d="m 45 20 c -22.09139 0 -40 17.90861 -40 40 0 5.52285 4.47715 10 10 10 22.09139 0 40 -17.90861 40 -40 0 -5.52285 -4.47715 -10 -10 -10 z"
+        style="fill:#ffffff"/>
+  <!-- Red quadrant (top-left of oval) -->
+  <path d="m 45 20 c -16.78 0 -31.13 10.35 -37.06 25 l 22.06 0 15 -25 z"
+        style="fill:#ed1c24"/>
+  <!-- Blue quadrant (top-right of oval) -->
+  <path d="m 45 20 -15 25 22.06 0 c 1.88 -4.64 2.94 -9.69 2.94 -15 0 -5.52 -4.48 -10 -10 -10 z"
+        style="fill:#0077c0"/>
+  <!-- Yellow quadrant (bottom-left of oval) -->
+  <path d="m 7.94 45 c -1.88 4.64 -2.94 9.69 -2.94 15 0 5.52 4.48 10 10 10 l 15 -25 -22.06 0 z"
+        style="fill:#ffcc00"/>
+  <!-- Green quadrant (bottom-right of oval) -->
+  <path d="m 30 45 -15 25 c 16.78 0 31.13 -10.35 37.06 -25 l -22.06 0 z"
+        style="fill:#00a651"/>
+  <!-- White outline on the oval -->
+  <path d="m 45 20 c -16.78 0 -31.13 10.35 -37.06 25 -1.88 4.64 -2.94 9.69 -2.94 15 0 5.52 4.48 10 10 10 16.78 0 31.13 -10.35 37.06 -25 1.88 -4.64 2.94 -9.69 2.94 -15 0 -5.52 -4.48 -10 -10 -10 z"
+        style="fill:none;stroke:#ffffff;stroke-width:1"/>
+  <!-- Small colored oval top-left -->
+  <path d="m 17.5 7.5 c -4.2 0 -7.78 2.59 -9.27 6.25 -0.47 1.16 -0.73 2.42 -0.73 3.75 0 1.38 1.12 2.5 2.5 2.5 4.2 0 7.78 -2.59 9.27 -6.25 0.47 -1.16 0.73 -2.42 0.73 -3.75 0 -1.38 -1.12 -2.5 -2.5 -2.5 z"
+        style="fill:none;stroke:#ffffff;stroke-width:1"/>
+  <!-- Small colored oval bottom-right -->
+  <path d="m 50 70 c -4.2 0 -7.78 2.59 -9.27 6.25 -0.47 1.16 -0.73 2.42 -0.73 3.75 0 1.38 1.12 2.5 2.5 2.5 4.2 0 7.78 -2.59 9.27 -6.25 0.47 -1.16 0.73 -2.42 0.73 -3.75 0 -1.38 -1.12 -2.5 -2.5 -2.5 z"
+        style="fill:none;stroke:#ffffff;stroke-width:1"/>
+  <!-- Top-left mini quadrants -->
+  <path d="m 17.5 7.5 -3.75 6.25 5.52 0 c 0.47 -1.16 0.73 -2.42 0.73 -3.75 0 -1.38 -1.12 -2.5 -2.5 -2.5 z" style="fill:#0077c0"/>
+  <path d="m 17.5 7.5 c -4.2 0 -7.78 2.59 -9.27 6.25 l 5.52 0 3.75 -6.25 z" style="fill:#ed1c24"/>
+  <path d="m 8.23 13.75 c -0.47 1.16 -0.73 2.42 -0.73 3.75 0 1.38 1.12 2.5 2.5 2.5 l 3.75 -6.25 -5.52 0 z" style="fill:#ffcc00"/>
+  <path d="m 13.75 13.75 -3.75 6.25 c 4.2 0 7.78 -2.59 9.27 -6.25 l -5.52 0 z" style="fill:#00a651"/>
+  <!-- Bottom-right mini quadrants -->
+  <path d="m 50 70 -3.75 6.25 5.52 0 c 0.47 -1.16 0.73 -2.42 0.73 -3.75 0 -1.38 -1.12 -2.5 -2.5 -2.5 z" style="fill:#0077c0"/>
+  <path d="m 50 70 c -4.2 0 -7.78 2.59 -9.27 6.25 l 5.52 0 3.75 -6.25 z" style="fill:#ed1c24"/>
+  <path d="m 40.73 76.25 c -0.47 1.16 -0.73 2.42 -0.73 3.75 0 1.38 1.12 2.5 2.5 2.5 l 3.75 -6.25 -5.52 0 z" style="fill:#ffcc00"/>
+  <path d="m 46.25 76.25 -3.75 6.25 c 4.2 0 7.78 -2.59 9.27 -6.25 l -5.52 0 z" style="fill:#00a651"/>
+</svg>

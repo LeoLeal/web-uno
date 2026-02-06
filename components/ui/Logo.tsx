@@ -1,0 +1,48 @@
+'use client';
+
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+
+interface LogoProps {
+  className?: string;
+}
+
+export const Logo = ({ className }: LogoProps) => {
+  return (
+    <div 
+      className={cn(
+        'flex items-center justify-center gap-0 animate-logo-fade-in',
+        className
+      )}
+    >
+      {/* WEB UN text */}
+      <span 
+        className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide"
+        style={{ 
+          color: 'var(--cream)',
+          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+        }}
+      >
+        WEB UN
+      </span>
+      
+      {/* Card as "O" - Uses extracted SVG from UNO deck */}
+      <div 
+        className="relative ml-1 sm:ml-2"
+        style={{ 
+          transform: 'rotate(15deg) translateY(4px)',
+          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))',
+        }}
+      >
+        <Image
+          src="/cards/wild.svg"
+          alt="wild card"
+          width={36}
+          height={54}
+          className="w-9 h-[54px] sm:w-11 sm:h-[66px] md:w-13 md:h-[78px]"
+          priority
+        />
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90">
+
+      <rect
+         width="60"
+         height="90"
+         rx="10"
+         ry="10"
+         x="0"
+         y="0"
+         id="rect2987-8-5-0-2"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none" />
+      <rect
+         width="50"
+         height="80"
+         rx="5"
+         ry="5"
+         x="5"
+         y="5"
+         id="rect3757-26-33-8-6"
+         style="fill:#0077c0;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+      <path
+         d="m 45 19.99998999999997 c -22.09139 0 -40 17.90861 -40 40 0 5.52285 4.47715 10 10 10 22.09139 0 40 -17.90861 40 -40 0 -5.52285 -4.47715 -10 -10 -10 z"
+         id="path3773-0-4-8-4-60-3-8-89"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+      <path
+         d="M 28.800009999999986 30.000009999999975 19 49.99998999999997 l 0 5 12 0 0 5.00002 5 0 0 -5.00002 3 0 0 -5 -3 0 0 -9.99997 -5 0 0 9.99997 -6.8 0 9.8 -19.99998 z"
+         id="rect3980-7-6-2-9-5-60-2-2"
+         style="fill:#0077c0;fill-opacity:1;stroke:none" />
+      <path
+         d="m 12.300000000000011 7.499989999999968 -4.9 10 0 2.50001 6 0 0 2.50001 2.5 0 0 -2.50001 1.5 0 0 -2.50001 -1.5 0 0 -4.99999 -2.5 0 0 4.99999 -3.4 0 4.9 -10 z"
+         id="rect3980-7-6-2-9-5-60-5-3-95"
+         style="fill:#ffffff;fill-opacity:1;stroke:none" />
+      <path
+         d="m 47.5 82.49998999999997 4.9 -10 0 -2.50001 -6 0 0 -2.50001 -2.5 0 0 2.50001 -1.5 0 0 2.50001 1.5 0 0 4.99999 2.5 0 0 -4.99999 3.4 0 -4.9 10 z"
+         id="rect3980-7-6-2-9-5-60-5-3-9-9"
+         style="fill:#ffffff;fill-opacity:1;stroke:none" />
+    
+</svg>

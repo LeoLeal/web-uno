@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90">
+  <!-- White card base -->
+  <rect width="60" height="90" rx="10" ry="10" x="0" y="0" 
+        style="fill:#ffffff;stroke:#000000;stroke-width:0.5"/>
+  <!-- Red background -->
+  <rect width="50" height="80" rx="5" ry="5" x="5" y="5" 
+        style="fill:#ed1c24"/>
+  <!-- White ellipse -->
+  <path d="m 45 20 c -22.09139 0 -40 17.90861 -40 40 0 5.52285 4.47715 10 10 10 22.09139 0 40 -17.90861 40 -40 0 -5.52285 -4.47715 -10 -10 -10 z"
+        style="fill:#ffffff"/>
+  <!-- Two stacked mini cards in center (skewed) -->
+  <g transform="translate(20, 38)">
+    <!-- Back card -->
+    <g transform="skewX(-15)">
+      <rect width="15" height="23" rx="2.5" ry="2.3" x="0" y="0" 
+            style="fill:#ffffff;stroke:#000000;stroke-width:0.5"/>
+      <rect width="10" height="18" rx="2.5" ry="2.3" x="2.5" y="2.5" 
+            style="fill:#ed1c24"/>
+    </g>
+    <!-- Front card -->
+    <g transform="skewX(-15) translate(8, -8)">
+      <rect width="15" height="23" rx="2.5" ry="2.3" x="0" y="0" 
+            style="fill:#ffffff;stroke:#000000;stroke-width:0.5"/>
+      <rect width="10" height="18" rx="2.5" ry="2.3" x="2.5" y="2.5" 
+            style="fill:#ed1c24"/>
+    </g>
+  </g>
+  <!-- +2 top-left: plus sign -->
+  <path d="m 8.5 12.5 0 2.5 -2.5 0 0 2.5 2.5 0 0 2.5 2.5 0 0 -2.5 2.5 0 0 -2.5 -2.5 0 0 -2.5 -2.5 0 z"
+        style="fill:#ffffff"/>
+  <!-- +2 top-left: number 2 -->
+  <path d="m 20 7.5 c -2.77 0 -5 2.23 -5 5 l 0 0.5 2.5 0 0 -0.5 c 0 -1.385 1.115 -2.5 2.5 -2.5 1.385 0 2.5 1.115 2.5 2.5 0 0.564 -0.468 1.67 -0.956 2.055 -2.652 2.087 -2.624 1.743 -6.544 4.445 l 0 3.5 10 0 0 -2.5 0 -1 -2.5 0 0 1 -4.5 0 c 3.095 -2.179 3.321 -2.127 5.747 -4.297 0.777 -0.695 1.253 -2.076 1.253 -3.203 0 -2.77 -2.23 -5 -5 -5 z"
+        style="fill:#ffffff"/>
+  <!-- +2 bottom-right: plus sign -->
+  <path d="m 51.5 77.5 0 -2.5 2.5 0 0 -2.5 -2.5 0 0 -2.5 -2.5 0 0 2.5 -2.5 0 0 2.5 2.5 0 0 2.5 2.5 0 z"
+        style="fill:#ffffff"/>
+  <!-- +2 bottom-right: number 2 -->
+  <path d="m 40 82.5 c 2.77 0 5 -2.23 5 -5 l 0 -0.5 -2.5 0 0 0.5 c 0 1.385 -1.115 2.5 -2.5 2.5 -1.385 0 -2.5 -1.115 -2.5 -2.5 0 -0.564 0.468 -1.67 0.956 -2.055 2.652 -2.087 2.624 -1.743 6.544 -4.445 l 0 -3.5 -10 0 0 2.5 0 1 2.5 0 0 -1 4.5 0 c -3.095 2.179 -3.321 2.127 -5.747 4.297 -0.777 0.695 -1.253 2.076 -1.253 3.203 0 2.77 2.23 5 5 5 z"
+        style="fill:#ffffff"/>
+</svg>

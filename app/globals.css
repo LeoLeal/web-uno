@@ -1,25 +1,258 @@
 @import "tailwindcss";
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+  /* Typography */
+  --font-display: var(--font-display, Georgia, serif);
+  --font-body: var(--font-body, system-ui, sans-serif);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  /* Table surface - felt greens */
+  --felt-dark: #0d2818;
+  --felt-mid: #1a472a;
+  --felt-light: #2d5a3d;
+
+  /* Wood/warm accents */
+  --wood-dark: #5c4033;
+  --wood-light: #8b6914;
+
+  /* Text colors */
+  --cream: #f5e6c8;
+  --cream-dark: #d4c4a8;
+
+  /* Button gradient - copper/bronze */
+  --copper-light: #c4873a;
+  --copper-dark: #a66a2a;
+  --copper-border: #8b5a2b;
+
+  /* UNO card colors */
+  --uno-red: #ed1c24;
+  --uno-blue: #0077c0;
+  --uno-yellow: #ffcc00;
+  --uno-green: #00a651;
+
+  /* Card base */
+  --card-white: #fff8f0;
+
+  /* Shadows */
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+  /* Button glow - warm yellowish like in mockup */
+  --shadow-button: 0 4px 16px rgba(196, 135, 58, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-button-hover: 0 6px 24px rgba(212, 151, 74, 0.5), 0 3px 6px rgba(0, 0, 0, 0.2);
+  --shadow-button-active: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  font-family: var(--font-body);
+  color: var(--cream);
+  background: radial-gradient(
+    ellipse at center,
+    var(--felt-mid) 0%,
+    var(--felt-dark) 100%
+  );
+  background-color: var(--felt-dark);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Felt texture noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+/* Vignette overlay for edge darkening */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  z-index: 2;
+}
+
+/* Animation keyframes */
+@keyframes logo-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card fan animation - cards fan out from a stacked deck */
+@keyframes card-fan {
+  0% {
+    opacity: 0;
+    transform: translateX(0) translateY(20px) rotate(0deg) scale(0.9);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(0) translateY(10px) rotate(0deg) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(var(--card-offset-x, 0px)) translateY(var(--card-offset-y, 0px)) rotate(var(--card-rotation, 0deg)) scale(1);
+  }
+}
+
+.animate-logo-fade-in {
+  animation: logo-fade-in 600ms ease-out forwards;
+}
+
+.animate-card-fan {
+  opacity: 0;
+  animation: card-fan 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--fan-delay, 0ms);
+  transform-origin: bottom center;
+}
+
+/* Mobile: use mobile-specific rotation and offset values */
+@media (max-width: 639px) {
+  .animate-card-fan {
+    --card-rotation: var(--mobile-rotation) !important;
+    --card-offset-x: var(--mobile-offset-x) !important;
+    --card-offset-y: 0px !important; /* No arc effect on mobile */
+  }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utility classes */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Copper pill button */
+.btn-copper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--cream);
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    to bottom,
+    var(--copper-light) 0%,
+    var(--copper-dark) 100%
+  );
+  border: 2px solid var(--copper-border);
+  border-radius: 9999px;
+  box-shadow: var(--shadow-button);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  text-decoration: none;
+}
+
+.btn-copper:hover {
+  background: linear-gradient(
+    to bottom,
+    #d4974a 0%,
+    var(--copper-light) 100%
+  );
+  box-shadow: var(--shadow-button-hover);
+  transform: translateY(-2px);
+}
+
+.btn-copper:active {
+  background: linear-gradient(
+    to bottom,
+    var(--copper-dark) 0%,
+    var(--copper-light) 100%
+  );
+  box-shadow: var(--shadow-button-active);
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-copper:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 2px;
+}
+
+.btn-copper:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Copper input styling */
+.input-copper {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--cream);
+  background-color: rgba(13, 40, 24, 0.8);
+  border: 2px solid var(--copper-border);
+  border-radius: 9999px;
+  transition: all 150ms ease-out;
+}
+
+.input-copper::placeholder {
+  color: var(--cream-dark);
+  opacity: 0.7;
+}
+
+.input-copper:focus {
+  outline: none;
+  border-color: var(--copper-light);
+  box-shadow: 0 0 0 3px rgba(196, 135, 58, 0.3);
+}
+
+/* Small icon button variant */
+.btn-copper-icon {
+  padding: 0.875rem;
+  min-width: 3rem;
+}
+
+/* Divider with text */
+.divider-copper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  color: var(--cream-dark);
+  font-size: 0.875rem;
+  text-transform: lowercase;
+}
+
+.divider-copper::before,
+.divider-copper::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--copper-border),
+    transparent
+  );
 }

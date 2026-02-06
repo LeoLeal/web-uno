@@ -7,7 +7,12 @@
     "signaling": "tsx scripts/signaling.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
@@ -23,17 +28,25 @@
     "yjs": "^13.6.10"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20.10.5",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^9.0.7",
     "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^5.1.3",
     "autoprefixer": "^10.4.16",
+    "axe-core": "^4.11.1",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.6",
+    "jsdom": "^28.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18",
+    "vitest-axe": "^0.1.0"
   }
 }
