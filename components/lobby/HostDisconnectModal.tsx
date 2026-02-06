@@ -1,5 +1,8 @@
+'use client';
+
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/ui/Modal';
 
 interface HostDisconnectModalProps {
   isOpen: boolean;
@@ -54,36 +57,30 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
     }
   }, [countdown, isOpen, router]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-      <div className="panel-felt border-red-500/50 w-full max-w-md p-8 text-center space-y-6">
-        {/* Icon */}
-        <div className="text-6xl">👋</div>
-        
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-(--cream)">
-          Host Disconnected
-        </h2>
-        
-        {/* Message */}
-        <p className="text-(--cream-dark) opacity-80 text-lg">
-          The game cannot continue without the host.
-        </p>
-        
-        {/* Countdown */}
-        <div className="py-4">
-          <p className="text-red-400 font-mono text-xl">
-            Returning to home in {countdown}...
-          </p>
-        </div>
-        
-        {/* Info */}
-        <p className="text-sm text-(--cream-dark) opacity-60">
-          You can join a new game or create your own room.
-        </p>
+    <Modal isOpen={isOpen} aria-labelledby="disconnect-modal-title">
+      {/* Icon */}
+      <div className="text-6xl text-center">👋</div>
+
+      {/* Title */}
+      <h2 id="disconnect-modal-title" className="text-2xl font-bold text-(--cream) text-center mt-6">
+        Host Disconnected
+      </h2>
+
+      {/* Message */}
+      <p className="text-(--cream-dark) opacity-80 text-lg text-center mt-4">
+        The game cannot continue without the host.
+      </p>
+
+      {/* Countdown */}
+      <div className="py-4 text-center">
+        <p className="text-red-400 font-mono text-xl">Returning to home in {countdown}...</p>
       </div>
-    </div>
+
+      {/* Info */}
+      <p className="text-sm text-(--cream-dark) opacity-60 text-center">
+        You can join a new game or create your own room.
+      </p>
+    </Modal>
   );
 };

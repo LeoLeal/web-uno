@@ -1,9 +1,4 @@
-# Spec: Lobby Game Settings
-
-## Purpose
-Provides a game settings panel in the lobby that displays current game configuration to all players, with host-only configuration controls.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Game Settings Panel Display
 The system SHALL display a Game Settings panel in the lobby that shows current game configuration to all players with dynamic content based on actual settings.
@@ -33,6 +28,14 @@ The system SHALL display a "Configure" button on the Game Settings panel only to
 - **WHEN** a non-host player views the Game Settings panel
 - **THEN** they do NOT see a "Configure" button
 - **AND** they see the settings as read-only
+
+## REMOVED Requirements
+
+### Requirement: Placeholder Configuration State
+**Reason**: Replaced by functional configuration modal
+**Migration**: The "Coming Soon" toast is no longer shown; clicking Configure now opens the settings modal
+
+## ADDED Requirements
 
 ### Requirement: Settings modal opens on configure
 The system SHALL open a settings configuration modal when the host clicks the Configure button.

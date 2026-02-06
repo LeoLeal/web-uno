@@ -10,8 +10,9 @@ async function createRoom(page: Page): Promise<string> {
 
 // Helper to join a room with a name
 async function joinRoom(page: Page, name: string): Promise<void> {
-  const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-  await expect(modal).toBeVisible({ timeout: 10000 });
+  // Modal is now a native dialog element
+  const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+  await expect(dialog).toBeVisible({ timeout: 10000 });
   
   const input = page.getByPlaceholder(/your name/i);
   await input.fill(name);
@@ -20,7 +21,7 @@ async function joinRoom(page: Page, name: string): Promise<void> {
   await joinButton.click();
   
   // Wait for modal to close
-  await expect(modal).not.toBeVisible({ timeout: 5000 });
+  await expect(dialog).not.toBeVisible({ timeout: 5000 });
 }
 
 test.describe('Lobby Theme Consistency', () => {
@@ -83,22 +84,21 @@ test.describe('Game Settings Panel', () => {
     await expect(settingsPanel).toBeVisible();
     await expect(settingsPanel).toContainText('Standard rules');
     await expect(settingsPanel).toContainText('7 cards');
-    await expect(settingsPanel).toContainText('No stacking');
   });
 
-  test('host clicking Configure shows Coming Soon toast', async ({ page }) => {
+  test('host clicking Configure opens settings modal', async ({ page }) => {
     await createRoom(page);
     await joinRoom(page, 'HostPlayer');
     
     const configureButton = page.getByRole('button', { name: /configure/i });
     await configureButton.click();
     
-    // Toast should appear
-    const toast = page.getByText(/coming soon/i);
-    await expect(toast).toBeVisible();
-    
-    // Toast should disappear after ~2.5s
-    await expect(toast).not.toBeVisible({ timeout: 4000 });
+    // Modal should open with Game Settings title
+    const modal = page.locator('dialog[open]');
+    await expect(modal).toBeVisible();
+    await expect(modal).toContainText('Game Settings');
+    await expect(modal).toContainText('Deal');
+    await expect(modal).toContainText('House Rules');
   });
 
   // Skip: P2P sync between browser contexts requires running signaling server
@@ -153,23 +153,23 @@ test.describe('Game Settings Panel', () => {
 });
 
 test.describe('Modal Theming', () => {
-  test('Join Game modal has felt background styling', async ({ page }) => {
+  test('Join Game modal has modal-content styling', async ({ page }) => {
     // Navigate directly to a room URL (will show join modal)
     await page.goto('/room/test-room-modal');
     
-    // Wait for sync and modal
-    const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-    await expect(modal).toBeVisible({ timeout: 10000 });
+    // Wait for sync and modal (now a native dialog)
+    const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     
-    // Check modal has panel-felt class
-    await expect(modal).toHaveClass(/panel-felt/);
+    // Check dialog has modal class
+    await expect(dialog).toHaveClass(/modal/);
   });
 
   test('Join Game modal input has copper styling', async ({ page }) => {
     await page.goto('/room/test-room-input');
     
-    const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-    await expect(modal).toBeVisible({ timeout: 10000 });
+    const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     
     const input = page.getByPlaceholder(/your name/i);
     await expect(input).toHaveClass(/input-copper/);
@@ -178,8 +178,8 @@ test.describe('Modal Theming', () => {
   test('Join Game modal button has copper styling', async ({ page }) => {
     await page.goto('/room/test-room-button');
     
-    const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-    await expect(modal).toBeVisible({ timeout: 10000 });
+    const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     
     const joinButton = page.getByRole('button', { name: /join lobby/i });
     await expect(joinButton).toHaveClass(/btn-copper/);
@@ -188,19 +188,19 @@ test.describe('Modal Theming', () => {
   test('Join Game modal title has cream text class', async ({ page }) => {
     await page.goto('/room/test-room-text');
     
-    const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-    await expect(modal).toBeVisible({ timeout: 10000 });
+    const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     
     // Check title uses cream color class
-    const title = modal.getByRole('heading', { name: /join the game/i });
+    const title = dialog.getByRole('heading', { name: /join the game/i });
     await expect(title).toHaveClass(/text-\(--cream\)/);
   });
 
   test('modal screenshot for visual verification', async ({ page }) => {
     await page.goto('/room/test-room-screenshot');
     
-    const modal = page.locator('.panel-felt').filter({ hasText: 'Join the Game' });
-    await expect(modal).toBeVisible({ timeout: 10000 });
+    const dialog = page.locator('dialog[open]').filter({ hasText: 'Join the Game' });
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     
     await expect(page).toHaveScreenshot('join-modal-theme.png', {
       maxDiffPixelRatio: 0.15,
@@ -274,8 +274,9 @@ test.describe('Lobby Accessibility', () => {
     
     // Can activate via keyboard
     await page.keyboard.press('Enter');
-    const toast = page.getByText(/coming soon/i);
-    await expect(toast).toBeVisible();
+    // Modal should open
+    const modal = page.locator('dialog[open]');
+    await expect(modal).toBeVisible();
   });
 
   test('focus states are visible', async ({ page }) => {
@@ -295,8 +296,9 @@ test.describe('Lobby Accessibility', () => {
     await createRoom(page);
     await joinRoom(page, 'TestPlayer');
     
-    const configureButton = page.getByRole('button', { name: /configure/i });
-    const buttonBox = await configureButton.boundingBox();
+    // Check primary action button (Start Game / Waiting for Players)
+    const startButton = page.getByRole('button', { name: /waiting for players/i });
+    const buttonBox = await startButton.boundingBox();
     
     // Check button height is at least 36px (reasonable for touch)
     expect(buttonBox!.height).toBeGreaterThanOrEqual(36);

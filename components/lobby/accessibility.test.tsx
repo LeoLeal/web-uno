@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
@@ -7,11 +7,39 @@ import { JoinGameModal } from './JoinGameModal';
 import { StartGameButton } from './StartGameButton';
 import { HostDisconnectModal } from './HostDisconnectModal';
 import { GameSettingsPanel } from './GameSettingsPanel';
+import { DEFAULT_SETTINGS } from '@/lib/game/settings';
+
+// Mock HTMLDialogElement methods for jsdom
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.setAttribute('open', '');
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.removeAttribute('open');
+  });
+});
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
+  }),
+}));
+
+// Mock the hooks
+vi.mock('@/hooks/useGameSettings', () => ({
+  useGameSettings: () => ({
+    settings: DEFAULT_SETTINGS,
+    updateSettings: vi.fn(),
+    initSettings: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useGameState', () => ({
+  useGameState: () => ({
+    status: 'LOBBY',
+    startGame: vi.fn(),
+    initGame: vi.fn(),
   }),
 }));
 
@@ -69,8 +97,8 @@ describe('Lobby Components Accessibility', () => {
     it('should have accessible form labels', () => {
       render(<JoinGameModal isOpen={true} onJoin={vi.fn()} />);
       
-      // Input should have placeholder as accessible name
-      const input = screen.getByPlaceholderText(/your name/i);
+      // Input should have aria-label
+      const input = screen.getByRole('textbox', { name: /your name/i });
       expect(input).toBeVisible();
     });
 
@@ -84,7 +112,7 @@ describe('Lobby Components Accessibility', () => {
     it('should focus input on open', () => {
       render(<JoinGameModal isOpen={true} onJoin={vi.fn()} />);
       
-      const input = screen.getByPlaceholderText(/your name/i);
+      const input = screen.getByRole('textbox', { name: /your name/i });
       expect(input).toHaveFocus();
     });
 
@@ -92,7 +120,7 @@ describe('Lobby Components Accessibility', () => {
       const onJoin = vi.fn();
       render(<JoinGameModal isOpen={true} onJoin={onJoin} />);
       
-      const input = screen.getByPlaceholderText(/your name/i);
+      const input = screen.getByRole('textbox', { name: /your name/i });
       await userEvent.type(input, 'TestUser{enter}');
       
       expect(onJoin).toHaveBeenCalledWith('TestUser');
@@ -174,7 +202,7 @@ describe('Lobby Components Accessibility', () => {
     it('should display settings summary', () => {
       render(<GameSettingsPanel isHost={false} />);
       
-      expect(screen.getByText(/game settings/i)).toBeVisible();
+      expect(screen.getByRole('heading', { name: /game settings/i, level: 3 })).toBeVisible();
       expect(screen.getByText(/standard rules/i)).toBeVisible();
     });
 
@@ -260,8 +288,9 @@ describe('Lobby Components Accessibility', () => {
       button.focus();
       await userEvent.keyboard('{Enter}');
       
-      // Toast should appear
-      expect(await screen.findByText(/coming soon/i)).toBeVisible();
+      // Modal should open
+      const dialog = document.querySelector('dialog');
+      expect(dialog).toHaveAttribute('open');
     });
   });
 });

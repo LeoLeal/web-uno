@@ -67,7 +67,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         </div>
         
         {/* Game Area */}
-        <div className="min-h-[60vh]">
+        <div>
             {status === 'LOBBY' ? (
                 <>
                    <div className="mb-6 flex items-center justify-between">
