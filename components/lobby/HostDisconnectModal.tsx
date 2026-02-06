@@ -58,17 +58,17 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-      <div className="bg-slate-800 border border-red-500/50 w-full max-w-md p-8 rounded-2xl shadow-2xl text-center space-y-6">
+      <div className="panel-felt border-red-500/50 w-full max-w-md p-8 text-center space-y-6">
         {/* Icon */}
         <div className="text-6xl">👋</div>
         
         {/* Title */}
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-(--cream)">
           Host Disconnected
         </h2>
         
         {/* Message */}
-        <p className="text-slate-400 text-lg">
+        <p className="text-(--cream-dark) opacity-80 text-lg">
           The game cannot continue without the host.
         </p>
         
@@ -80,7 +80,7 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
         </div>
         
         {/* Info */}
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-(--cream-dark) opacity-60">
           You can join a new game or create your own room.
         </p>
       </div>

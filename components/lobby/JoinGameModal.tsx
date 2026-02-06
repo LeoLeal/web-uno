@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Users } from 'lucide-react';
 
 interface JoinGameModalProps {
@@ -13,10 +13,10 @@ export const JoinGameModal = ({ isOpen, onJoin }: JoinGameModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-800 border border-slate-700 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6">
+      <div className="panel-felt w-full max-w-md p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-white">Join the Game</h2>
-          <p className="text-slate-400">Enter your name to join the lobby.</p>
+          <h2 className="text-2xl font-bold text-(--cream)">Join the Game</h2>
+          <p className="text-(--cream-dark) opacity-70">Enter your name to join the lobby.</p>
         </div>
 
         <form 
@@ -32,13 +32,13 @@ export const JoinGameModal = ({ isOpen, onJoin }: JoinGameModalProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Name (e.g. Alex)"
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg text-center"
+            className="input-copper w-full text-center font-bold text-lg"
             maxLength={12}
           />
           <button
             type="submit"
             disabled={!name.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white py-3 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2"
+            className="btn-copper w-full"
           >
             <Users className="w-5 h-5" />
             Join Lobby

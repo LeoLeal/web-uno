@@ -142,5 +142,7 @@ vite.config.ts.timestamp-*
 playwright-report/
 playwright-report.zip
 
+test-results/
+
 .DS_Store
 Thumbs.db

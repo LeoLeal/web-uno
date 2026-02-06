@@ -44,20 +44,21 @@ export const useRoom = (roomId: string) => {
     const myId = awareness.clientID;
     setMyClientId(myId);
 
-    // Host Claim via Shared State - Atomic Check-and-Set
-    // If hostId is null/undefined, set it to my ID
-    const claimHostIfEmpty = () => {
+    // Host claiming - only called once per session
+    // Claims host only when: no existing host AND we're the only peer
+    const claimHostIfEligible = () => {
       if (hasAttemptedClaim.current) return;
+      hasAttemptedClaim.current = true;
       
       const currentHostId = gameState.get('hostId');
+      const peerCount = awareness.getStates().size;
       
-      if (currentHostId === undefined || currentHostId === null) {
-        console.log(`Claiming host (hostId was ${currentHostId})`);
+      if ((currentHostId === undefined || currentHostId === null) && peerCount <= 1) {
+        console.log(`Claiming host (hostId was ${currentHostId}, peerCount: ${peerCount})`);
         gameState.set('hostId', myId);
       } else {
-        console.log(`Host already exists: ${currentHostId}`);
+        console.log(`Not claiming host (hostId: ${currentHostId}, peerCount: ${peerCount})`);
       }
-      hasAttemptedClaim.current = true;
     };
 
     // Watch for hostId changes in shared state
@@ -90,12 +91,12 @@ export const useRoom = (roomId: string) => {
         }
       });
 
-      // Sort: Host first, then by ClientID
+      // Sort: Host first, then alphabetically by name
       const currentHostId = gameState.get('hostId') as number | null;
       activePlayers.sort((a, b) => {
         if (a.clientId === currentHostId) return -1;
         if (b.clientId === currentHostId) return 1;
-        return 0;
+        return a.name.localeCompare(b.name);
       });
       setPlayers(activePlayers);
       
@@ -106,14 +107,39 @@ export const useRoom = (roomId: string) => {
       }
     };
 
-    // For solo rooms (first peer), we're immediately "synced"
-    const initialStates = awareness.getStates();
-    if (initialStates.size <= 1) {
-      setIsSynced(true);
-    }
+    // Track if we've seen any other peers connect
+    // This is the reliable signal that we're NOT the first peer
+    let hasSeenOtherPeers = false;
+    
+    // Listen for peer connection events
+    // If we see other peers BEFORE claiming, we're a joiner
+    newProvider.on('peers', ({ webrtcPeers, bcPeers }: { webrtcPeers: string[], bcPeers: string[] }) => {
+      const totalPeers = webrtcPeers.length + bcPeers.length;
+      if (totalPeers > 0) {
+        hasSeenOtherPeers = true;
+      }
+    });
 
+    // Handle sync event - fires when we've synced with peers
     newProvider.on('synced', ({ synced }: { synced: boolean }) => {
       setIsSynced(synced);
+      // After sync completes, attempt to claim host
+      // The claim logic will check if conditions are met
+      if (synced) {
+        claimHostIfEligible();
+      }
+    });
+    
+    // For solo rooms: if after connecting to signaling we have no peers,
+    // we need to set synced=true and claim host.
+    // We do this by checking after the provider has had a chance to discover peers.
+    // The 'status' event fires when signaling connection status changes.
+    newProvider.on('status', ({ connected }: { connected: boolean }) => {
+      if (connected && !hasSeenOtherPeers && !hasAttemptedClaim.current) {
+        // Connected to signaling but no peers found - we're first
+        setIsSynced(true);
+        claimHostIfEligible();
+      }
     });
 
     // Subscribe to changes
@@ -121,13 +147,9 @@ export const useRoom = (roomId: string) => {
     awareness.on('change', handleAwarenessChange);
     setProvider(newProvider);
 
-    // Initial checks
+    // Initial state reads
     handleGameStateChange();
     handleAwarenessChange();
-    
-    // Claim host if empty - runs immediately, no setTimeout needed
-    // Yjs handles concurrent writes atomically
-    claimHostIfEmpty();
 
     return () => {
       gameState.unobserve(handleGameStateChange);
