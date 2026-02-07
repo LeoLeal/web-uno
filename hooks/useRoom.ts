@@ -19,6 +19,22 @@ export const useRoom = (roomId: string) => {
   const [hostId, setHostId] = useState<number | null>(null);
   const [isHostConnected, setIsHostConnected] = useState<boolean | null>(null);
   const hasAttemptedClaim = useRef(false);
+  const isExplicitCreator = useRef(false);
+
+  // Check for creation intent flag (cookie) on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check for room-creator cookie
+      const match = document.cookie.match(new RegExp(`(?:^|; )room-creator=${roomId}(?:;|$)`));
+      
+      if (match) {
+        isExplicitCreator.current = true;
+        // Clear the cookie by setting max-age=0
+        document.cookie = `room-creator=${roomId}; path=/; max-age=0`;
+        console.log('Creation intent detected via cookie: Marking as explicit creator');
+      }
+    }
+  }, [roomId]);
 
   // Function to update local player state
   const updateMyState = useCallback((state: Partial<Omit<Player, 'clientId'>>) => {
@@ -45,19 +61,30 @@ export const useRoom = (roomId: string) => {
     setMyClientId(myId);
 
     // Host claiming - only called once per session
-    // Claims host only when: no existing host AND we're the only peer
+    // Claims host if:
+    // 1. We explicitly created the room (sessionStorage flag)
+    // 2. OR: No existing host AND we're the only peer (legacy/fallback)
     const claimHostIfEligible = () => {
       if (hasAttemptedClaim.current) return;
-      hasAttemptedClaim.current = true;
       
       const currentHostId = gameState.get('hostId');
       const peerCount = awareness.getStates().size;
+      const isCreator = isExplicitCreator.current;
       
-      if ((currentHostId === undefined || currentHostId === null) && peerCount <= 1) {
-        console.log(`Claiming host (hostId was ${currentHostId}, peerCount: ${peerCount})`);
+      const shouldClaim = isCreator || ((currentHostId === undefined || currentHostId === null) && peerCount <= 1);
+
+      if (shouldClaim) {
+        console.log(`Claiming host (Creator: ${isCreator}, hostId was ${currentHostId}, peerCount: ${peerCount})`);
         gameState.set('hostId', myId);
+        setIsHostConnected(true); // Immediate update to prevent disconnect modal flash
+        hasAttemptedClaim.current = true;
       } else {
-        console.log(`Not claiming host (hostId: ${currentHostId}, peerCount: ${peerCount})`);
+        console.log(`Not claiming host (Creator: ${isCreator}, hostId: ${currentHostId}, peerCount: ${peerCount})`);
+        // Only mark attempted if we successfully decided NOT to claim because someone else is host
+        // If we are just waiting (e.g. not synced yet), maybe don't mark attempted?
+        // Actually, for "race condition" fix, if we are NOT creator, we should be very conservative.
+        // We mark attempted=true so we don't try again and again.
+        hasAttemptedClaim.current = true;
       }
     };
 
@@ -69,7 +96,7 @@ export const useRoom = (roomId: string) => {
       // Check if host is still connected
       if (currentHostId !== null) {
         const states = awareness.getStates();
-        const hostConnected = states.has(currentHostId);
+        const hostConnected = currentHostId === myId || states.has(currentHostId);
         setIsHostConnected(hostConnected);
       }
     };
@@ -102,7 +129,7 @@ export const useRoom = (roomId: string) => {
       
       // Check host presence on every awareness change
       if (currentHostId !== null) {
-        const hostConnected = states.has(currentHostId);
+        const hostConnected = currentHostId === myId || states.has(currentHostId);
         setIsHostConnected(hostConnected);
       }
     };
@@ -136,9 +163,20 @@ export const useRoom = (roomId: string) => {
     // The 'status' event fires when signaling connection status changes.
     newProvider.on('status', ({ connected }: { connected: boolean }) => {
       if (connected && !hasSeenOtherPeers && !hasAttemptedClaim.current) {
-        // Connected to signaling but no peers found - we're first
-        setIsSynced(true);
-        claimHostIfEligible();
+        // If we are explicitly the creator, we can confidently claim being first.
+        if (isExplicitCreator.current) {
+          setIsSynced(true);
+          claimHostIfEligible();
+        }
+        // If we are NOT the creator (e.g. joined by URL), we should NOT assume we are first.
+        // We wait for 'peers' or 'synced' events.
+        // Note: Manual URL creators will not auto-claim host here, preventing race conditions.
+        
+        // Guest UI Fix: We set isSynced(true) so the UI unlocks (Join Modal shows).
+        // They remain guests until state syncs or host is claimed by someone else.
+        if (!isExplicitCreator.current) {
+           setIsSynced(true);
+        }
       }
     });
 
@@ -150,6 +188,12 @@ export const useRoom = (roomId: string) => {
     // Initial state reads
     handleGameStateChange();
     handleAwarenessChange();
+
+    // Immediate claim for explicit creators (optimistic write)
+    if (isExplicitCreator.current) {
+      setIsSynced(true); // Force sync state for creator to unblock UI
+      claimHostIfEligible();
+    }
 
     return () => {
       gameState.unobserve(handleGameStateChange);

@@ -100,7 +100,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         )}
 
         {/* Modals - Show if synced and hasn't joined yet (works for both host and guests) */}
-        <JoinGameModal isOpen={isSynced && !hasJoined} onJoin={handleJoin} />
+        {/* Only show Join Modal if host is NOT disconnected (null or true) */}
+        <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false} onJoin={handleJoin} />
         
         {/* Host Disconnect Modal - Shows when host disconnects */}
         <HostDisconnectModal isOpen={isHostConnected === false} />
