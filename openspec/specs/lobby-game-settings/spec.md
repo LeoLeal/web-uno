@@ -15,7 +15,7 @@ The system SHALL display a Game Settings panel in the lobby that shows current g
 
 #### Scenario: Summary reflects actual settings
 - **WHEN** settings are at default values
-- **THEN** the summary displays "Standard rules · 7 cards"
+- **THEN** the summary displays "No stacking · 7 cards" (replacing "Standard rules")
 
 #### Scenario: Summary updates when settings change
 - **WHEN** the host changes settings
@@ -65,6 +65,7 @@ The GameSettingsModal SHALL have a "House Rules" section with toggle switches fo
 - **THEN** they see toggle switches for: Draw Stacking, Jump-In, Zero Swap, Seven Swap, Force Play, Multiple Card Play
 - **AND** each toggle shows current on/off state
 - **AND** each toggle has an info tooltip explaining the rule
+- **AND** the Draw Stacking toggle description explicitly says "No stacking" when disabled (OFF)
 
 ### Requirement: Settings modal has draft state
 The GameSettingsModal SHALL maintain draft state for settings changes until explicitly saved.

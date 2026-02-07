@@ -414,6 +414,7 @@ dialog.modal {
   border: none;
   background: transparent;
   margin: 0;
+  outline: none;
   
   /* Center in viewport */
   place-self: center;

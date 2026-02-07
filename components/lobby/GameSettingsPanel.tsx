@@ -36,7 +36,7 @@ export const GameSettingsPanel = ({ isHost }: GameSettingsPanelProps) => {
 
   return (
     <>
-      <div className="panel-felt p-4 flex items-center justify-between">
+      <div className="panel-felt p-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Settings className="w-5 h-5 text-(--copper-light)" />
           <div>

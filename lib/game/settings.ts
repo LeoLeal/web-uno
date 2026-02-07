@@ -92,32 +92,20 @@ export const BOOLEAN_SETTING_LABELS: Record<BooleanSettingKey, string> = {
 export const getSettingsSummary = (settings: GameSettings): string => {
   const parts: string[] = [];
 
-  // Check if using standard rules (all booleans off)
-  const hasCustomRules = BOOLEAN_SETTING_KEYS.some((key) => settings[key]);
+  // 1. Stacking Status (Always explicit as requested)
+  parts.push(settings.drawStacking ? 'Stacking' : 'No stacking');
 
-  if (hasCustomRules) {
-    // List active rules
-    const activeRules: string[] = [];
-    if (settings.drawStacking) activeRules.push('Stacking');
-    if (settings.jumpIn) activeRules.push('Jump-In');
-    if (settings.zeroSwap) activeRules.push('0-Swap');
-    if (settings.sevenSwap) activeRules.push('7-Swap');
-    if (settings.forcePlay) activeRules.push('Force Play');
-    if (settings.multipleCardPlay) activeRules.push('Multi-Play');
+  // 2. Other Active Rules
+  if (settings.jumpIn) parts.push('Jump-In');
+  if (settings.zeroSwap) parts.push('0-Swap');
+  if (settings.sevenSwap) parts.push('7-Swap');
+  if (settings.forcePlay) parts.push('Force Play');
+  if (settings.multipleCardPlay) parts.push('Multi-Play');
 
-    if (activeRules.length <= 2) {
-      parts.push(activeRules.join(', '));
-    } else {
-      parts.push(`${activeRules.length} rules enabled`);
-    }
-  } else {
-    parts.push('Standard rules');
-  }
-
-  // Add hand size
+  // 3. Hand Size
   parts.push(`${settings.startingHandSize} cards`);
 
-  // Add score limit if not default
+  // 4. Score Limit
   if (settings.scoreLimit !== null) {
     parts.push(`${settings.scoreLimit} pts`);
   }
