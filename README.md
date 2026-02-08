@@ -1,4 +1,4 @@
-# Web Uno
+# P2P Uno
 
 A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the browser.
 

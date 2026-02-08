@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { Logo } from './Logo';
 
 describe('Logo', () => {
-  it('renders WEB UN text', () => {
+  it('renders P2P UN text', () => {
     render(<Logo />);
-    expect(screen.getByText('WEB UN')).toBeInTheDocument();
+    expect(screen.getByText('P2P UN')).toBeInTheDocument();
   });
 
   it('renders the card element with alt text', () => {

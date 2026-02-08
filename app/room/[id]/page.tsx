@@ -40,7 +40,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         <div className="flex justify-between items-center border-b border-(--copper-border) pb-4 mt-4">
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <span className="text-(--cream)">Web Uno</span>
+              <span className="text-(--cream)">P2P Uno</span>
               <span className="text-xs bg-(--felt-dark) px-2 py-1 rounded text-(--cream-dark) font-mono border border-(--copper-border)">BETA</span>
             </h1>
              <div className="text-xs text-(--cream-dark) opacity-70 font-mono mt-1 select-all cursor-pointer hover:opacity-100 transition-opacity"

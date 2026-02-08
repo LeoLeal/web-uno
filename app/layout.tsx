@@ -15,7 +15,7 @@ const nunito = Nunito({
 })
 
 export const metadata: Metadata = {
-  title: 'Web Uno P2P',
+  title: 'P2P Uno',
   description: 'Serverless P2P Uno Game',
 }
 

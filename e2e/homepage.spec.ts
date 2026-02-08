@@ -9,7 +9,7 @@ test.describe('Homepage Visual Tests', () => {
 
   test('homepage renders correctly on desktop', async ({ page }) => {
     // Check that the logo is visible
-    await expect(page.getByText('WEB UN')).toBeVisible();
+    await expect(page.getByText('P2P UN')).toBeVisible();
     
     // Check the card fan is present (should have cards with symbols)
     await expect(page.getByText('+2').first()).toBeVisible();
@@ -80,7 +80,7 @@ test.describe('Homepage Mobile Tests', () => {
 
   test('layout stacks correctly on mobile', async ({ page }) => {
     // Verify elements are stacked vertically
-    const logo = page.getByText('WEB UN');
+    const logo = page.getByText('P2P UN');
     const createButton = page.getByRole('link', { name: /create new game/i });
     
     const logoBox = await logo.boundingBox();
@@ -143,7 +143,7 @@ test.describe('Homepage Reduced Motion', () => {
     await page.goto('/');
     
     // With reduced motion, elements should be immediately visible
-    await expect(page.getByText('WEB UN')).toBeVisible();
+    await expect(page.getByText('P2P UN')).toBeVisible();
     await expect(page.getByRole('link', { name: /create new game/i })).toBeVisible();
     
     // Take screenshot to verify no animations are in progress

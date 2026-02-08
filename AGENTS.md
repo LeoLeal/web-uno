@@ -1,12 +1,13 @@
-# Agentic Coding Guidelines - Web Uno
+# Agentic Coding Guidelines - P2P Uno
 
 For product vision and architecture, see /project.md.
 
-This document outlines the development standards, commands, and conventions for the **Web Uno** project. Agents and developers should strictly adhere to these guidelines to maintain codebase consistency and quality.
+This document outlines the development standards, commands, and conventions for the **P2P Uno** project. Agents and developers should strictly adhere to these guidelines to maintain codebase consistency and quality.
 
 ## 1. Project Overview & Tech Stack
 
 This is a peer-to-peer multiplayer Uno game.
+
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript (Strict Mode)
 - **Styling**: Tailwind CSS
@@ -17,11 +18,13 @@ This is a peer-to-peer multiplayer Uno game.
 ## 2. Operational Commands
 
 ### Package Management
+
 - Use `npm` for dependency management.
 - Install dependencies: `npm install`
 - Add dev dependency: `npm install -D <package>`
 
 ### Build & Run
+
 - **Signaling Server**: `npm run signaling`
   - Required for P2P discovery in dev environment.
 - **Development Server**: `npm run dev`
@@ -30,12 +33,14 @@ This is a peer-to-peer multiplayer Uno game.
 - **Start Production**: `npm run start`
 
 ### Linting & Formatting
+
 - **Lint Code**: `npm run lint`
   - Strictly fix all ESLint warnings/errors before committing.
 - **Type Check**: `tsc --noEmit`
   - Ensure zero type errors.
 
 ### Testing (Vitest)
+
 - **Run All Tests**: `npm run test` (or `npm test`)
 - **Run Tests in Watch Mode**: `npm run test:watch`
 - **Run Single Test File**:
@@ -51,12 +56,14 @@ This is a peer-to-peer multiplayer Uno game.
 ## 3. Code Style Guidelines
 
 ### General Principles
+
 - **Functional Programming**: Prefer pure functions and immutability.
 - **Composition**: Favor component composition over inheritance or complex configuration.
 - **DRY (Don't Repeat Yourself)**: Extract common logic into custom hooks or utility functions.
 - **Early Returns**: Use early returns to reduce nesting in conditionals.
 
 ### TypeScript Conventions
+
 - **Strict Typing**: Avoid `any`. Use `unknown` if the type is truly uncertain, then narrow it.
 - **Interfaces**: Use `interface` for object definitions and React props (e.g., `interface ButtonProps`).
 - **Types**: Use `type` for unions, intersections, or primitives (e.g., `type CardColor = 'red' | 'blue'`).
@@ -67,11 +74,12 @@ This is a peer-to-peer multiplayer Uno game.
 - **Enums**: Avoid TypeScript Enums; use Union Types or const objects instead.
   ```typescript
   // DO
-  const CARD_COLORS = ['red', 'blue', 'green', 'yellow'] as const;
-  type CardColor = typeof CARD_COLORS[number];
+  const CARD_COLORS = ["red", "blue", "green", "yellow"] as const;
+  type CardColor = (typeof CARD_COLORS)[number];
   ```
 
 ### React & Next.js Conventions
+
 - **Functional Components**: Use arrow functions for components.
   ```tsx
   export const GameBoard = ({ deckId }: GameBoardProps) => { ... }
@@ -87,6 +95,7 @@ This is a peer-to-peer multiplayer Uno game.
   - Add `'use client'` directive only when state or effects are strictly needed.
 
 ### Styling (Tailwind CSS)
+
 - **Utility First**: Use standard Tailwind utility classes.
 - **No Arbitrary Values**: Avoid brackets like `w-[35px]` unless absolutely necessary. Add to `tailwind.config.ts` theme if reused.
 - **Class Sorting**: Order classes logically (layout -> box model -> typography -> decoration -> effects).
@@ -97,6 +106,7 @@ This is a peer-to-peer multiplayer Uno game.
   ```
 
 ### File Structure & Naming
+
 - **Directories**: kebab-case (e.g., `components/game-board`, `lib/utils`).
 - **Component Files**: PascalCase (e.g., `Card.tsx`, `PlayerHand.tsx`).
 - **Utility/Hook Files**: camelCase (e.g., `useGameState.ts`, `formatDate.ts`).
@@ -108,8 +118,8 @@ This is a peer-to-peer multiplayer Uno game.
   - Use Absolute Imports configured in `tsconfig.json`.
   - Pattern: `@/components/...`, `@/lib/...`, `@/hooks/...`.
   ```typescript
-  import { Card } from '@/components/ui/Card';
-  import { useDeck } from '@/hooks/useDeck';
+  import { Card } from "@/components/ui/Card";
+  import { useDeck } from "@/hooks/useDeck";
   ```
 
 ## 4. Error Handling
@@ -148,7 +158,7 @@ This is a peer-to-peer multiplayer Uno game.
 - **Self-Documenting Code**: Variable and function names should explain their purpose.
 - **JSDoc**: Use JSDoc for complex utility functions, explaining parameters and return values.
 - **Code Comments**:
-  - Explain *WHY*, not *WHAT*.
+  - Explain _WHY_, not _WHAT_.
   - Use `// TODO:` for technical debt or missing features.
 
 ## 8. Git & Commit Guidelines
@@ -167,6 +177,7 @@ This is a peer-to-peer multiplayer Uno game.
 - **Example**: `feat(game-board): add initial card rendering logic`
 
 ### Branch Naming
+
 - **Format**: `<type>/<short-description>`
 - **Types**: Must match the commit types (feat, fix, refactor, etc.).
 - **Description**: kebab-case, short and descriptive.
@@ -176,7 +187,8 @@ This is a peer-to-peer multiplayer Uno game.
   - `chore/update-deps`
 
 ### Pull Requests
-- **Description**: State clearly *what* changed and the *impact* of those changes.
+
+- **Description**: State clearly _what_ changed and the _impact_ of those changes.
 - **Skip the Journey**: Do not narrate the development process ("I tried X then Y"). Focus on the final result.
 
 ## 9. Agent Instructions
@@ -190,4 +202,5 @@ This is a peer-to-peer multiplayer Uno game.
   4. Create new tests for new functionality.
 
 ---
-*Generated by OpenCode for Web Uno Project*
+
+_Generated by OpenCode for P2P Uno Project_

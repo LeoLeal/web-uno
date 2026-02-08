@@ -6,7 +6,7 @@ workflow:
 
 # Project context
 context: |
-  Web Uno - P2P multiplayer Uno game.
+  P2P Uno - Peer-to-peer multiplayer Uno game.
   Full guidelines: See /AGENTS.md
   
   Stack: Next.js 16, TypeScript, Tailwind CSS, Yjs CRDT, WebRTC, Vitest.

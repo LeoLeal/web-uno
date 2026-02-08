@@ -15,7 +15,7 @@ export const Logo = ({ className }: LogoProps) => {
         className
       )}
     >
-      {/* WEB UN text */}
+      {/* P2P UN text */}
       <span 
         className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide"
         style={{ 
@@ -23,7 +23,7 @@ export const Logo = ({ className }: LogoProps) => {
           textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
         }}
       >
-        WEB UN
+        P2P UN
       </span>
       
       {/* Card as "O" - Uses extracted SVG from UNO deck */}
