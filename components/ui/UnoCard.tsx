@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 type CardColor = 'red' | 'blue' | 'yellow' | 'green';
-type CardSymbol = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'reverse' | 'skip' | 'plus2' | 'wild' | 'wild-draw4';
+type CardSymbol = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'reverse' | 'skip' | 'draw2' | 'wild' | 'wild-draw4';
 
 interface UnoCardProps {
   color: CardColor;

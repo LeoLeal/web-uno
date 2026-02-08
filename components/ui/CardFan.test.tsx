@@ -6,7 +6,7 @@ describe('CardFan', () => {
   it('renders 4 cards with alt texts', () => {
     render(<CardFan />);
     
-    expect(screen.getByAltText('red plus2 card')).toBeInTheDocument();
+    expect(screen.getByAltText('red draw2 card')).toBeInTheDocument();
     expect(screen.getByAltText('blue skip card')).toBeInTheDocument();
     expect(screen.getByAltText('yellow reverse card')).toBeInTheDocument();
     expect(screen.getByAltText('green reverse card')).toBeInTheDocument();
@@ -35,10 +35,10 @@ describe('CardFan', () => {
   it('uses correct SVG file paths', () => {
     render(<CardFan />);
     
-    const redPlus2 = screen.getByAltText('red plus2 card');
+    const redDraw2 = screen.getByAltText('red draw2 card');
     const blueSkip = screen.getByAltText('blue skip card');
     
-    expect(redPlus2).toHaveAttribute('src', expect.stringContaining('red-plus2.svg'));
+    expect(redDraw2).toHaveAttribute('src', expect.stringContaining('red-draw2.svg'));
     expect(blueSkip).toHaveAttribute('src', expect.stringContaining('blue-skip.svg'));
   });
 });

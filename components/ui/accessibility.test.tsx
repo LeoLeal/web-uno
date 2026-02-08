@@ -61,7 +61,7 @@ describe('Accessibility', () => {
     });
 
     it('should have no accessibility violations for green card', async () => {
-      const { container } = render(<UnoCard color="green" symbol="plus2" />);
+      const { container } = render(<UnoCard color="green" symbol="draw2" />);
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });

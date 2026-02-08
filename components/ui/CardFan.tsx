@@ -13,7 +13,7 @@ interface CardFanProps {
 const cards = [
   {
     color: 'red' as const,
-    symbol: 'plus2' as const,
+    symbol: 'draw2' as const,
     rotation: -24,
     mobileRotation: -16, // Adjusted: 3-card fan centered (-16, 0, +16)
     offsetX: -45,
