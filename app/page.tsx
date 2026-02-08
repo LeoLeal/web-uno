@@ -1,16 +1,26 @@
 'use client';
 
-import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gamepad2, ArrowRight } from 'lucide-react';
-import { normalizeRoomId } from '@/lib/room-code';
+import { generateRoomId, normalizeRoomId } from '@/lib/room-code';
 import { Logo } from '@/components/ui/Logo';
 import { CardFan } from '@/components/ui/CardFan';
 
 export default function Home() {
   const router = useRouter();
   const [roomCode, setRoomCode] = useState('');
+
+  // Defensive cleanup: clear stale creator intent on home page load
+  useEffect(() => {
+    sessionStorage.removeItem('room-creator');
+  }, []);
+
+  const handleCreate = () => {
+    const id = generateRoomId();
+    sessionStorage.setItem('room-creator', id);
+    router.push(`/room/${id}`);
+  };
 
   const handleJoin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,13 +44,13 @@ export default function Home() {
         <div className="w-full flex flex-col items-center gap-6 mt-4">
           
           {/* Create Game Button */}
-          <Link 
-            href="/create" 
+          <button 
+            onClick={handleCreate}
             className="btn-copper w-full max-w-xs"
           >
             <Gamepad2 className="w-5 h-5" />
             Create New Game
-          </Link>
+          </button>
 
           {/* Divider */}
           <div className="divider-copper w-full max-w-xs">

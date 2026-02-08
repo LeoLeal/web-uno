@@ -10,6 +10,15 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock sessionStorage
+const sessionStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+
 describe('Homepage', () => {
   describe('Accessibility', () => {
     it('should have no accessibility violations', async () => {
@@ -40,13 +49,12 @@ describe('Homepage', () => {
       expect(submitButton).toBeInTheDocument();
     });
 
-    it('should have accessible links', async () => {
+    it('should have accessible buttons', async () => {
       render(<Home />);
       
-      // Create game link should be accessible
-      const createLink = screen.getByRole('link', { name: /create new game/i });
-      expect(createLink).toBeInTheDocument();
-      expect(createLink).toHaveAttribute('href', '/create');
+      // Create game button should be accessible
+      const createButton = screen.getByRole('button', { name: /create new game/i });
+      expect(createButton).toBeInTheDocument();
     });
   });
 
@@ -55,13 +63,13 @@ describe('Homepage', () => {
       render(<Home />);
       
       // All interactive elements should be focusable
-      const link = screen.getByRole('link', { name: /create new game/i });
+      const createButton = screen.getByRole('button', { name: /create new game/i });
       const input = screen.getByPlaceholderText('Enter room code...');
-      const button = screen.getByRole('button', { name: 'Join room' });
+      const joinButton = screen.getByRole('button', { name: 'Join room' });
       
-      expect(link).not.toHaveAttribute('tabindex', '-1');
+      expect(createButton).not.toHaveAttribute('tabindex', '-1');
       expect(input).not.toHaveAttribute('tabindex', '-1');
-      expect(button).not.toHaveAttribute('tabindex', '-1');
+      expect(joinButton).not.toHaveAttribute('tabindex', '-1');
     });
   });
 

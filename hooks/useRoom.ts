@@ -21,17 +21,17 @@ export const useRoom = (roomId: string) => {
   const hasAttemptedClaim = useRef(false);
   const isExplicitCreator = useRef(false);
 
-  // Check for creation intent flag (cookie) on mount
+  // Check for creation intent flag (sessionStorage) on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Check for room-creator cookie
-      const match = document.cookie.match(new RegExp(`(?:^|; )room-creator=${roomId}(?:;|$)`));
+      // Check for room-creator sessionStorage entry
+      const creatorRoomId = sessionStorage.getItem('room-creator');
       
-      if (match) {
+      if (creatorRoomId === roomId) {
         isExplicitCreator.current = true;
-        // Clear the cookie by setting max-age=0
-        document.cookie = `room-creator=${roomId}; path=/; max-age=0`;
-        console.log('Creation intent detected via cookie: Marking as explicit creator');
+        // Clear the sessionStorage entry to prevent re-claiming on reload
+        sessionStorage.removeItem('room-creator');
+        console.log('Creation intent detected via sessionStorage: Marking as explicit creator');
       }
     }
   }, [roomId]);
