@@ -18,29 +18,35 @@ const ADJECTIVES = [
 ];
 
 const NOUNS = [
-  'lions', 'tigers', 'bears', 'wolves', 'foxes', 'eagles', 'hawks', 'falcons',
-  'sharks', 'whales', 'dolphins', 'seals', 'otters', 'beavers', 'raccoons',
-  'pandas', 'koalas', 'kangaroos', 'wombats', 'platypuses', 'lemurs',
-  'monkeys', 'apes', 'gorillas', 'chimpanzees', 'orangutans', 'baboons',
-  'elephants', 'rhinos', 'hippos', 'giraffes', 'zebras', 'camels', 'llamas',
-  'horses', 'ponies', 'donkeys', 'mules', 'cows', 'bulls', 'oxen', 'bison',
-  'deer', 'moose', 'elk', 'caribou', 'antelopes', 'gazelles', 'impalas',
-  'penguins', 'pelicans', 'seagulls', 'albatrosses', 'herons', 'storks',
-  'flamingos', 'swans', 'geese', 'ducks', 'turkeys', 'chickens', 'roosters',
-  'peacocks', 'parrots', 'macaws', 'cockatoos', 'toucans', 'hummingbirds',
-  'dragons', 'unicorns', 'griffins', 'phoenixes', 'wyverns', 'krakens',
-  'robots', 'androids', 'cyborgs', 'droids', 'mechs', 'bots', 'automatons',
-  'wizards', 'warlocks', 'sorcerers', 'mages', 'necromancers', 'druids',
-  'knights', 'paladins', 'rangers', 'rogues', 'thieves', 'assassins', 'ninjas',
-  'pirates', 'captains', 'sailors', 'marines', 'navigators', 'explorers',
-  'astronauts', 'cosmonauts', 'taikonauts', 'pilots', 'aviators',
-  'vampires', 'werewolves', 'zombies', 'ghosts', 'spirits', 'phantoms',
-  'scientists', 'engineers', 'doctors', 'nurses', 'pilots', 'drivers',
-  'artists', 'painters', 'sculptors', 'musicians', 'composers', 'conductors',
-  'chefs', 'cooks', 'bakers', 'butchers', 'farmers', 'gardeners', 'hunters',
-  'detectives', 'spies', 'agents', 'officers', 'soldiers', 'warriors',
-  'athletes', 'runners', 'swimmers', 'divers', 'climbers', 'skiers',
-  'dancers', 'singers', 'actors', 'performers', 'magicians', 'comedians'
+  // Fantasy & Magic
+  'wizards', 'mages', 'sorcerers', 'warlocks', 'witches', 'druids', 'shamans',
+  'enchanters', 'conjurers', 'illusionists', 'alchemists', 'mystics', 'oracles',
+  // Warriors & Fighters
+  'knights', 'paladins', 'warriors', 'gladiators', 'champions', 'berserkers',
+  'samurai', 'ronin', 'spartans', 'vikings', 'crusaders', 'templars', 'sentinels',
+  // Rogues & Shadows
+  'ninjas', 'assassins', 'rogues', 'thieves', 'bandits', 'outlaws', 'rebels',
+  'phantoms', 'shadows', 'specters', 'wraiths', 'ghosts', 'spirits', 'haunters',
+  // Adventurers & Explorers
+  'pirates', 'buccaneers', 'corsairs', 'privateers', 'sailors', 'voyagers',
+  'explorers', 'wanderers', 'nomads', 'drifters', 'seekers', 'pathfinders',
+  // Mythical Beings
+  'dragons', 'phoenixes', 'unicorns', 'griffins', 'hydras', 'basilisks',
+  'chimeras', 'sphinxes', 'cyclopes', 'titans', 'giants', 'golems', 'gargoyles',
+  // Celestial & Divine
+  'angels', 'seraphs', 'celestials', 'guardians', 'protectors', 'watchers',
+  'prophets', 'sages', 'seers', 'visionaries', 'dreamers', 'stargazers',
+  // Robots & Sci-Fi
+  'robots', 'androids', 'cyborgs', 'mechs', 'automatons', 'synthetics',
+  'replicants', 'drones', 'sentries', 'circuits', 'pilots', 'cadets',
+  // Heroes & Legends
+  'heroes', 'legends', 'icons', 'mavericks', 'trailblazers', 'pioneers',
+  'vanguards', 'elites', 'aces', 'prodigies', 'virtuosos', 'maestros',
+  // Tricksters & Jesters
+  'tricksters', 'jesters', 'jokers', 'pranksters', 'wildcards', 'rascals',
+  'scoundrels', 'mischief', 'imps', 'gremlins', 'sprites', 'pixies', 'fairies',
+  // Cosmic & Mysterious
+  'cosmonauts', 'starfarers', 'voyagers', 'travelers', 'dimensionals', 'eternals'
 ];
 
 /**
