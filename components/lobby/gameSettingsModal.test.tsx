@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import { GameSettingsModal } from './GameSettingsModal';
 import { DEFAULT_SETTINGS, GameSettings } from '@/lib/game/settings';
+import infoTooltipStyles from '../ui/InfoTooltip.module.css';
 
 // Mock HTMLDialogElement methods for jsdom
 beforeAll(() => {
@@ -222,10 +223,10 @@ describe('GameSettingsModal', () => {
     });
 
     it('should render info tooltips for all settings', () => {
-      render(<GameSettingsModal {...defaultProps} />);
+      const { container } = render(<GameSettingsModal {...defaultProps} />);
 
       // Should have 8 tooltips (2 for discrete + 6 for boolean)
-      const tooltips = document.querySelectorAll('.info-tooltip');
+      const tooltips = container.getElementsByClassName(infoTooltipStyles.root);
       expect(tooltips.length).toBe(8);
     });
   });

@@ -1,0 +1,81 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: help;
+  color: var(--cream-dark);
+  opacity: 0.7;
+  transition: all 150ms ease-out;
+  anchor-name: --info-trigger;
+}
+
+.trigger:hover,
+.trigger:focus {
+  color: var(--copper-light);
+  opacity: 1;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 2px;
+}
+
+/* Tooltip bubble */
+.content {
+  display: none;
+  position: fixed;
+  position-anchor: --info-trigger;
+  inset-area: top;
+  position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+  position-visibility: anchors-visible;
+  
+  max-width: 250px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  
+  background-color: rgba(13, 40, 24, 0.95);
+  border: 1px solid var(--copper-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  
+  color: var(--cream);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-align: left;
+  
+  z-index: 100;
+}
+
+/* Show tooltip on hover/focus (desktop) */
+/* Note: CSS modules scoping might make sibling selectors tricky if not careful */
+.trigger:hover + .content,
+.trigger:focus + .content,
+.content:hover {
+  display: block;
+}
+
+/* Show tooltip when open (mobile tap) */
+.open .content {
+  display: block;
+}
+
+/* Fallback for browsers without anchor positioning */
+@supports not (anchor-name: --info-trigger) {
+  .content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.5rem;
+  }
+}

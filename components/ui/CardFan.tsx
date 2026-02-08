@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { UnoCard } from './UnoCard';
+import styles from './CardFan.module.css';
 
 interface CardFanProps {
   className?: string;
@@ -78,7 +79,7 @@ export const CardFan = ({ className }: CardFanProps) => {
               // Hide green card on mobile (last card)
               isLastCard && 'hidden sm:block',
               // Fan animation
-              'animate-card-fan'
+              styles.fan
             )}
             style={{
               // Stack order - rightmost card on top

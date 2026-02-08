@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
+import { clsx } from 'clsx';
+import styles from './ToggleSwitch.module.css';
 
 interface ToggleSwitchProps {
   /** Whether the switch is on */
@@ -58,10 +60,10 @@ export const ToggleSwitch = ({
       disabled={disabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="toggle-switch"
+      className={clsx(styles.toggleSwitch, checked && styles.checked)}
     >
-      <span className="toggle-switch__track" aria-hidden="true" />
-      <span className="toggle-switch__thumb" aria-hidden="true" />
+      <span className={styles.track} aria-hidden="true" />
+      <span className={styles.thumb} aria-hidden="true" />
     </button>
   );
 };

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import { clsx } from 'clsx';
+import styles from './PillButtonGroup.module.css';
 
 interface PillButtonGroupOption<T> {
   value: T;
@@ -85,7 +87,7 @@ export const PillButtonGroup = <T extends string | number | null>({
       ref={groupRef}
       role="radiogroup"
       aria-label={ariaLabel}
-      className="pill-button-group"
+      className={styles.group}
     >
       {options.map((option, index) => {
         const isSelected = option.value === value;
@@ -99,7 +101,7 @@ export const PillButtonGroup = <T extends string | number | null>({
             tabIndex={isSelected ? 0 : -1}
             onClick={() => handleClick(option.value)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            className="pill-button"
+            className={clsx(styles.button, isSelected && styles.checked)}
           >
             {option.label}
           </button>

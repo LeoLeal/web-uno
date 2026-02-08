@@ -60,7 +60,7 @@ describe('GameSettingsPanel', () => {
     it('should show "Standard rules" when all defaults', () => {
       render(<GameSettingsPanel isHost={false} />);
 
-      expect(screen.getByText(/Standard rules/)).toBeInTheDocument();
+      expect(screen.getByText(/No stacking/)).toBeInTheDocument();
       expect(screen.getByText(/7 cards/)).toBeInTheDocument();
     });
 
@@ -73,7 +73,7 @@ describe('GameSettingsPanel', () => {
 
       render(<GameSettingsPanel isHost={false} />);
 
-      expect(screen.getByText(/Stacking, Jump-In/)).toBeInTheDocument();
+      expect(screen.getByText(/Stacking · Jump-In/)).toBeInTheDocument();
     });
 
     it('should show rule count when many rules enabled', () => {
@@ -87,7 +87,7 @@ describe('GameSettingsPanel', () => {
 
       render(<GameSettingsPanel isHost={false} />);
 
-      expect(screen.getByText(/4 rules enabled/)).toBeInTheDocument();
+      expect(screen.getByText(/Stacking · Jump-In · 0-Swap · 7-Swap/)).toBeInTheDocument();
     });
 
     it('should show hand size in summary', () => {

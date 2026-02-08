@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { Info } from 'lucide-react';
+import { clsx } from 'clsx';
+import styles from './InfoTooltip.module.css';
 
 interface InfoTooltipProps {
   /** The tooltip content text */
@@ -71,11 +73,11 @@ export const InfoTooltip = ({
   return (
     <div
       ref={containerRef}
-      className={`info-tooltip ${isOpen ? 'info-tooltip--open' : ''}`}
+      className={clsx(styles.root, isOpen && styles.open)}
     >
       <button
         type="button"
-        className="info-tooltip__trigger"
+        className={styles.trigger}
         aria-label={ariaLabel}
         aria-describedby={tooltipId}
         onClick={handleClick}
@@ -85,7 +87,7 @@ export const InfoTooltip = ({
       <div
         id={tooltipId}
         role="tooltip"
-        className="info-tooltip__content"
+        className={styles.content}
         aria-hidden={!isOpen}
       >
         {content}

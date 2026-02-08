@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import Home from './page';
+import cardFanStyles from '../components/ui/CardFan.module.css';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -80,7 +81,7 @@ describe('Homepage', () => {
       
       // Verify components with animations are rendered
       expect(container.querySelector('.animate-logo-fade-in')).toBeInTheDocument();
-      expect(container.querySelectorAll('.animate-card-fan').length).toBe(4);
+      expect(container.getElementsByClassName(cardFanStyles.fan).length).toBe(4);
     });
   });
 });

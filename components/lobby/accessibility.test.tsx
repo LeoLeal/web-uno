@@ -203,7 +203,8 @@ describe('Lobby Components Accessibility', () => {
       render(<GameSettingsPanel isHost={false} />);
       
       expect(screen.getByRole('heading', { name: /game settings/i, level: 3 })).toBeVisible();
-      expect(screen.getByText(/standard rules/i)).toBeVisible();
+      expect(screen.getByText(/No stacking/i)).toBeVisible();
+      expect(screen.getByText(/7 cards/i)).toBeVisible();
     });
 
     it('should show Configure button only for host', () => {

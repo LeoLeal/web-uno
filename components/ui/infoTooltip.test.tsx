@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { InfoTooltip } from './InfoTooltip';
+import styles from './InfoTooltip.module.css';
 
 describe('InfoTooltip', () => {
   beforeEach(() => {
@@ -17,7 +18,7 @@ describe('InfoTooltip', () => {
 
       const trigger = screen.getByRole('button');
       expect(trigger).toBeInTheDocument();
-      expect(trigger).toHaveClass('info-tooltip__trigger');
+      expect(trigger).toHaveClass(styles.trigger);
     });
 
     it('should have default aria-label', () => {
@@ -65,16 +66,16 @@ describe('InfoTooltip', () => {
     it('should toggle open class on click', () => {
       render(<InfoTooltip content="Test content" />);
 
-      const container = document.querySelector('.info-tooltip');
       const trigger = screen.getByRole('button');
+      const content = screen.getByRole('tooltip', { hidden: true });
 
-      expect(container).not.toHaveClass('info-tooltip--open');
-
-      fireEvent.click(trigger);
-      expect(container).toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'true');
 
       fireEvent.click(trigger);
-      expect(container).not.toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'false');
+
+      fireEvent.click(trigger);
+      expect(content).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should close when clicking outside', async () => {
@@ -86,49 +87,47 @@ describe('InfoTooltip', () => {
       );
 
       const trigger = screen.getByRole('button', { name: 'More information' });
-      const container = document.querySelector('.info-tooltip');
+      const content = screen.getByRole('tooltip', { hidden: true });
 
       // Open tooltip
       fireEvent.click(trigger);
-      expect(container).toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'false');
 
       // Run timer to attach click listener
       vi.runAllTimers();
 
       // Click outside
       fireEvent.click(screen.getByTestId('outside'));
-      expect(container).not.toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should close on Escape key', () => {
       render(<InfoTooltip content="Test content" />);
 
       const trigger = screen.getByRole('button');
-      const container = document.querySelector('.info-tooltip');
+      const content = screen.getByRole('tooltip', { hidden: true });
 
       // Open tooltip
       fireEvent.click(trigger);
-      expect(container).toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'false');
 
       // Press Escape
       fireEvent.keyDown(document, { key: 'Escape' });
-      expect(container).not.toHaveClass('info-tooltip--open');
+      expect(content).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   describe('styling classes', () => {
-    it('should have info-tooltip class on container', () => {
-      render(<InfoTooltip content="Test content" />);
-
-      const container = document.querySelector('.info-tooltip');
-      expect(container).toBeInTheDocument();
+    it('should have info-tooltip root properties', () => {
+      const { container } = render(<InfoTooltip content="Test content" />);
+      expect(container.firstChild).toHaveClass(styles.root);
     });
 
-    it('should have info-tooltip__content class on tooltip', () => {
+    it('should have info-tooltip content properties', () => {
       render(<InfoTooltip content="Test content" />);
 
-      const tooltip = document.querySelector('[role="tooltip"]');
-      expect(tooltip).toHaveClass('info-tooltip__content');
+      const tooltip = screen.getByRole('tooltip', { hidden: true });
+      expect(tooltip).toHaveClass(styles.content);
     });
   });
 

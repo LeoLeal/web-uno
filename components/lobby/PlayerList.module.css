@@ -1,0 +1,85 @@
+/* Player card - cream gradient background like playing cards */
+.card {
+  position: relative;
+  background: linear-gradient(
+    to bottom,
+    var(--card-white) 0%,
+    var(--cream) 100%
+  );
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+  color: var(--wood-dark);
+}
+
+/* "You" card - blue tinted gradient with refined border */
+.highlighted {
+  background: linear-gradient(
+    to bottom,
+    #f8fafc 0%,
+    #e8f0f8 50%,
+    #dbe8f4 100%
+  );
+  border: 2px solid #6b9bd1;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(107, 155, 209, 0.4);
+}
+
+/* Host card - rich gold gradient with yellow glow */
+.hostGlow {
+  background: linear-gradient(
+    to bottom,
+    #fffbeb 0%,
+    #fde68a 50%,
+    #fcd34d 100%
+  );
+  border: 2px solid rgba(234, 179, 8, 0.8);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 24px rgba(234, 179, 8, 0.5),
+    0 0 48px rgba(234, 179, 8, 0.25);
+}
+
+/* Host + Me card - gold background with blue border */
+.hostMe {
+  background: linear-gradient(
+    to bottom,
+    #fffbeb 0%,
+    #fde68a 50%,
+    #fcd34d 100%
+  );
+  border: 2px solid #6b9bd1;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 24px rgba(234, 179, 8, 0.5),
+    0 0 48px rgba(234, 179, 8, 0.25);
+}
+
+/* Crown circle - positioned at top of host card */
+.crownCircle {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(
+    to bottom,
+    #fef3c7 0%,
+    #fcd34d 100%
+  );
+  border: 2px solid rgba(234, 179, 8, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 16px rgba(234, 179, 8, 0.5);
+}

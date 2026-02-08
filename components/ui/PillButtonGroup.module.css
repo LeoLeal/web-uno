@@ -1,0 +1,57 @@
+.group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  min-width: 3rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cream-dark);
+  background: transparent;
+  border: 2px solid var(--copper-border);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+/* Hover state (unselected) */
+.button:hover:not(.checked):not(:disabled) {
+  border-color: var(--copper-light);
+  background-color: rgba(196, 135, 58, 0.1);
+}
+
+/* Selected state */
+.checked {
+  color: var(--cream);
+  background: linear-gradient(
+    to bottom,
+    var(--copper-light) 0%,
+    var(--copper-dark) 100%
+  );
+  border-color: var(--copper-light);
+  box-shadow: 0 0 8px rgba(196, 135, 58, 0.4);
+}
+
+/* Focus state */
+.button:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  border-color: var(--copper-border);
+  background: transparent;
+}

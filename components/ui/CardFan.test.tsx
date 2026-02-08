@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CardFan } from './CardFan';
 
+import styles from './CardFan.module.css';
+
 describe('CardFan', () => {
   it('renders 4 cards with alt texts', () => {
     render(<CardFan />);
@@ -19,15 +21,17 @@ describe('CardFan', () => {
 
   it('has card-fan animation class on wrappers', () => {
     const { container } = render(<CardFan />);
-    const animatedWrappers = container.querySelectorAll('.animate-card-fan');
+    const animatedWrappers = container.getElementsByClassName(styles.fan);
     expect(animatedWrappers.length).toBe(4);
   });
 
   it('last card (green) is hidden on mobile', () => {
     const { container } = render(<CardFan />);
-    const wrappers = container.querySelectorAll('.animate-card-fan');
+    const wrappers = container.getElementsByClassName(styles.fan);
     
-    // The 4th wrapper (index 3) should have 'hidden sm:block' classes
+    // The 4th wrapper (index 3) should be hidden on mobile
+    // Note: We can't easily check for 'hidden' class with CSS modules unless we export it or checking computed style
+    // But since 'hidden' and 'sm:block' are global utility classes (Tailwind), they should still be present
     expect(wrappers[3]).toHaveClass('hidden');
     expect(wrappers[3]).toHaveClass('sm:block');
   });

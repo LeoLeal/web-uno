@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { Modal } from './Modal';
+import styles from './Modal.module.css';
 
 // Mock HTMLDialogElement methods for jsdom
 beforeAll(() => {
@@ -175,28 +176,32 @@ describe('Modal', () => {
       );
 
       const dialog = document.querySelector('dialog');
-      expect(dialog).toHaveClass('modal');
+      expect(dialog).toHaveClass(styles.modal);
     });
 
     it('should have modal-content class on content wrapper', () => {
-      render(
+      const { container } = render(
         <Modal isOpen={true} onClose={vi.fn()}>
           <p>Content</p>
         </Modal>
       );
 
-      const content = document.querySelector('.modal-content');
+      // Dialog is at root of container in jsdom (or body?)
+      // Modal renders <dialog> directly.
+      // But querySelector('dialog') works.
+      // We want to find the content div inside.
+      const content = container.getElementsByClassName(styles.content)[0];
       expect(content).toBeInTheDocument();
     });
 
     it('should apply custom className to content wrapper', () => {
-      render(
+      const { container } = render(
         <Modal isOpen={true} onClose={vi.fn()} className="custom-class">
           <p>Content</p>
         </Modal>
       );
 
-      const content = document.querySelector('.modal-content');
+      const content = container.getElementsByClassName(styles.content)[0];
       expect(content).toHaveClass('custom-class');
     });
   });

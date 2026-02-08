@@ -1,0 +1,106 @@
+/* Dialog reset and base styling */
+.modal {
+  /* Reset browser defaults */
+  padding: 0;
+  border: none;
+  background: transparent;
+  margin: 0;
+  outline: none;
+  
+  /* Center in viewport */
+  place-self: center;
+  
+  /* Sizing */
+  width: min(calc(100vw - 2rem), 28rem);
+  max-width: none;
+  max-height: calc(100vh - 2rem);
+  height: fit-content;
+  
+  /* Allow scrolling if content overflows */
+  overflow: visible;
+}
+
+/* Native backdrop styling */
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Modal content panel */
+.content {
+  background-color: rgba(13, 40, 24, 0.95);
+  border: 2px solid var(--copper-border);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  
+  /* Enable scrolling within content */
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+/* Mobile: Full screen modal */
+@media (max-width: 639px) {
+  .modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    margin: 0;
+    inset: 0;
+    place-self: stretch;
+  }
+  
+  .content {
+    min-height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    padding: 1.5rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Modal open animations */
+.modal[open] {
+  animation: modalIn 150ms ease-out;
+}
+
+.modal[open]::backdrop {
+  animation: backdropIn 150ms ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile: Slide up animation instead of scale */
+@media (max-width: 639px) {
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

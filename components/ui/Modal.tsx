@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { clsx } from 'clsx';
+import styles from './Modal.module.css';
 
 interface ModalProps {
   /** Whether the modal is open */
@@ -72,11 +74,11 @@ export const Modal = ({
       ref={dialogRef}
       onCancel={handleCancel}
       onClick={handleClick}
-      className="modal"
+      className={styles.modal}
       aria-labelledby={ariaLabelledby}
       aria-describedby={ariaDescribedby}
     >
-      <div className={`modal-content ${className}`.trim()}>
+      <div className={clsx(styles.content, className)}>
         {children}
       </div>
     </dialog>

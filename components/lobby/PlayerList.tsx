@@ -2,6 +2,7 @@ import { Player } from '@/hooks/useRoom';
 import { getAvatar } from '@/lib/avatar';
 import { Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import styles from './PlayerList.module.css';
 
 interface PlayerListProps {
   players: Player[];
@@ -28,15 +29,16 @@ export const PlayerList = ({ players, myClientId, hostId }: PlayerListProps) => 
           <div 
             key={player.clientId}
             className={cn(
-              "card-player group flex flex-col items-center justify-center p-6 transition-all",
-              isHost && isMe && "card-player--host-me",
-              isHost && !isMe && "card-player--host-glow",
-              isMe && !isHost && "card-player--highlighted"
+              styles.card,
+              "group flex flex-col items-center justify-center p-6 transition-all",
+              isHost && isMe && styles.hostMe,
+              isHost && !isMe && styles.hostGlow,
+              isMe && !isHost && styles.highlighted
             )}
           >
             {/* Host Crown in Circle */}
             {isHost && (
-              <div className="card-player__crown-circle">
+              <div className={styles.crownCircle}>
                 <Crown className="w-5 h-5 text-amber-700 fill-current" />
               </div>
             )}

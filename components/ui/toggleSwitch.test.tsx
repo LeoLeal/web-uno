@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ToggleSwitch } from './ToggleSwitch';
+import styles from './ToggleSwitch.module.css';
 
 describe('ToggleSwitch', () => {
   describe('rendering', () => {
@@ -16,7 +17,7 @@ describe('ToggleSwitch', () => {
       render(<ToggleSwitch checked={false} onChange={vi.fn()} />);
 
       const toggle = screen.getByRole('switch');
-      expect(toggle).toHaveClass('toggle-switch');
+      expect(toggle).toHaveClass(styles.toggleSwitch);
     });
   });
 
