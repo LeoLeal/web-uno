@@ -5,10 +5,9 @@ A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the br
 ## 🚀 How to Run
 
 To run the development environment:
-
-    ```bash
-    npm run dev
-    ```
+```bash
+npm run dev
+```
 
 Open [http://localhost:3000](http://localhost:3000) to start playing.
 
