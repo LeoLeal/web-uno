@@ -4,13 +4,8 @@ A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the br
 
 ## 🚀 How to Run
 
-To run the development environment, you need two terminal processes:
+To run the development environment:
 
-1.  **Signaling Server** (Handles P2P discovery):
-    ```bash
-    npm run signaling
-    ```
-2.  **Next.js Application** (The Game UI):
     ```bash
     npm run dev
     ```
