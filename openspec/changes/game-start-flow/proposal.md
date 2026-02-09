@@ -6,9 +6,11 @@ When the host clicks "Start Game", the status changes to `PLAYING` but nothing a
 
 - Create the deck (108 cards) on the host's side only (Trusted Dealer pattern)
 - Deal cards to each player based on `startingHandSize` setting
+  - Host stores own hand locally (no self-messaging)
+  - Guests receive hands via WebRTC broadcast (filtered by recipient)
 - Flip the first card to start the discard pile
 - Sync public game state (discard pile, current turn, card counts) via Yjs
-- Send private hand data to each player via direct WebRTC messages
+- **Lobby Lock**: Store player list at game start, reject late joiners with modal
 - Display the game board UI:
   - **Header**: Keep existing lobby header as-is
   - **Player's hand**: Cards fanned in an arc at bottom (as if held in hand)
@@ -24,6 +26,7 @@ When the host clicks "Start Game", the status changes to `PLAYING` but nothing a
 - Playing cards, drawing, special card effects
 - Turn progression, game rules enforcement
 - Win conditions
+- Player reconnection/hand handover (see `game-session-management` change)
 
 ## Capabilities
 

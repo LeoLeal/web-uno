@@ -49,23 +49,37 @@ interface Card {
 
 **Rationale:** Keep it simple. ID needed to track which cards go where. Standard Uno deck composition (108 cards).
 
-### 2. Private Hand Distribution via WebRTC Data Channels
+### 2. Private Hand Distribution via WebRTC Broadcast
 
-**Decision:** Use `y-webrtc`'s underlying WebRTC connections to send private messages directly to peers.
+**Decision:** Broadcast messages to all peers with a recipient filter. Each peer ignores messages not addressed to them.
 
-The host will:
+**Implementation:**
 
-1. Build the deck and shuffle
-2. For each player, extract N cards from deck
-3. Send a `DEAL_HAND` message to each peer via data channel with their cards
-4. Store remaining deck in host's local state (not Yjs)
+1. Host broadcasts to all WebRTC peers via `provider.room.webrtcConns`:
+   ```typescript
+   {
+     type: 'DEAL_HAND',
+     toClientId: number,  // Yjs awareness clientId
+     cards: Card[]
+   }
+   ```
+2. All peers add a custom message listener (prefix byte `0xFF` to distinguish from y-webrtc sync messages)
+3. Each peer checks: `msg.toClientId === myClientId` → process or ignore
+
+**The Identity Problem (Resolved):**
+
+- Yjs Awareness uses `clientId` (number) to identify peers
+- y-webrtc uses `peerId` (UUID string) to key WebRTC connections
+- These are independent—no built-in mapping exists
+- **Solution:** Broadcast to all, filter by `clientId` on receive
 
 **Alternatives Considered:**
 
-- **Encrypted Yjs data**: Complex key management, overkill
-- **Separate signaling for private data**: Adds infrastructure complexity
+- **True 1:1 via separate data channels**: Would require forking y-webrtc or complex peer mapping
+- **Encrypted Yjs data**: Complex key management, overkill for friendly games
+- **clientId→peerId mapping table**: Fragile, requires coordination
 
-**Rationale:** WebRTC data channels already exist via y-webrtc. We can access them to send targeted messages. Keeps "trusted dealer" pattern pure—cards never touch shared state.
+**Rationale:** Pragmatic for a friendly game. Cards never touch Yjs shared state (trusted dealer preserved). Tradeoff: a sophisticated attacker with dev tools could observe all dealt hands. Acceptable for MVP; encryption can be added later.
 
 ### 3. Public Game State in Yjs
 
@@ -80,6 +94,7 @@ gameState {
   discardPile: Card[]        // Top cards visible to all (store last few for visual)
   playerCardCounts: Map<number, number>  // clientId → card count
   turnOrder: number[]        // Ordered list of player clientIds
+  lockedPlayers: { clientId: number, name: string }[]  // Players at game start (for lobby lock + future handover)
 }
 ```
 
@@ -164,14 +179,15 @@ When host clicks "Start Game":
 
 ## Risks / Trade-offs
 
-| Risk                                                   | Mitigation                                                                                                                                    |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| WebRTC data channel access is undocumented in y-webrtc | Fallback: Use y-webrtc's broadcast with recipient field, ignore if not for you (less private but functional). Research y-webrtc source first. |
-| Player joins mid-deal                                  | Don't allow joins once game starts. Lock lobby.                                                                                               |
-| Card back PNG is large (104KB)                         | Acceptable for now. Could optimize to SVG later.                                                                                              |
-| Host disconnects after dealing                         | Existing HostDisconnectModal handles this. Game ends.                                                                                         |
+| Risk                                          | Mitigation                                                                                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Broadcast-with-filter is not truly private    | Acceptable for friendly games. Cards never in Yjs. Future: add per-player encryption (AES key exchange).        |
+| Player joins mid-deal                         | Don't allow joins once game starts. Lock lobby.                                                                 |
+| Card back PNG is large (104KB)                | Acceptable for now. Could optimize to SVG later.                                                                |
+| Host disconnects after dealing                | Existing HostDisconnectModal handles this. Game ends.                                                           |
+| Custom y-webrtc message listener may conflict | Use `0xFF` prefix byte to distinguish game messages from Yjs sync protocol. Additive listener, not replacement. |
 
 ## Open Questions
 
-1. **How to access WebRTC data channels from y-webrtc?** → Need to research y-webrtc internals or use `provider.room.webrtcConns` map.
+1. ~~**How to access WebRTC data channels from y-webrtc?**~~ → **RESOLVED**: Use `provider.room.webrtcConns` Map, iterate and call `conn.peer.send()`. Add listener on peer's `data` event with prefix byte filtering.
 2. **Should we animate the deal?** → Deferred to future change (polish).

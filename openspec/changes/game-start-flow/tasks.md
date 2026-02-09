@@ -7,21 +7,21 @@
 ## 2. Private Messaging Infrastructure
 
 - [ ] 2.1 Create `hooks/usePrivateMessages.ts` hook to send/receive WebRTC data channel messages
-- [ ] 2.2 Define message types: `DEAL_HAND` with Card[] payload in `lib/game/messages.ts`
-- [ ] 2.3 Integrate with y-webrtc provider to access peer connections
+- [ ] 2.2 Define message protocol in `lib/game/messages.ts`: 0xFF prefix byte + JSON payload with `type`, `toClientId`, `cards`
+- [ ] 2.3 Integrate with y-webrtc provider to access peer connections via `provider.room.webrtcConns`
 
 ## 3. Game Engine (Host-Side)
 
 - [ ] 3.1 Create `hooks/useGameEngine.ts` for host-only game management
 - [ ] 3.2 Implement `initializeGame()`: create deck, shuffle, deal to all players
-- [ ] 3.3 Implement dealing logic: extract cards for each player, send via private message
+- [ ] 3.3 Implement dealing logic: host stores own hand locally, sends to guests via broadcast
 - [ ] 3.4 Implement first card flip with Wild Draw 4 reshuffle rule
-- [ ] 3.5 Update Yjs shared state: currentTurn, direction, discardPile, playerCardCounts, turnOrder
+- [ ] 3.5 Update Yjs shared state: currentTurn, direction, discardPile, playerCardCounts, turnOrder, lockedPlayers
 - [ ] 3.6 Add tests for deal logic and turn order initialization
 
 ## 4. Game State Extensions
 
-- [ ] 4.1 Extend `useGameState.ts` to read new fields (currentTurn, direction, discardPile, playerCardCounts)
+- [ ] 4.1 Extend `useGameState.ts` to read new fields (currentTurn, direction, discardPile, playerCardCounts, lockedPlayers)
 - [ ] 4.2 Create `usePlayerHand.ts` hook for local hand state (receives from private messages)
 - [ ] 4.3 Add tests for game state observation
 
@@ -59,3 +59,10 @@
 - [ ] 9.2 Test full flow: create room → join with 3 players → start game → verify all see game board
 - [ ] 9.3 Verify deck privacy: guests cannot see deck in Yjs state
 - [ ] 9.4 Verify hand privacy: each player sees only their own cards
+
+## 10. Lobby Lock
+
+- [ ] 10.1 Create `components/modals/GameAlreadyStartedModal.tsx` with "Game Already Started" message and home button
+- [ ] 10.2 Add late joiner detection logic in room page (check clientId against lockedPlayers)
+- [ ] 10.3 Show GameAlreadyStartedModal and redirect late joiners to home
+- [ ] 10.4 Test: join room after game starts → verify modal appears and redirect works

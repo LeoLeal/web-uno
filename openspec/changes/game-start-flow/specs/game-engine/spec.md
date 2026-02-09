@@ -61,6 +61,14 @@ The system SHALL flip the top card of the deck to start the discard pile.
 - **AND** the deck is reshuffled
 - **AND** a new top card is drawn
 
+#### Scenario: Regular Wild as first card
+
+- **WHEN** the top card is a regular Wild (not Wild Draw Four)
+- **THEN** that card becomes the first card of the discard pile
+- **AND** the wild card is treated as having no active color
+
+> **Note:** Color assignment for a wild first card is out of scope for this change. The first player will set the color when they play (future change).
+
 ### Requirement: Turn Order Initialization
 
 The system SHALL establish a turn order based on connected players.
