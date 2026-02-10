@@ -1,17 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
-import * as Y from 'yjs';
 import { useGame } from '@/components/providers/GameProvider';
+import { Card } from '@/lib/game/cards';
 
 export type GameStatus = 'LOBBY' | 'PLAYING' | 'ENDED';
+
+export interface LockedPlayer {
+  clientId: number;
+  name: string;
+}
 
 export const useGameState = () => {
   const { doc } = useGame();
   const [status, setStatus] = useState<GameStatus>('LOBBY');
-  
-  // Get the shared map
-  // Note: Yjs types are mutable, so we don't put them in state directly usually
-  // But we need to subscribe to changes.
-  
+  const [currentTurn, setCurrentTurn] = useState<number | null>(null);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [discardPile, setDiscardPile] = useState<Card[]>([]);
+  const [playerCardCounts, setPlayerCardCounts] = useState<Record<number, number>>({});
+  const [turnOrder, setTurnOrder] = useState<number[]>([]);
+  const [lockedPlayers, setLockedPlayers] = useState<LockedPlayer[]>([]);
+
   useEffect(() => {
     if (!doc) return;
 
@@ -22,17 +29,33 @@ export const useGameState = () => {
       if (currentStatus) {
         setStatus(currentStatus);
       } else {
-        // Default to LOBBY if not set
         if (!gameStateMap.has('status')) {
-           // We don't set it here to avoid race conditions, 
-           // Host initialization logic (Task 5.1) handles the write.
-           setStatus('LOBBY');
+          setStatus('LOBBY');
         }
       }
+
+      // Read game fields (only relevant when PLAYING)
+      const turn = gameStateMap.get('currentTurn') as number | undefined;
+      setCurrentTurn(turn ?? null);
+
+      const dir = gameStateMap.get('direction') as 1 | -1 | undefined;
+      setDirection(dir ?? 1);
+
+      const discard = gameStateMap.get('discardPile') as Card[] | undefined;
+      setDiscardPile(discard ?? []);
+
+      const counts = gameStateMap.get('playerCardCounts') as Record<number, number> | undefined;
+      setPlayerCardCounts(counts ?? {});
+
+      const order = gameStateMap.get('turnOrder') as number[] | undefined;
+      setTurnOrder(order ?? []);
+
+      const locked = gameStateMap.get('lockedPlayers') as LockedPlayer[] | undefined;
+      setLockedPlayers(locked ?? []);
     };
 
     gameStateMap.observe(handleChange);
-    handleChange(); // Initial check
+    handleChange();
 
     return () => {
       gameStateMap.unobserve(handleChange);
@@ -54,5 +77,15 @@ export const useGameState = () => {
     }
   }, [doc]);
 
-  return { status, startGame, initGame };
+  return {
+    status,
+    currentTurn,
+    direction,
+    discardPile,
+    playerCardCounts,
+    turnOrder,
+    lockedPlayers,
+    startGame,
+    initGame,
+  };
 };

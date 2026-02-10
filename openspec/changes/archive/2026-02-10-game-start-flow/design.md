@@ -13,7 +13,7 @@ The lobby system is complete: players connect via WebRTC/Yjs, host is establishe
 **Constraints:**
 
 - "Trusted Dealer" model: Host holds deck in memory, guests never see it
-- Private hands must be sent via WebRTC data channels (not Yjs, which is shared)
+- Hands distributed via Yjs `dealtHands` map (pragmatic for friendly games; privacy enhancement deferred)
 - Public state (discard pile, turn) synced via Yjs for all to see
 
 ## Goals / Non-Goals
@@ -21,7 +21,7 @@ The lobby system is complete: players connect via WebRTC/Yjs, host is establishe
 **Goals:**
 
 - Initialize and shuffle a 108-card Uno deck on host
-- Deal starting hands to all players (via private WebRTC messages)
+- Deal starting hands to all players (via Yjs `dealtHands` map)
 - Flip first card to discard pile and set first player's turn
 - Display game board with player's hand, opponent indicators, deck, and discard pile
 - All players see the same public state (top of discard, whose turn, card counts)
@@ -49,37 +49,21 @@ interface Card {
 
 **Rationale:** Keep it simple. ID needed to track which cards go where. Standard Uno deck composition (108 cards).
 
-### 2. Private Hand Distribution via WebRTC Broadcast
+### 2. Hand Distribution via Yjs `dealtHands` Map
 
-**Decision:** Broadcast messages to all peers with a recipient filter. Each peer ignores messages not addressed to them.
+**Decision:** Host writes each player's hand to a Yjs Y.Map keyed by clientId. Each player's `usePlayerHand` hook observes only their own key.
 
 **Implementation:**
 
-1. Host broadcasts to all WebRTC peers via `provider.room.webrtcConns`:
-   ```typescript
-   {
-     type: 'DEAL_HAND',
-     toClientId: number,  // Yjs awareness clientId
-     cards: Card[]
-   }
-   ```
-2. All peers add a custom message listener (prefix byte `0xFF` to distinguish from y-webrtc sync messages)
-3. Each peer checks: `msg.toClientId === myClientId` → process or ignore
+1. Host creates the `dealtHands` Y.Map in a single Yjs transaction along with all other game state
+2. Each player's `usePlayerHand` hook observes `dealtHands.get(String(myClientId))`
+3. Hands are delivered as soon as the Yjs transaction syncs to peers
 
-**The Identity Problem (Resolved):**
+**Why not WebRTC private channels?**
 
-- Yjs Awareness uses `clientId` (number) to identify peers
-- y-webrtc uses `peerId` (UUID string) to key WebRTC connections
-- These are independent—no built-in mapping exists
-- **Solution:** Broadcast to all, filter by `clientId` on receive
+y-webrtc registers its own `data` event handler on every SimplePeer connection. This handler consumes all incoming data and parses it as y-webrtc protocol messages. Custom messages sent via `conn.peer.send()` are intercepted and discarded before any custom listener runs. Piggybacking custom data on y-webrtc's data channels is not viable without forking the library.
 
-**Alternatives Considered:**
-
-- **True 1:1 via separate data channels**: Would require forking y-webrtc or complex peer mapping
-- **Encrypted Yjs data**: Complex key management, overkill for friendly games
-- **clientId→peerId mapping table**: Fragile, requires coordination
-
-**Rationale:** Pragmatic for a friendly game. Cards never touch Yjs shared state (trusted dealer preserved). Tradeoff: a sophisticated attacker with dev tools could observe all dealt hands. Acceptable for MVP; encryption can be added later.
+**Tradeoff:** Hands are in shared Yjs state, so a peer with dev tools could inspect other players' hands. Acceptable for friendly games. A future enhancement will add either per-player encryption or a separate WebRTC data channel for true privacy.
 
 ### 3. Public Game State in Yjs
 
@@ -146,18 +130,19 @@ gameState {
 components/game/
 ├── GameBoard.tsx           # Main container, layout manager
 ├── PlayerHand.tsx          # Fanned arc of player's cards
-├── OpponentIndicator.tsx   # Circular avatar + card count
+├── OpponentIndicator.tsx   # Circular avatar + card count + host crown
+├── OpponentRow.tsx         # Horizontal row of opponents
 ├── TableCenter.tsx         # Deck pile + discard pile
 ├── DiscardPile.tsx         # Stacked cards with random offset
-└── CardBack.tsx            # Card back image component
+└── DeckPile.tsx            # Stacked card backs
 ```
 
 **Hooks:**
 
 ```
 hooks/
-├── useGameEngine.ts        # Host-only deck management, dealing
-└── usePrivateMessages.ts   # Send/receive private WebRTC messages
+├── useGameEngine.ts        # Host-only deck management, dealing via Yjs
+└── usePlayerHand.ts        # Local hand state (reads from Yjs dealtHands map)
 ```
 
 ### 6. Deal Sequence
@@ -168,8 +153,7 @@ When host clicks "Start Game":
 2. **Host determines turn order** → From current `players` array order
 3. **Host deals to each player**:
    - Extract N cards from deck
-   - Send `DEAL_HAND` message via data channel to that peer
-   - If dealing to self (host), just set local state
+   - Write all hands to Yjs `dealtHands` map in a single transaction
 4. **Host flips first card** → Move top of deck to discard pile
    - If first card is Wild Draw 4, reshuffle and retry
 5. **Host sets first turn** → First player in turn order
@@ -179,15 +163,14 @@ When host clicks "Start Game":
 
 ## Risks / Trade-offs
 
-| Risk                                          | Mitigation                                                                                                      |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Broadcast-with-filter is not truly private    | Acceptable for friendly games. Cards never in Yjs. Future: add per-player encryption (AES key exchange).        |
-| Player joins mid-deal                         | Don't allow joins once game starts. Lock lobby.                                                                 |
-| Card back PNG is large (104KB)                | Acceptable for now. Could optimize to SVG later.                                                                |
-| Host disconnects after dealing                | Existing HostDisconnectModal handles this. Game ends.                                                           |
-| Custom y-webrtc message listener may conflict | Use `0xFF` prefix byte to distinguish game messages from Yjs sync protocol. Additive listener, not replacement. |
+| Risk                               | Mitigation                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| Hands in Yjs are not truly private | Acceptable for friendly games. Future: add per-player encryption or separate data channel. |
+| Player joins mid-deal              | Don't allow joins once game starts. Lock lobby.                                            |
+| Card back PNG is large (104KB)     | Acceptable for now. Could optimize to SVG later.                                           |
+| Host disconnects after dealing     | Existing HostDisconnectModal handles this. Game ends.                                      |
 
 ## Open Questions
 
-1. ~~**How to access WebRTC data channels from y-webrtc?**~~ → **RESOLVED**: Use `provider.room.webrtcConns` Map, iterate and call `conn.peer.send()`. Add listener on peer's `data` event with prefix byte filtering.
+1. ~~**How to access WebRTC data channels from y-webrtc?**~~ → **ABANDONED**: y-webrtc consumes all SimplePeer data events internally; custom messages cannot coexist. Hands are distributed via Yjs instead.
 2. **Should we animate the deal?** → Deferred to future change (polish).

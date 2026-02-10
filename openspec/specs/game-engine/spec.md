@@ -4,7 +4,7 @@
 
 Core game state management for Uno: deck creation, shuffling, dealing hands, and turn order initialization.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Deck Creation
 
@@ -39,11 +39,12 @@ The system SHALL deal the configured number of cards to each player when the gam
 - **AND** each player receives exactly H cards
 - **AND** the remaining deck size is 108 - (H×N) - 1 (minus the first discard)
 
-#### Scenario: Host deals to self
+#### Scenario: Host deals to all players
 
 - **WHEN** the host deals cards
-- **THEN** the host also receives their own hand
-- **AND** the host's hand is stored in local state (not transmitted)
+- **THEN** all players' hands (including the host's own) are written to the Yjs `dealtHands` map
+- **AND** each entry is keyed by `String(clientId)`
+- **AND** all hand entries are written in a single Yjs transaction
 
 ### Requirement: First Card Flip
 

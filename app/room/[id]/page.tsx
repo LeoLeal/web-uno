@@ -5,11 +5,16 @@ import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
+import { useGameSettings } from '@/hooks/useGameSettings';
+import { usePlayerHand } from '@/hooks/usePlayerHand';
+import { useGameEngine } from '@/hooks/useGameEngine';
 import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/lobby/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
 import { HostDisconnectModal } from '@/components/lobby/HostDisconnectModal';
+import { GameAlreadyStartedModal } from '@/components/modals/GameAlreadyStartedModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
+import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
 import { formatRoomId } from '@/lib/room-code';
 
@@ -17,8 +22,17 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
-  const { status, startGame, initGame } = useGameState();
+  const { status, currentTurn, discardPile, playerCardCounts, lockedPlayers, initGame } = useGameState();
+  const { settings } = useGameSettings();
+  const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
+
+  // Game engine — host-only deck management and dealing (hands delivered via Yjs)
+  const { initializeGame } = useGameEngine({
+    players,
+    myClientId,
+    startingHandSize: settings.startingHandSize,
+  });
 
   // Initialize Game State
   useEffect(() => {
@@ -31,6 +45,20 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     updateMyState({ name, avatar: getAvatar(myClientId || 0) });
     setHasJoined(true);
   };
+
+  // Start game handler — host triggers initializeGame
+  const handleStartGame = () => {
+    if (amIHost) {
+      initializeGame();
+    }
+  };
+
+  // Late joiner detection: game is playing but I'm not in locked players list
+  const isLateJoiner =
+    status === 'PLAYING' &&
+    lockedPlayers.length > 0 &&
+    myClientId !== null &&
+    !lockedPlayers.some((p) => p.clientId === myClientId);
 
   return (
     <main className="relative z-10 flex min-h-screen flex-col items-center p-4 pb-24 md:pb-4">
@@ -77,13 +105,15 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                    <PlayerList players={players} myClientId={myClientId} hostId={hostId} />
                 </>
             ) : (
-                <div className="flex items-center justify-center h-64 border-2 border-dashed border-(--copper-border) rounded-xl bg-(--felt-dark)/50">
-                    <div className="text-center space-y-2">
-                        <div className="text-4xl">🎮</div>
-                        <h2 className="text-2xl font-bold text-(--cream)">Game Started!</h2>
-                        <p className="text-(--cream-dark) opacity-70">The game engine is loading...</p>
-                    </div>
-                </div>
+                <GameBoard
+                  players={players}
+                  myClientId={myClientId}
+                  hostId={hostId}
+                  currentTurn={currentTurn}
+                  hand={hand}
+                  discardPile={discardPile}
+                  playerCardCounts={playerCardCounts}
+                />
             )}
         </div>
 
@@ -94,19 +124,18 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                 <StartGameButton 
                     isHost={amIHost} 
                     playerCount={players.length} 
-                    onStart={startGame} 
+                    onStart={handleStartGame} 
                 />
             </div>
         )}
 
-        {/* Modals - Show if synced and hasn't joined yet (works for both host and guests) */}
-        {/* Only show Join Modal if host is NOT disconnected (null or true) */}
+        {/* Modals */}
         <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false} onJoin={handleJoin} />
-        
-        {/* Host Disconnect Modal - Shows when host disconnects */}
         <HostDisconnectModal isOpen={isHostConnected === false} />
+        <GameAlreadyStartedModal isOpen={isLateJoiner} />
 
       </div>
     </main>
   );
 }
+

@@ -6,8 +6,8 @@ When the host clicks "Start Game", the status changes to `PLAYING` but nothing a
 
 - Create the deck (108 cards) on the host's side only (Trusted Dealer pattern)
 - Deal cards to each player based on `startingHandSize` setting
-  - Host stores own hand locally (no self-messaging)
-  - Guests receive hands via WebRTC broadcast (filtered by recipient)
+  - Hands distributed via Yjs `dealtHands` map (keyed by clientId)
+  - Each player reads only their own entry
 - Flip the first card to start the discard pile
 - Sync public game state (discard pile, current turn, card counts) via Yjs
 - **Lobby Lock**: Store player list at game start, reject late joiners with modal
@@ -37,11 +37,11 @@ When the host clicks "Start Game", the status changes to `PLAYING` but nothing a
 
 ### Modified Capabilities
 
-- `p2p-networking`: Add private messaging for hand distribution (Host → Player)
+- `p2p-networking`: Add `dealtHands` Yjs map for hand distribution
 
 ## Impact
 
 - **New files**: Card types, deck utilities, game board components, hand display
-- **Modified**: `useGameState.ts`, `room/[id]/page.tsx`, `useRoom.ts` for data channels
-- **State**: New Yjs maps for public game state (discardPile, currentTurn, playerCardCounts)
+- **Modified**: `useGameState.ts`, `room/[id]/page.tsx`
+- **State**: New Yjs maps for public game state (discardPile, currentTurn, playerCardCounts) and `dealtHands` for hand distribution
 - **Assets**: Card images (front faces + back)

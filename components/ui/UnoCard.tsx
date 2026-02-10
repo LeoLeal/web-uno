@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 type CardColor = 'red' | 'blue' | 'yellow' | 'green';
-type CardSymbol = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'reverse' | 'skip' | 'draw2' | 'wild' | 'wild-draw4';
+type CardSymbol = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'reverse' | 'skip' | 'draw2' | 'wild' | 'wild-draw4' | 'back';
 
 interface UnoCardProps {
-  color: CardColor;
+  color?: CardColor;
   symbol: CardSymbol;
   rotation?: number;
   className?: string;
@@ -25,7 +25,12 @@ const sizeMap = {
  * Maps card color and symbol to the SVG file path.
  * SVG files are extracted from the official UNO deck.
  */
-const getCardPath = (color: CardColor, symbol: CardSymbol): string => {
+const getCardPath = (color: CardColor | undefined, symbol: CardSymbol): string => {
+  // Card back
+  if (symbol === 'back') {
+    return '/cards/uno_card_back.png';
+  }
+
   // Wild cards don't have a color prefix
   if (symbol === 'wild' || symbol === 'wild-draw4') {
     return `/cards/${symbol}.svg`;
@@ -44,11 +49,13 @@ export const UnoCard = ({
 }: UnoCardProps) => {
   const dimensions = sizeMap[size];
   const cardPath = getCardPath(color, symbol);
-  const altText = `${color} ${symbol} card`;
+  const altText = symbol === 'back'
+    ? 'Card back'
+    : `${color} ${symbol} card`;
 
   return (
     <div
-      className={cn('relative', className)}
+      className={cn('relative flex-shrink-0', className)}
       style={{
         width: dimensions.width,
         height: dimensions.height,
@@ -62,9 +69,10 @@ export const UnoCard = ({
         alt={altText}
         width={dimensions.width}
         height={dimensions.height}
-        className="w-full h-full"
+        className="w-full h-full rounded-sm object-cover"
         priority
       />
     </div>
   );
 };
+
