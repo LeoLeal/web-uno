@@ -131,7 +131,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
 
         {/* Modals */}
         <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false} onJoin={handleJoin} />
-        <HostDisconnectModal isOpen={isHostConnected === false} />
+        {isHostConnected === false && <HostDisconnectModal />}
         <GameAlreadyStartedModal isOpen={isLateJoiner} />
 
       </div>

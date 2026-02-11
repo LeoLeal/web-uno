@@ -167,20 +167,20 @@ describe('Lobby Components Accessibility', () => {
 
   describe('HostDisconnectModal', () => {
     it('should have no accessibility violations when open', async () => {
-      const { container } = render(<HostDisconnectModal isOpen={true} />);
+      const { container } = render(<HostDisconnectModal />);
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
     it('should display disconnect message clearly', () => {
-      render(<HostDisconnectModal isOpen={true} />);
+      render(<HostDisconnectModal />);
       
       expect(screen.getByText(/host disconnected/i)).toBeVisible();
       expect(screen.getByText(/game cannot continue/i)).toBeVisible();
     });
 
     it('should show countdown accessibly', () => {
-      render(<HostDisconnectModal isOpen={true} />);
+      render(<HostDisconnectModal />);
       
       expect(screen.getByText(/returning to home in/i)).toBeVisible();
     });

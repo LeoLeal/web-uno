@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createDeck, shuffle } from '@/lib/game/deck';
 import { Card, isWildDrawFour } from '@/lib/game/cards';
 
@@ -18,13 +18,13 @@ describe('Game Engine Logic', () => {
       const handSize = 7;
       const hands: Record<number, Card[]> = {};
 
-      for (const playerId of playerIds) {
-        hands[playerId] = deck.splice(0, handSize);
+      for (const _playerId of playerIds) {
+        hands[_playerId] = deck.splice(0, handSize);
       }
 
       // Each player gets exactly 7 cards
-      for (const playerId of playerIds) {
-        expect(hands[playerId]).toHaveLength(handSize);
+      for (const _playerId of playerIds) {
+        expect(hands[_playerId]).toHaveLength(handSize);
       }
 
       // Remaining deck should be 108 - 21 = 87
@@ -39,7 +39,7 @@ describe('Game Engine Logic', () => {
       const handSize = 7;
       const allDealtIds = new Set<string>();
 
-      for (const playerId of playerIds) {
+      for (const _playerId of playerIds) {
         const hand = deck.splice(0, handSize);
         hand.forEach((c) => allDealtIds.add(c.id));
       }
@@ -56,12 +56,12 @@ describe('Game Engine Logic', () => {
       const handSize = 10;
       const hands: Record<number, Card[]> = {};
 
-      for (const playerId of playerIds) {
-        hands[playerId] = deck.splice(0, handSize);
+      for (const _playerId of playerIds) {
+        hands[_playerId] = deck.splice(0, handSize);
       }
 
-      for (const playerId of playerIds) {
-        expect(hands[playerId]).toHaveLength(handSize);
+      for (const _playerId of playerIds) {
+        expect(hands[_playerId]).toHaveLength(handSize);
       }
 
       // 108 - 40 = 68 remaining

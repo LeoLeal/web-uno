@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import { GameSettingsPanel } from './GameSettingsPanel';
-import { DEFAULT_SETTINGS, GameSettings } from '@/lib/game/settings';
+import { DEFAULT_SETTINGS } from '@/lib/game/settings';
 
 // Mock HTMLDialogElement methods for jsdom
 beforeAll(() => {

@@ -55,9 +55,8 @@ export const GameSettingsPanel = ({ isHost }: GameSettingsPanelProps) => {
         )}
       </div>
 
-      {canConfigure && (
+      {canConfigure && isModalOpen && (
         <GameSettingsModal
-          isOpen={isModalOpen}
           onClose={handleCloseModal}
           currentSettings={settings}
           onSave={handleSaveSettings}

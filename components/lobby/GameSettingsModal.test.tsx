@@ -16,7 +16,6 @@ beforeAll(() => {
 
 describe('GameSettingsModal', () => {
   const defaultProps = {
-    isOpen: true,
     onClose: vi.fn(),
     currentSettings: DEFAULT_SETTINGS,
     onSave: vi.fn(),

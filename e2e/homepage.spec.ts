@@ -69,8 +69,6 @@ test.describe('Homepage Mobile Tests', () => {
 
   test('card fan shows 3 cards on mobile', async ({ page }) => {
     // On mobile, the green card should be hidden
-    // Count visible reverse symbols (should be 1 from yellow, not 2)
-    const reverseSymbols = page.locator('text=⟲');
     
     // Take mobile screenshot
     await expect(page).toHaveScreenshot('homepage-mobile.png', {

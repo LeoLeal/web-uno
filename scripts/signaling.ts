@@ -13,10 +13,10 @@ wss.on('connection', (ws) => {
   const subscribedTopics = new Set<string>();
 
   ws.on('message', (message) => {
-    let msg: any;
+    let msg: { type?: string; topics?: string[]; topic?: string };
     try {
       msg = JSON.parse(message.toString());
-    } catch (e) {
+    } catch (_e) {
       return;
     }
 

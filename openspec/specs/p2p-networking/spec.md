@@ -124,3 +124,11 @@ The system SHALL lock the player list when the game starts and reject late joine
 - **AND** the late joiner is NOT added to the game
 
 > **Note:** The late joiner's awareness state may briefly appear before rejection. Client-side filtering handles this.
+
+### Requirement: Awareness State Type Safety
+
+The `useRoom` hook SHALL use proper TypeScript types when accessing awareness local state, using `{ user?: Partial<Omit<Player, 'clientId'>> } | null` instead of `any`.
+
+### Requirement: Client ID Sync
+
+Setting `myClientId` from the WebRTC awareness `clientID` within an effect is a legitimate pattern for syncing state from an external system and MAY use an `eslint-disable` comment.

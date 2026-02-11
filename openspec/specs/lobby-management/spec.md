@@ -195,3 +195,21 @@ The system SHALL style all lobby modals (Join Game, Host Disconnect) with the Ca
 - **THEN** the modal background uses felt-toned colors
 - **AND** text uses cream color palette
 - **AND** the modal container does NOT show a default browser focus ring/outline
+
+### Requirement: Modal Component Lifecycle
+
+Modal components (`GameSettingsModal`, `HostDisconnectModal`) SHALL be conditionally rendered by their parent components, mounting only when they need to be visible. This ensures state resets naturally via `useState` initializers without `useEffect` synchronization.
+
+#### Scenario: GameSettingsModal opens
+
+- **WHEN** the host clicks "Configure" in `GameSettingsPanel`
+- **THEN** `GameSettingsModal` mounts with `draft` initialized from `currentSettings`
+- **WHEN** the modal is closed
+- **THEN** `GameSettingsModal` unmounts completely
+
+#### Scenario: HostDisconnectModal appears
+
+- **WHEN** `isHostConnected` becomes `false`
+- **THEN** `HostDisconnectModal` mounts with `countdown` initialized to `5`
+- **WHEN** the countdown reaches 0
+- **THEN** the user is navigated to the homepage

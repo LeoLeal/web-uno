@@ -4,11 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/Modal';
 
-interface HostDisconnectModalProps {
-  isOpen: boolean;
-}
-
-export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
+export const HostDisconnectModal = () => {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -16,10 +12,6 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
 
   // Countdown timer effect - only handles state updates
   useEffect(() => {
-    if (!isOpen) return;
-
-    // Reset state when modal opens
-    setCountdown(5);
     hasNavigated.current = false;
 
     // Countdown timer
@@ -43,11 +35,10 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
         timerRef.current = null;
       }
     };
-  }, [isOpen]);
+  }, []);
 
   // Navigation effect - watches countdown and navigates when it hits 0
   useEffect(() => {
-    if (!isOpen) return;
     if (countdown === 0 && !hasNavigated.current) {
       hasNavigated.current = true;
       // Small delay to ensure cleanup completes
@@ -55,10 +46,10 @@ export const HostDisconnectModal = ({ isOpen }: HostDisconnectModalProps) => {
         router.push('/');
       }, 100);
     }
-  }, [countdown, isOpen, router]);
+  }, [countdown, router]);
 
   return (
-    <Modal isOpen={isOpen} aria-labelledby="disconnect-modal-title">
+    <Modal isOpen={true} aria-labelledby="disconnect-modal-title">
       {/* Icon */}
       <div className="text-6xl text-center">👋</div>
 

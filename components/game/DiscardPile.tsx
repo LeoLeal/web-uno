@@ -19,7 +19,7 @@ export const DiscardPile = ({ cards, className }: DiscardPileProps) => {
   const visibleCards = cards.slice(-3);
   const transforms = useMemo(
     () =>
-      visibleCards.map((_, i) => ({
+      visibleCards.map((_card, _i) => ({
         rotation: Math.random() * 20 - 10,
         offsetX: Math.random() * 6 - 3,
         offsetY: Math.random() * 6 - 3,

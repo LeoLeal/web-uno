@@ -3,7 +3,6 @@ import { useGame } from '@/components/providers/GameProvider';
 import {
   GameSettings,
   DEFAULT_SETTINGS,
-  BooleanSettingKey,
   StartingHandSize,
   ScoreLimit,
 } from '@/lib/game/settings';

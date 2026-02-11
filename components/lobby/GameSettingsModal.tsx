@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -20,8 +20,6 @@ import {
 } from '@/lib/game/settings';
 
 interface GameSettingsModalProps {
-  /** Whether the modal is open */
-  isOpen: boolean;
   /** Called when the modal should close */
   onClose: () => void;
   /** Current settings from Yjs */
@@ -45,20 +43,12 @@ const scoreLimitOptions = SCORE_LIMITS.map((limit) => ({
  * Host-only component that allows customizing game rules.
  */
 export const GameSettingsModal = ({
-  isOpen,
   onClose,
   currentSettings,
   onSave,
 }: GameSettingsModalProps) => {
-  // Draft state for editing
+  // Draft state for editing — initialized from current settings on each mount
   const [draft, setDraft] = useState<GameSettings>(currentSettings);
-
-  // Reset draft when modal opens with current settings
-  useEffect(() => {
-    if (isOpen) {
-      setDraft(currentSettings);
-    }
-  }, [isOpen, currentSettings]);
 
   const handleHandSizeChange = useCallback((value: StartingHandSize) => {
     setDraft((prev) => ({ ...prev, startingHandSize: value }));
@@ -83,7 +73,7 @@ export const GameSettingsModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={true}
       onClose={onClose}
       aria-labelledby="settings-modal-title"
       className="w-full max-w-md"

@@ -26,7 +26,7 @@ async function joinRoom(page: Page, name: string): Promise<void> {
 
 test.describe('Lobby Theme Consistency', () => {
   test.beforeEach(async ({ page }) => {
-    const roomUrl = await createRoom(page);
+    const _roomUrl = await createRoom(page);
     await joinRoom(page, 'TestHost');
   });
 

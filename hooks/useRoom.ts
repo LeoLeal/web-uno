@@ -39,7 +39,7 @@ export const useRoom = (roomId: string) => {
   // Function to update local player state
   const updateMyState = useCallback((state: Partial<Omit<Player, 'clientId'>>) => {
     if (!provider) return;
-    const current = provider.awareness.getLocalState() as any;
+    const current = provider.awareness.getLocalState() as { user?: Partial<Omit<Player, 'clientId'>> } | null;
     provider.awareness.setLocalStateField('user', {
       ...current?.user,
       ...state
@@ -58,6 +58,7 @@ export const useRoom = (roomId: string) => {
     const awareness = newProvider.awareness;
     const gameState = doc.getMap('gameState');
     const myId = awareness.clientID;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing state from external WebRTC provider
     setMyClientId(myId);
 
     // Host claiming - only called once per session
