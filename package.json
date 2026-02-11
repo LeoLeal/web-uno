@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Serverless P2P Uno Game",
   "scripts": {
-    "dev": "concurrently -n \"NEXT,SIGNAL\" -c \"cyan,magenta\" \"npm run dev:next\" \"npm run dev:signaling\"",
+    "dev": "concurrently -n \"NEXTJS,SIGNAL\" -c \"cyan,magenta\" \"npm run dev:next\" \"npm run dev:signaling\"",
     "dev:next": "next dev",
     "dev:signaling": "tsx scripts/signaling.ts",
     "signaling": "tsx scripts/signaling.ts",
