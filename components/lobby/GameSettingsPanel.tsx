@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { useGameSettings } from '@/hooks/useGameSettings';
 import { useGameState } from '@/hooks/useGameState';
-import { GameSettingsModal } from './GameSettingsModal';
+import { GameSettingsModal } from '@/components/modals/GameSettingsModal';
 import { GameSettings, getSettingsSummary } from '@/lib/game/settings';
 
 interface GameSettingsPanelProps {

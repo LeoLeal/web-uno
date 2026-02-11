@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
 import { PlayerList } from './PlayerList';
-import { JoinGameModal } from './JoinGameModal';
+import { JoinGameModal } from '@/components/modals/JoinGameModal';
 import { StartGameButton } from './StartGameButton';
-import { HostDisconnectModal } from './HostDisconnectModal';
+import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
 import { GameSettingsPanel } from './GameSettingsPanel';
 import { DEFAULT_SETTINGS } from '@/lib/game/settings';
 
