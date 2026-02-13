@@ -54,6 +54,13 @@ The system SHALL display opponents around the edge of the viewport with circular
 - **AND** the name box has a copper border and felt-dark background
 - **AND** the name box has a higher z-index than the avatar
 
+#### Scenario: Opponent avatar size
+
+- **WHEN** displaying an opponent's avatar
+- **THEN** the avatar is at least 80px in diameter on desktop
+- **AND** the avatar scales down on mobile to fit multiple opponents
+- **AND** the avatar has a copper border
+
 ### Requirement: Opponent Card Count
 
 The system SHALL display the number of cards each opponent holds using card back images in a fan formation.
@@ -196,3 +203,31 @@ The system SHALL visually indicate disconnected opponents on the game board.
 - **WHEN** a replacement player takes over an orphaned hand
 - **THEN** the avatar updates to show the new player's name and avatar
 - **AND** the dimming/disconnect indicator is removed
+
+## MODIFIED Requirements
+
+### Requirement: UNO Button
+
+**UPDATED**: Now includes visibility, appearance, interaction, and position requirements for the UNO button above the player's hand.
+
+#### Scenario: UNO button always visible during gameplay
+- **WHEN** the game is in PLAYING status
+- **THEN** a circular UNO button is displayed above the player's hand
+
+#### Scenario: UNO button enabled at 2 cards
+- **WHEN** the player's hand has exactly 2 cards
+- **AND** the UNO button is visible
+- **THEN** the button is enabled and clickable
+- **AND** the button has a subtle pulsing animation to draw attention
+
+#### Scenario: UNO button disabled with more cards
+- **WHEN** the player's hand has 3 or more cards
+- **AND** the UNO button is visible
+- **THEN** the button is visually dimmed
+- **AND** the button is not clickable
+
+#### Scenario: Clicking UNO button calls UNO
+- **WHEN** the player clicks the UNO button (when enabled)
+- **THEN** the UNO action is triggered
+- **AND** the player's UNO status is updated to "called"
+- **AND** the UNO button remains visible but shows "called" state

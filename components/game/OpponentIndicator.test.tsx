@@ -61,8 +61,8 @@ describe('OpponentIndicator', () => {
         <OpponentIndicator {...defaultProps} isDisconnected={false} />
       );
 
-      // The avatar div should not have both opacity-40 and grayscale
-      const avatarDiv = container.querySelector('.w-14.h-14');
+      // The avatar div should not have opacity-40 or grayscale
+      const avatarDiv = container.querySelector('.w-16');
       expect(avatarDiv).not.toHaveClass('opacity-40');
       expect(avatarDiv).not.toHaveClass('grayscale');
     });
@@ -99,14 +99,18 @@ describe('OpponentIndicator', () => {
         <OpponentIndicator {...defaultProps} cardCount={3} />
       );
 
-      // Should render 3 small cards (checking for the UnoCard component renders)
+      // Should render 3 small cards (CardCountFan renders cards with 16px width)
       const cards = container.querySelectorAll('[style*="width: 16"]');
-      expect(cards.length).toBeGreaterThanOrEqual(3);
+      expect(cards.length).toBe(3);
     });
 
-    it('should show count badge for large hands', () => {
-      render(<OpponentIndicator {...defaultProps} cardCount={10} />);
-      expect(screen.getByText('×10')).toBeInTheDocument();
+    it('should show all cards in fan for large hands', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} cardCount={10} />
+      );
+      // CardCountFan now shows ALL cards in a tight fan
+      const cards = container.querySelectorAll('[style*="width: 16"]');
+      expect(cards.length).toBe(10);
     });
   });
 

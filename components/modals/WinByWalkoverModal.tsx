@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 interface WinByWalkoverModalProps {
   /** Whether the modal is open */
@@ -20,8 +19,8 @@ export const WinByWalkoverModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-(--felt) border border-(--copper-border) rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="panel-felt p-8 max-w-md mx-4 text-center">
         {/* Icon */}
         <div className="text-6xl mb-4">
           {isWinner ? '🏆' : '😔'}
@@ -51,11 +50,7 @@ export const WinByWalkoverModal = ({
         {/* Back to lobby button */}
         <Link
           href="/"
-          className={cn(
-            'inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all',
-            'bg-(--copper) text-(--felt) hover:bg-(--copper-light)',
-            'shadow-lg hover:shadow-xl'
-          )}
+          className="btn-copper"
         >
           ← Back to Lobby
         </Link>

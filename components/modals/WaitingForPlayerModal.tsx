@@ -27,8 +27,8 @@ export const WaitingForPlayerModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-(--felt) border border-(--copper-border) rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="panel-felt p-8 max-w-md mx-4 text-center">
         {/* Icon */}
         <div className="text-6xl mb-4">⏸️</div>
 

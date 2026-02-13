@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { UnoCard } from '@/components/ui/UnoCard';
+import { CardCountFan } from '@/components/ui/CardCountFan';
 
 interface OpponentIndicatorProps {
   name: string;
@@ -40,7 +40,7 @@ export const OpponentIndicator = ({
 
         <div
           className={cn(
-            'relative w-14 h-14 rounded-full flex items-center justify-center text-2xl',
+            'relative w-16 md:w-20 h-16 md:h-20 rounded-full flex items-center justify-center text-3xl md:text-4xl',
             'bg-(--felt-dark) border-2 transition-all duration-300',
             isDisconnected && 'opacity-40 grayscale',
             isCurrentTurn
@@ -52,57 +52,33 @@ export const OpponentIndicator = ({
 
           {/* Disconnect indicator overlay */}
           {isDisconnected && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500 border-2 border-(--felt) flex items-center justify-center">
-              <span className="text-xs">⚠️</span>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-red-500 border-2 border-(--felt) flex items-center justify-center">
+              <span className="text-sm">⚠️</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Player name */}
-      <span
+      {/* Player name - positioned to overlap with avatar bottom */}
+      <div
         className={cn(
-          'text-xs font-medium truncate max-w-[80px] text-center',
+          '-mt-5 px-2 py-0.5 rounded-lg border border-(--copper-border) bg-(--felt-dark) z-20',
           isDisconnected && 'opacity-40',
-          isCurrentTurn ? 'text-yellow-400' : 'text-(--cream-dark) opacity-70'
+          isCurrentTurn ? 'border-yellow-400/70' : ''
         )}
       >
-        {name}
-      </span>
-
-      {/* Card count indicator — small card backs */}
-      <div className="flex items-center gap-0.5">
-        {cardCount <= 5 ? (
-          // Show individual card backs for small counts
-          Array.from({ length: cardCount }).map((_, i) => (
-            <UnoCard
-              key={i}
-              symbol="back"
-              size="sm"
-              style={{
-                width: 16,
-                height: 24,
-                marginLeft: i > 0 ? -8 : 0,
-                filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))',
-              }}
-            />
-          ))
-        ) : (
-          // Show count badge for larger hands
-          <div className="flex items-center gap-1">
-            <UnoCard
-              symbol="back"
-              size="sm"
-              style={{
-                width: 16,
-                height: 24,
-                filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))',
-              }}
-            />
-            <span className="text-xs font-mono text-(--cream-dark)">×{cardCount}</span>
-          </div>
-        )}
+        <span
+          className={cn(
+            'text-xs font-medium truncate block max-w-[80px] text-center',
+            isCurrentTurn ? 'text-yellow-400' : 'text-(--cream-dark) opacity-70'
+          )}
+        >
+          {name}
+        </span>
       </div>
+
+      {/* Card count indicator — fan of card backs */}
+      <CardCountFan cardCount={cardCount} />
     </div>
   );
 };

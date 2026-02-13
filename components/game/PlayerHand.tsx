@@ -2,24 +2,60 @@
 
 import { Card } from '@/lib/game/cards';
 import { UnoCard } from '@/components/ui/UnoCard';
+import { UnoButton } from '@/components/ui/UnoButton';
 import { cn } from '@/lib/utils';
 
 interface PlayerHandProps {
   cards: Card[];
   isMyTurn?: boolean;
+  onUno?: () => void;
+  hasCalledUno?: boolean;
   className?: string;
 }
 
 /**
  * Displays the player's hand as a fanned arc of cards at the bottom of the screen.
  * Cards are rotated to follow an arc curve with the center card highest.
+ * Cards scale to fit within the screen width.
  */
-export const PlayerHand = ({ cards, isMyTurn = false, className }: PlayerHandProps) => {
+export const PlayerHand = ({ 
+  cards, 
+  isMyTurn = false, 
+  onUno,
+  hasCalledUno = false,
+  className 
+}: PlayerHandProps) => {
   const cardCount = cards.length;
+  const canCallUno = cardCount === 2;
+
+  /**
+   * Calculate card spacing to fit within screen width.
+   * More cards = tighter spacing.
+   */
+  const getCardSpacing = (): number => {
+    // Card width in pixels (size="md" = 80px)
+    const cardWidth = 80;
+    // Available width (assuming ~90% of viewport on mobile, full on desktop)
+    const availableWidth = typeof window !== 'undefined' 
+      ? (window.innerWidth < 768 ? window.innerWidth * 0.9 : 600)
+      : 600;
+    
+    if (cardCount <= 1) return 0;
+    
+    // Calculate how much overlap we need
+    const totalCardsWidth = cardCount * cardWidth;
+    const overlapNeeded = totalCardsWidth - availableWidth;
+    
+    // Convert to negative margin (overlap)
+    // Minimum overlap is -12 (for few cards), maximum is -50 (for many cards)
+    const spacing = Math.max(-50, Math.min(-12, -overlapNeeded / (cardCount - 1)));
+    
+    return spacing;
+  };
 
   /**
    * Calculate fan angle and vertical offset for each card.
-   * More cards = tighter spacing, fewer = wider fan.
+   * More cards = tighter spacing.
    */
   const getCardTransform = (index: number): { rotation: number; translateY: number } => {
     if (cardCount <= 1) return { rotation: 0, translateY: 0 };
@@ -37,18 +73,29 @@ export const PlayerHand = ({ cards, isMyTurn = false, className }: PlayerHandPro
     return { rotation, translateY };
   };
 
+  // Calculate spacing once per render
+  const cardSpacing = getCardSpacing();
+
   return (
-    <div className={cn('relative flex items-end justify-center', className)}>
+    <div className={cn('fixed bottom-0 left-0 right-0 flex items-end justify-center pb-8 md:pb-6', className)}>
       {/* Turn indicator glow */}
       {isMyTurn && (
         <div className="absolute -inset-4 rounded-3xl bg-yellow-400/10 border border-yellow-400/30 animate-pulse pointer-events-none" />
       )}
 
+      {/* UNO Button - positioned above the "Your Turn!" label */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 z-20">
+        <UnoButton
+          isEnabled={canCallUno}
+          onClick={onUno || (() => {})}
+          hasCalledUno={hasCalledUno}
+        />
+      </div>
+
       <div className="flex items-end justify-center" style={{ minHeight: 140 }}>
         {cards.map((card, index) => {
           const { rotation, translateY } = getCardTransform(index);
-          // Hover margin: give enough overlap
-          const marginLeft = index === 0 ? 0 : cardCount > 10 ? -28 : cardCount > 6 ? -20 : -12;
+          const marginLeft = index === 0 ? 0 : cardSpacing;
 
           return (
             <div

@@ -66,25 +66,23 @@ export const GameBoard = ({
   return (
     <div
       className={cn(
-        'flex flex-col min-h-[calc(100vh-120px)] gap-4 md:gap-6',
+        'flex flex-col flex-1 min-h-0',
         isFrozen && 'pointer-events-none opacity-75',
         className
       )}
     >
       {/* Opponents row */}
-      <div className="pt-2">
+      <div className="pt-2 mt-4 flex-shrink-0">
         <OpponentRow opponents={opponents} currentTurn={currentTurn} />
       </div>
 
-      {/* Table center — grows to fill available space */}
+      {/* Table center — grows to fill available space, centered */}
       <div className="flex-1 flex items-center justify-center">
         <TableCenter discardPile={discardPile} />
       </div>
 
-      {/* Player's hand — anchored to bottom */}
-      <div className="pb-4 md:pb-6">
-        <PlayerHand cards={hand} isMyTurn={isMyTurn} />
-      </div>
+      {/* Player's hand - now fixed positioned in PlayerHand component */}
+      <PlayerHand cards={hand} isMyTurn={isMyTurn} />
     </div>
   );
 };
