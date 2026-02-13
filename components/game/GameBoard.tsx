@@ -2,6 +2,7 @@
 
 import { Card } from '@/lib/game/cards';
 import { Player } from '@/hooks/useRoom';
+import { OrphanHand } from '@/hooks/useGameState';
 import { OpponentRow } from './OpponentRow';
 import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
@@ -22,6 +23,10 @@ interface GameBoardProps {
   discardPile: Card[];
   /** Map of clientId -> card count */
   playerCardCounts: Record<number, number>;
+  /** Orphan hands for disconnected players */
+  orphanHands?: OrphanHand[];
+  /** Whether interaction is frozen (e.g., during pause) */
+  isFrozen?: boolean;
   className?: string;
 }
 
@@ -37,8 +42,13 @@ export const GameBoard = ({
   hand,
   discardPile,
   playerCardCounts,
+  orphanHands = [],
+  isFrozen = false,
   className,
 }: GameBoardProps) => {
+  // Get disconnected player IDs from orphan hands
+  const disconnectedIds = orphanHands.map((o) => o.originalClientId);
+
   // Filter out self from opponents
   const opponents = players
     .filter((p) => p.clientId !== myClientId)
@@ -48,14 +58,16 @@ export const GameBoard = ({
       avatar: p.avatar || '🎮',
       cardCount: playerCardCounts[p.clientId] || 0,
       isHost: hostId !== null && p.clientId === hostId,
+      isDisconnected: disconnectedIds.includes(p.clientId),
     }));
 
-  const isMyTurn = currentTurn === myClientId;
+  const isMyTurn = currentTurn === myClientId && !isFrozen;
 
   return (
     <div
       className={cn(
         'flex flex-col min-h-[calc(100vh-120px)] gap-4 md:gap-6',
+        isFrozen && 'pointer-events-none opacity-75',
         className
       )}
     >

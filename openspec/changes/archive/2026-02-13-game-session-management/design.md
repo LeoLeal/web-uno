@@ -59,7 +59,7 @@ Add an `orphanHands` field: `Array<{ originalClientId: number; originalName: str
 
 Create a dedicated hook that:
 
-1. Watches awareness changes during `PLAYING` status
+1. Watches awareness changes during `PLAYING` and `PAUSED_WAITING_PLAYER` status (to detect sequential disconnects while already paused)
 2. Compares active awareness clientIds against `lockedPlayers`
 3. When a disconnect is detected: transitions to `PAUSED_WAITING_PLAYER`, reads the disconnected player's hand from `dealtHands` map, writes it to `orphanHands`
 4. Handles hand assignment to replacement players
@@ -77,11 +77,13 @@ When a new player joins during a pause, match them to an orphan hand using Leven
 
 **Alternative considered:** Manual host assignment — rejected as it adds UI complexity and slows recovery. Could be added later as an override.
 
-### 5. Walkover detection in the same hook
+### 5. Walkover detection via host action
 
-If `lockedPlayers.length - orphanHands.length <= 1` (only one player remaining connected), immediately set `status = 'ENDED'` and record the remaining player as winner.
+Walkover is triggered only when the host explicitly removes all opponents via "Continue without", leaving `updatedLockedPlayers.length <= 1`. Disconnections alone always pause — they never auto-end the game.
 
-**Rationale:** This is a natural extension of the disconnect detection logic. No separate hook needed.
+**Rationale:** Auto-walkover on disconnect would prevent players from reconnecting and remove host agency. Keeping walkover as an explicit host action gives disconnected players a chance to rejoin and lets the host decide when to move on. The check lives in the `continueWithout` callback within the same hook.
+
+**Alternative considered:** Immediate walkover on disconnect — rejected after testing because it prevented reconnection and removed host control. Implemented initially but reverted as a bug fix.
 
 ### 6. UI components: modals for pause and walkover
 

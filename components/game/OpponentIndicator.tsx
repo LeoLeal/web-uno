@@ -9,6 +9,7 @@ interface OpponentIndicatorProps {
   cardCount: number;
   isCurrentTurn: boolean;
   isHost?: boolean;
+  isDisconnected?: boolean;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export const OpponentIndicator = ({
   cardCount,
   isCurrentTurn,
   isHost = false,
+  isDisconnected = false,
   className,
 }: OpponentIndicatorProps) => {
   return (
@@ -40,12 +42,20 @@ export const OpponentIndicator = ({
           className={cn(
             'relative w-14 h-14 rounded-full flex items-center justify-center text-2xl',
             'bg-(--felt-dark) border-2 transition-all duration-300',
+            isDisconnected && 'opacity-40 grayscale',
             isCurrentTurn
               ? 'border-yellow-400 ring-4 ring-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.6)]'
               : 'border-(--copper-border)'
           )}
         >
           {avatar}
+
+          {/* Disconnect indicator overlay */}
+          {isDisconnected && (
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500 border-2 border-(--felt) flex items-center justify-center">
+              <span className="text-xs">⚠️</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -53,6 +63,7 @@ export const OpponentIndicator = ({
       <span
         className={cn(
           'text-xs font-medium truncate max-w-[80px] text-center',
+          isDisconnected && 'opacity-40',
           isCurrentTurn ? 'text-yellow-400' : 'text-(--cream-dark) opacity-70'
         )}
       >

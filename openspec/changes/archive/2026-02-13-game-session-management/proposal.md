@@ -39,7 +39,8 @@ During gameplay, players may disconnect (tab close, network issues, browser refr
 
 ### Win by Walkover (W/O)
 
-- If all players except one disconnect, that player wins immediately
+- If the host removes all disconnected players via "Continue without" and only one player remains, that player wins
+- Walkover does NOT auto-trigger on disconnect — the game pauses and waits for the host to decide
 - Status set to `ENDED`, winner recorded
 - Special UI: "You win! All other players disconnected."
 

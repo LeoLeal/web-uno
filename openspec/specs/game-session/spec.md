@@ -1,4 +1,10 @@
-## ADDED Requirements
+# Spec: Game Session
+
+## Purpose
+
+Manages game session resilience including player disconnection detection, pause/resume flow, hand handover to replacement players, and win-by-walkover scenarios.
+
+## Requirements
 
 ### Requirement: Player Disconnection Detection
 
@@ -6,9 +12,9 @@ The system SHALL detect player disconnections during gameplay by comparing activ
 
 #### Scenario: Single player disconnects
 
-- **WHEN** a player's awareness state disappears during `PLAYING` status
-- **AND** the number of active awareness peers with clientIds in `lockedPlayers` drops below `lockedPlayers.length`
-- **THEN** the host identifies the missing player by diffing awareness against `lockedPlayers`
+- **WHEN** a player's awareness state disappears during `PLAYING` or `PAUSED_WAITING_PLAYER` status
+- **AND** the number of active awareness peers with clientIds in `lockedPlayers` drops below the expected connected count (locked minus already-orphaned)
+- **THEN** the host identifies the missing player by diffing awareness against `lockedPlayers`, excluding players already in `orphanHands`
 - **AND** the host triggers the game pause flow
 
 #### Scenario: Multiple players disconnect simultaneously
@@ -44,6 +50,7 @@ The system SHALL pause the game when a locked player disconnects, setting status
 
 - **WHEN** the game is already in `PAUSED_WAITING_PLAYER` status
 - **AND** an additional locked player disconnects
+- **AND** the player is not already tracked in `orphanHands`
 - **THEN** the new disconnect is added to orphan tracking
 - **AND** the game remains paused
 
@@ -116,17 +123,20 @@ The system SHALL allow the host to remove a disconnected player and continue the
 
 ### Requirement: Win by Walkover
 
-The system SHALL declare a winner when all other players disconnect, awarding a win by walkover (W/O).
+The system SHALL declare a winner by walkover only when the host explicitly removes all opponents via "Continue without". Disconnections alone SHALL pause the game, never auto-end it.
 
-#### Scenario: Last player standing
+#### Scenario: Walkover via host removal
 
-- **WHEN** all locked players except one have disconnected or been removed
+- **WHEN** the host removes disconnected players via "Continue without"
+- **AND** only one player remains after removal
 - **THEN** the host sets `gameState.status` to `ENDED`
 - **AND** the remaining player is recorded as the winner
 - **AND** a walkover victory is indicated
 
-#### Scenario: Walkover during pause resolution
+#### Scenario: All opponents disconnect (no auto-walkover)
 
-- **WHEN** the host removes disconnected players via "Continue without"
-- **AND** only one player remains after removal
-- **THEN** the game ends immediately as a walkover win for the remaining player
+- **WHEN** all locked players except one have disconnected
+- **THEN** the game remains in `PAUSED_WAITING_PLAYER` status
+- **AND** the host sees "Continue without" buttons for each disconnected player
+- **AND** disconnected players may still rejoin and reclaim their hands
+- **AND** walkover is NOT automatically triggered

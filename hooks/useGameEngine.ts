@@ -25,6 +25,8 @@ interface UseGameEngineOptions {
 interface UseGameEngineReturn {
   /** Initialize the game: create deck, deal hands, set first card, update Yjs state */
   initializeGame: () => void;
+  /** Reference to the deck (host-only, used for reshuffling orphan cards) */
+  deckRef: React.RefObject<Card[]>;
 }
 
 export const useGameEngine = ({
@@ -94,5 +96,5 @@ export const useGameEngine = ({
     });
   }, [doc, myClientId, players, startingHandSize]);
 
-  return { initializeGame };
+  return { initializeGame, deckRef };
 };
