@@ -8,11 +8,14 @@ import { useGameState } from '@/hooks/useGameState';
 import { useGameSettings } from '@/hooks/useGameSettings';
 import { usePlayerHand } from '@/hooks/usePlayerHand';
 import { useGameEngine } from '@/hooks/useGameEngine';
+import { useSessionResilience } from '@/hooks/useSessionResilience';
 import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/modals/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
 import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
 import { GameAlreadyStartedModal } from '@/components/modals/GameAlreadyStartedModal';
+import { WaitingForPlayerModal } from '@/components/modals/WaitingForPlayerModal';
+import { WinByWalkoverModal } from '@/components/modals/WinByWalkoverModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
 import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
@@ -22,16 +25,28 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
-  const { status, currentTurn, discardPile, playerCardCounts, lockedPlayers, initGame } = useGameState();
+  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
 
   // Game engine — host-only deck management and dealing (hands delivered via Yjs)
-  const { initializeGame } = useGameEngine({
+  const { initializeGame, deckRef } = useGameEngine({
     players,
     myClientId,
     startingHandSize: settings.startingHandSize,
+  });
+
+  // Session resilience — host-only disconnect handling and pause management
+  const { continueWithout } = useSessionResilience({
+    status,
+    lockedPlayers,
+    orphanHands,
+    currentTurn,
+    turnOrder,
+    playerCardCounts,
+    activePlayers: players,
+    deckRef,
   });
 
   // Initialize Game State
@@ -54,6 +69,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   };
 
   // Late joiner detection: game is playing but I'm not in locked players list
+  // Allow joins during PAUSED_WAITING_PLAYER (replacement players)
   const isLateJoiner =
     status === 'PLAYING' &&
     lockedPlayers.length > 0 &&
@@ -113,6 +129,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                   hand={hand}
                   discardPile={discardPile}
                   playerCardCounts={playerCardCounts}
+                  orphanHands={orphanHands}
+                  isFrozen={status === 'PAUSED_WAITING_PLAYER'}
                 />
             )}
         </div>
@@ -133,6 +151,16 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false} onJoin={handleJoin} />
         {isHostConnected === false && <HostDisconnectModal />}
         <GameAlreadyStartedModal isOpen={isLateJoiner} />
+        <WaitingForPlayerModal
+          isOpen={status === 'PAUSED_WAITING_PLAYER'}
+          orphanHands={orphanHands}
+          isHost={amIHost}
+          onContinueWithout={amIHost ? continueWithout : undefined}
+        />
+        <WinByWalkoverModal
+          isOpen={status === 'ENDED' && winner !== null}
+          isWinner={myClientId === winner}
+        />
 
       </div>
     </main>

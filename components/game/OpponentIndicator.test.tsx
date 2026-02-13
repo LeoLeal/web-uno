@@ -1,0 +1,137 @@
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { OpponentIndicator } from './OpponentIndicator';
+
+describe('OpponentIndicator', () => {
+  const defaultProps = {
+    name: 'Alice',
+    avatar: '🐱',
+    cardCount: 5,
+    isCurrentTurn: false,
+  };
+
+  describe('Basic Rendering', () => {
+    it('should render opponent name', () => {
+      render(<OpponentIndicator {...defaultProps} />);
+      expect(screen.getByText('Alice')).toBeInTheDocument();
+    });
+
+    it('should render avatar', () => {
+      render(<OpponentIndicator {...defaultProps} />);
+      expect(screen.getByText('🐱')).toBeInTheDocument();
+    });
+
+    it('should show crown for host', () => {
+      render(<OpponentIndicator {...defaultProps} isHost={true} />);
+      expect(screen.getByText('👑')).toBeInTheDocument();
+    });
+  });
+
+  describe('Disconnection Indicator', () => {
+    it('should show disconnect icon when player is disconnected', () => {
+      render(<OpponentIndicator {...defaultProps} isDisconnected={true} />);
+      expect(screen.getByText('⚠️')).toBeInTheDocument();
+    });
+
+    it('should not show disconnect icon for connected players', () => {
+      render(<OpponentIndicator {...defaultProps} isDisconnected={false} />);
+      expect(screen.queryByText('⚠️')).not.toBeInTheDocument();
+    });
+
+    it('should apply dimmed styling when disconnected', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} isDisconnected={true} />
+      );
+
+      const avatar = container.querySelector('.opacity-40');
+      expect(avatar).toBeInTheDocument();
+    });
+
+    it('should apply grayscale filter when disconnected', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} isDisconnected={true} />
+      );
+
+      const avatar = container.querySelector('.grayscale');
+      expect(avatar).toBeInTheDocument();
+    });
+
+    it('should not apply dimmed styling when connected', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} isDisconnected={false} />
+      );
+
+      // The avatar div should not have both opacity-40 and grayscale
+      const avatarDiv = container.querySelector('.w-14.h-14');
+      expect(avatarDiv).not.toHaveClass('opacity-40');
+      expect(avatarDiv).not.toHaveClass('grayscale');
+    });
+  });
+
+  describe('Turn Indicator', () => {
+    it('should highlight when current turn', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} isCurrentTurn={true} />
+      );
+
+      const avatar = container.querySelector('.border-yellow-400');
+      expect(avatar).toBeInTheDocument();
+    });
+
+    it('should show disconnected and current turn together', () => {
+      const { container } = render(
+        <OpponentIndicator
+          {...defaultProps}
+          isCurrentTurn={true}
+          isDisconnected={true}
+        />
+      );
+
+      // Should have both turn highlight and disconnect styling
+      expect(container.querySelector('.border-yellow-400')).toBeInTheDocument();
+      expect(screen.getByText('⚠️')).toBeInTheDocument();
+    });
+  });
+
+  describe('Card Count Display', () => {
+    it('should show individual cards for small counts', () => {
+      const { container } = render(
+        <OpponentIndicator {...defaultProps} cardCount={3} />
+      );
+
+      // Should render 3 small cards (checking for the UnoCard component renders)
+      const cards = container.querySelectorAll('[style*="width: 16"]');
+      expect(cards.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should show count badge for large hands', () => {
+      render(<OpponentIndicator {...defaultProps} cardCount={10} />);
+      expect(screen.getByText('×10')).toBeInTheDocument();
+    });
+  });
+
+  describe('Host Indicator', () => {
+    it('should show crown for host', () => {
+      render(<OpponentIndicator {...defaultProps} isHost={true} />);
+      expect(screen.getByText('👑')).toBeInTheDocument();
+    });
+
+    it('should not show crown for non-host', () => {
+      render(<OpponentIndicator {...defaultProps} isHost={false} />);
+      expect(screen.queryByText('👑')).not.toBeInTheDocument();
+    });
+
+    it('should show disconnected host with crown', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          isHost={true}
+          isDisconnected={true}
+        />
+      );
+
+      expect(screen.getByText('👑')).toBeInTheDocument();
+      expect(screen.getByText('⚠️')).toBeInTheDocument();
+    });
+  });
+});

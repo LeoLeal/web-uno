@@ -2,11 +2,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
 
-export type GameStatus = 'LOBBY' | 'PLAYING' | 'ENDED';
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED';
 
 export interface LockedPlayer {
   clientId: number;
   name: string;
+}
+
+export interface OrphanHand {
+  originalClientId: number;
+  originalName: string;
+  cards: Card[];
 }
 
 export const useGameState = () => {
@@ -18,6 +24,8 @@ export const useGameState = () => {
   const [playerCardCounts, setPlayerCardCounts] = useState<Record<number, number>>({});
   const [turnOrder, setTurnOrder] = useState<number[]>([]);
   const [lockedPlayers, setLockedPlayers] = useState<LockedPlayer[]>([]);
+  const [orphanHands, setOrphanHands] = useState<OrphanHand[]>([]);
+  const [winner, setWinner] = useState<number | null>(null);
 
   useEffect(() => {
     if (!doc) return;
@@ -52,6 +60,12 @@ export const useGameState = () => {
 
       const locked = gameStateMap.get('lockedPlayers') as LockedPlayer[] | undefined;
       setLockedPlayers(locked ?? []);
+
+      const orphans = gameStateMap.get('orphanHands') as OrphanHand[] | undefined;
+      setOrphanHands(orphans ?? []);
+
+      const gameWinner = gameStateMap.get('winner') as number | undefined;
+      setWinner(gameWinner ?? null);
     };
 
     gameStateMap.observe(handleChange);
@@ -85,6 +99,8 @@ export const useGameState = () => {
     playerCardCounts,
     turnOrder,
     lockedPlayers,
+    orphanHands,
+    winner,
     startGame,
     initGame,
   };

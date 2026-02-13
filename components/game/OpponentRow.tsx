@@ -9,6 +9,7 @@ interface Opponent {
   avatar: string;
   cardCount: number;
   isHost: boolean;
+  isDisconnected?: boolean;
 }
 
 interface OpponentRowProps {
@@ -36,6 +37,7 @@ export const OpponentRow = ({ opponents, currentTurn, className }: OpponentRowPr
           cardCount={opponent.cardCount}
           isCurrentTurn={currentTurn === opponent.clientId}
           isHost={opponent.isHost}
+          isDisconnected={opponent.isDisconnected}
         />
       ))}
     </div>

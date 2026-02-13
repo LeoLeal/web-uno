@@ -79,7 +79,7 @@ The system SHALL distribute dealt hands to all players via a Yjs `dealtHands` Y.
 
 ### Requirement: Public Game State Sync
 
-The system SHALL sync public game state (discard pile, turn, card counts) via Yjs shared document.
+The system SHALL sync public game state (discard pile, turn, card counts, orphan hands) via Yjs shared document.
 
 #### Scenario: Public state fields
 
@@ -90,6 +90,7 @@ The system SHALL sync public game state (discard pile, turn, card counts) via Yj
   - `discardPile`: array of visible discard cards
   - `playerCardCounts`: map of clientId to card count
   - `turnOrder`: ordered array of player clientIds
+  - `orphanHands`: array of `{ originalClientId, originalName, cards }` for disconnected players
 
 #### Scenario: All peers see same state
 
@@ -97,10 +98,11 @@ The system SHALL sync public game state (discard pile, turn, card counts) via Yj
 - **THEN** they see the same discard pile top card
 - **AND** they see the same current turn indicator
 - **AND** they see correct card counts for all players
+- **AND** they see the same orphan hand data (if any)
 
 ### Requirement: Lobby Lock
 
-The system SHALL lock the player list when the game starts and reject late joiners.
+The system SHALL lock the player list when the game starts and reject late joiners, except during a pause when replacement players are allowed.
 
 #### Scenario: Lock player list on game start
 
@@ -119,9 +121,19 @@ The system SHALL lock the player list when the game starts and reject late joine
 #### Scenario: Late joiner rejection
 
 - **WHEN** a late joiner is detected
+- **AND** the game status is `PLAYING` (not paused)
 - **THEN** the late joiner sees a modal: "Game Already Started - You cannot join this game"
 - **AND** the modal has a button to return to the home page
 - **AND** the late joiner is NOT added to the game
+
+#### Scenario: Replacement player during pause
+
+- **WHEN** a new peer connects to the room
+- **AND** the game status is `PAUSED_WAITING_PLAYER`
+- **AND** the peer's clientId is NOT in `lockedPlayers`
+- **AND** there are unassigned orphan hands
+- **THEN** the peer is treated as a potential replacement player
+- **AND** the host assigns them an orphan hand
 
 > **Note:** The late joiner's awareness state may briefly appear before rejection. Client-side filtering handles this.
 
@@ -132,3 +144,18 @@ The `useRoom` hook SHALL use proper TypeScript types when accessing awareness lo
 ### Requirement: Client ID Sync
 
 Setting `myClientId` from the WebRTC awareness `clientID` within an effect is a legitimate pattern for syncing state from an external system and MAY use an `eslint-disable` comment.
+
+### Requirement: Extended Game Status
+
+The system SHALL support the `PAUSED_WAITING_PLAYER` game status in addition to existing statuses (`LOBBY`, `PLAYING`, `ENDED`).
+
+#### Scenario: Status type definition
+
+- **WHEN** the system defines `GameStatus`
+- **THEN** the type SHALL be `'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED'`
+
+#### Scenario: Peers observe pause status
+
+- **WHEN** the host sets `gameState.status` to `PAUSED_WAITING_PLAYER`
+- **THEN** all peers observe the status change via Yjs
+- **AND** all peers react to the paused state (freeze UI, show modal)
