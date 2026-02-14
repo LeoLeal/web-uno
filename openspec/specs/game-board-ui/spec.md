@@ -99,6 +99,8 @@ The system SHALL display the deck and discard pile in the center of the game are
 - **WHEN** the game is playing
 - **THEN** the deck is shown as a stack of face-down cards (card backs)
 - **AND** the deck appears as a pile (slight offset to show depth)
+- **AND** on desktop (≥768px), cards are displayed at 130x195px (~60% larger)
+- **AND** on mobile (<768px), cards are displayed at 80x120px
 
 #### Scenario: Discard pile display
 
@@ -106,6 +108,8 @@ The system SHALL display the deck and discard pile in the center of the game are
 - **THEN** the discard pile shows the top card face-up
 - **AND** previous cards are visible underneath with random rotation (±10°)
 - **AND** previous cards have small random position offsets (organic pile look)
+- **AND** on desktop (≥768px), cards are displayed at 130x195px (~60% larger)
+- **AND** on mobile (<768px), cards are displayed at 80x120px
 
 ### Requirement: Header Preservation
 
@@ -133,6 +137,7 @@ The system SHALL adapt the game board to different screen sizes.
 - **WHEN** viewport width is 768px or greater
 - **THEN** opponents can be spread more widely
 - **AND** more cards can be visible in the player's hand without overlap compression
+- **AND** the table center has additional bottom padding (200px) to shift piles upward for better visual prominence
 
 ### Requirement: Waiting for Player Modal
 

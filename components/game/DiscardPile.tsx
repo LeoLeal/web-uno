@@ -8,13 +8,19 @@ import { useMemo } from 'react';
 interface DiscardPileProps {
   cards: Card[];
   className?: string;
+  /** Card dimensions - defaults to mobile size (80x120) */
+  cardWidth?: number;
+  cardHeight?: number;
 }
+
+const DEFAULT_WIDTH = 80;
+const DEFAULT_HEIGHT = 120;
 
 /**
  * Discard pile with stacked cards featuring random rotation/offset for organic look.
  * Shows up to the last 3 cards with the top card fully visible.
  */
-export const DiscardPile = ({ cards, className }: DiscardPileProps) => {
+export const DiscardPile = ({ cards, className, cardWidth = DEFAULT_WIDTH, cardHeight = DEFAULT_HEIGHT }: DiscardPileProps) => {
   // Pre-compute random transforms for visible cards (memoized to avoid re-rolling on render)
   const visibleCards = cards.slice(-3);
   const transforms = useMemo(
@@ -33,9 +39,10 @@ export const DiscardPile = ({ cards, className }: DiscardPileProps) => {
     return (
       <div
         className={cn(
-          'w-[80px] h-[120px] rounded-lg border-2 border-dashed border-(--copper-border)/30 flex items-center justify-center',
+          'rounded-lg border-2 border-dashed border-(--copper-border)/30 flex items-center justify-center',
           className
         )}
+        style={{ width: cardWidth, height: cardHeight }}
       >
         <span className="text-(--cream-dark) opacity-30 text-xs">Discard</span>
       </div>
@@ -43,7 +50,7 @@ export const DiscardPile = ({ cards, className }: DiscardPileProps) => {
   }
 
   return (
-    <div className={cn('relative w-[80px] h-[120px]', className)}>
+    <div className={cn('relative', className)} style={{ width: cardWidth, height: cardHeight }}>
       {visibleCards.map((card, i) => {
         const transform = transforms[i] || { rotation: 0, offsetX: 0, offsetY: 0 };
         const isTop = i === visibleCards.length - 1;
@@ -61,7 +68,7 @@ export const DiscardPile = ({ cards, className }: DiscardPileProps) => {
             <UnoCard
               color={card.color === 'wild' ? 'red' : card.color}
               symbol={card.symbol}
-              size="md"
+              style={{ width: cardWidth, height: cardHeight }}
             />
           </div>
         );
