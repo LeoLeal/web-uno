@@ -8,7 +8,7 @@ The system SHALL allow the current player to click cards in their hand to play t
 - **THEN** the card play action is submitted (or the wild color modal opens if it's a wild card)
 
 #### Scenario: Clicking an unplayable card
-- **WHEN** the player clicks a card that is not playable against the current discard/activeColor
+- **WHEN** the player clicks a card that is not playable against the current top discard card
 - **THEN** no action is submitted
 - **AND** the card does not respond to the click
 
@@ -21,7 +21,7 @@ The system SHALL visually distinguish cards that cannot be played on the current
 
 #### Scenario: Unplayable cards dimmed
 - **WHEN** it is the player's turn
-- **THEN** cards that do not match the current `activeColor` or top discard symbol (and are not wild) are visually dimmed
+- **THEN** cards that do not match the top discard card's color or symbol (and are not wild) are visually dimmed
 - **AND** dimmed cards have reduced opacity or a desaturated appearance
 
 #### Scenario: All cards normal when not your turn

@@ -1,22 +1,5 @@
 ## ADDED Requirements
 
-### Requirement: Active color in game state
-The system SHALL store and maintain an `activeColor` field in the `gameStateMap`.
-
-#### Scenario: activeColor field exists during gameplay
-- **WHEN** the game is in `PLAYING` status
-- **THEN** `gameStateMap` contains an `activeColor` field
-- **AND** its value is one of `'red' | 'blue' | 'green' | 'yellow' | null`
-
-#### Scenario: activeColor is null before first play
-- **WHEN** the game starts and the first discard card is a wild card (no color)
-- **THEN** `activeColor` is `null`
-- **AND** the first player may play any card
-
-#### Scenario: activeColor set on game initialization
-- **WHEN** the game starts and the first discard card has a color
-- **THEN** `activeColor` is set to that card's color
-
 ### Requirement: Card type with optional color
 The system SHALL define the `Card` interface with `color` as an optional property.
 

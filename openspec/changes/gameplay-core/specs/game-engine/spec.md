@@ -48,7 +48,6 @@ The system SHALL wrap all game state changes from a single action in one Yjs tra
 - **THEN** the following are updated in a single `doc.transact()`:
   - Player's hand in `dealtHandsMap`
   - Discard pile in `gameStateMap`
-  - `activeColor` in `gameStateMap`
   - `playerCardCounts` in `gameStateMap`
   - `currentTurn` in `gameStateMap`
   - `direction` in `gameStateMap` (if Reverse)
@@ -56,6 +55,53 @@ The system SHALL wrap all game state changes from a single action in one Yjs tra
   - Target player's card count in `playerCardCounts` (if Draw Two or Wild Draw Four)
   - `status` and `winner` in `gameStateMap` (if win detected)
   - Player's action in `actionsMap` (cleared to null)
+
+### Requirement: First discard card effects
+The system SHALL apply the appropriate effect when the first card flipped from the deck is an action or wild card. Wild Draw Four is the only card that triggers a reshuffle; all other action cards have their effects applied at game start.
+
+#### Scenario: First card is a number card
+- **WHEN** the first card flipped from the deck is a number card (0-9)
+- **THEN** no special effect is applied
+- **AND** the first player in `turnOrder` takes their turn with direction `1`
+
+#### Scenario: First card is a Skip
+- **WHEN** the first card flipped from the deck is a Skip card
+- **THEN** the first player in `turnOrder` is skipped
+- **AND** the turn starts with the second player in `turnOrder`
+
+#### Scenario: First card is a Reverse
+- **WHEN** the first card flipped from the deck is a Reverse card
+- **THEN** the direction is set to `-1` (counter-clockwise)
+- **AND** the turn starts with the last player in `turnOrder`
+
+#### Scenario: First card is a Draw Two
+- **WHEN** the first card flipped from the deck is a Draw Two card
+- **THEN** the first player in `turnOrder` is dealt 2 cards from the deck
+- **AND** the first player's card count is incremented by 2
+- **AND** the first player's turn is skipped
+- **AND** the turn starts with the second player in `turnOrder`
+
+#### Scenario: First card is a Wild
+- **WHEN** the first card flipped from the deck is a Wild card
+- **THEN** the card remains on the discard pile with no color assigned
+- **AND** the first player may play any card (null active color means any color matches)
+
+#### Scenario: First card is a Wild Draw Four
+- **WHEN** the first card flipped from the deck is a Wild Draw Four
+- **THEN** the card is returned to the deck
+- **AND** the deck is reshuffled
+- **AND** a new card is flipped from the deck
+- **AND** this process repeats until the first card is not a Wild Draw Four
+
+### Requirement: Forced draw with insufficient deck
+The system SHALL deal as many cards as available when a forced draw cannot be fully fulfilled.
+
+#### Scenario: Forced draw with partially exhausted deck
+- **WHEN** a Draw Two or Wild Draw Four effect requires dealing cards
+- **AND** the deck has fewer cards than required even after reshuffling the discard pile
+- **THEN** the host deals as many cards as are available from the deck
+- **AND** the target player's card count is incremented by the number of cards actually dealt
+- **AND** the target player's turn is still skipped
 
 ## MODIFIED Requirements
 

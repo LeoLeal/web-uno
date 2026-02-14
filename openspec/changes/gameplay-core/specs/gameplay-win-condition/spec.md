@@ -37,6 +37,11 @@ The system SHALL allow a player to win by playing an action card as their last c
 - **THEN** the Skip effect is applied (next player skipped)
 - **AND** the player wins immediately after effects are applied
 
+#### Scenario: Last card is a Reverse
+- **WHEN** a player plays a Reverse card as their last card
+- **THEN** the Reverse effect is applied (direction flips)
+- **AND** the player wins immediately after effects are applied
+
 #### Scenario: Last card is a Draw Two
 - **WHEN** a player plays a Draw Two as their last card
 - **THEN** the Draw Two effect is applied (next player draws 2)

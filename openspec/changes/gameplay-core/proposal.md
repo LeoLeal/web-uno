@@ -9,7 +9,7 @@ The game board, deck, dealing, session resilience, and lobby are all implemented
 - Implement turn advancement with direction awareness (clockwise/counter-clockwise)
 - Implement action card effects: Skip (next player skipped), Reverse (direction flips), Draw Two (next player draws 2 and is skipped)
 - Implement wild card flow: color picker modal before action submission, Wild Draw Four forces next player to draw 4 and is skipped
-- Add `activeColor` to game state — the authoritative current color for matching, updated on every play
+- Derive `activeColor` from the top discard card's color in the `useGamePlay` hook (not stored in Yjs)
 - Fix Card type: `color` becomes optional (`color?: CardColor`), removing the `'wild'` pseudo-color. Wild cards have no color until played.
 - Implement draw card action: player requests draw, host pops from deck and adds to player's hand. Deck reshuffles from discard pile when empty.
 - Add card interactivity: clickable cards in hand, clickable deck pile to draw, unplayable cards visually distinguished
@@ -31,7 +31,7 @@ The game board, deck, dealing, session resilience, and lobby are all implemented
 - `game-engine`: Host evolves from dealing-only to full game engine — observes action queue, validates moves, executes all state mutations
 - `game-board-ui`: Cards become interactive (click to play), deck becomes clickable (draw), unplayable cards visually distinguished, wild cards on discard show chosen color via grayscale effect
 - `uno-button`: UNO button becomes cosmetic-only; opponents with 1 card show "UNO!" chat balloon via CSS anchor positioning on their avatar
-- `game-settings`: `activeColor` added to game state; Card type updated to make `color` optional
+- `game-settings`: Card type updated to make `color` optional; `activeColor` derived from top discard (not stored)
 
 ## Impact
 
@@ -40,4 +40,4 @@ The game board, deck, dealing, session resilience, and lobby are all implemented
 - **Components**: `PlayerHand` gains card click handlers; `DeckPile` gains click handler; new `WildColorModal` component; `DiscardPile` renders played wilds via SVGR; `OpponentIndicator` gains UNO balloon
 - **SVG Assets**: Wild card SVGs (`wild.svg`, `wild-draw4.svg`) modified to use CSS classes on color paths instead of inline styles; SVGR configured in Next.js
 - **Dependencies**: `@svgr/webpack` added for SVG-as-React-component imports
-- **Yjs Document**: New `actionsMap` shared map added; `activeColor` field added to `gameStateMap`
+- **Yjs Document**: New `actionsMap` shared map added

@@ -39,8 +39,9 @@ The system SHALL provide a `useGamePlay` hook for players to submit actions and 
 #### Scenario: Local card playability check
 - **WHEN** a player calls `canPlayCard(card)`
 - **THEN** the function returns `true` if:
+  - The top discard card has no color (any card is playable), OR
   - The card has no color (wild card), OR
-  - The card's color matches `activeColor`, OR
+  - The card's color matches the top discard card's color, OR
   - The card's symbol matches the top discard card's symbol
 - **AND** returns `false` otherwise
 
@@ -75,7 +76,7 @@ The system SHALL validate all player actions before execution.
 
 #### Scenario: Card playability validation
 - **WHEN** the host receives a `PLAY_CARD` action
-- **THEN** the host checks that the card is playable against the current discard top and `activeColor`
+- **THEN** the host checks that the card is playable against the current discard top card
 - **AND** rejects the action if the card cannot be played
 
 #### Scenario: Wild card color validation
@@ -102,7 +103,6 @@ The system SHALL execute valid actions atomically in a Yjs transaction.
 - **THEN** the card is removed from the player's hand in `dealtHandsMap`
 - **AND** the card is added to the discard pile in `gameStateMap`
 - **AND** the player's card count is updated in `playerCardCounts`
-- **AND** `activeColor` is updated
 - **AND** card effects are applied (if action card)
 - **AND** the turn is advanced (unless win detected)
 - **AND** the action is cleared from `actionsMap`

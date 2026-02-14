@@ -1,14 +1,18 @@
 ## ADDED Requirements
 
 ### Requirement: Card play validation rules
-The system SHALL validate that a card can be played against the current game state.
+The system SHALL validate that a card can be played against the current game state. The active color is derived from the top discard card's `color` property (not stored separately in game state).
+
+#### Scenario: No active color — any card playable
+- **WHEN** the top discard card has no color (e.g. wild first card at game start)
+- **THEN** any card is considered playable (any color matches)
 
 #### Scenario: Wild card always playable
 - **WHEN** a player attempts to play a card with no color (wild or wild-draw4)
-- **THEN** the card is considered playable regardless of the current discard or active color
+- **THEN** the card is considered playable regardless of the top discard card
 
 #### Scenario: Color match
-- **WHEN** a player attempts to play a card whose color matches the current `activeColor`
+- **WHEN** a player attempts to play a card whose color matches the top discard card's color
 - **THEN** the card is considered playable
 
 #### Scenario: Symbol match
@@ -16,28 +20,11 @@ The system SHALL validate that a card can be played against the current game sta
 - **THEN** the card is considered playable (even if colors differ)
 
 #### Scenario: No match
-- **WHEN** a player attempts to play a card that has a color, does not match `activeColor`, and does not match the top discard's symbol
+- **WHEN** a player attempts to play a card that has a color, does not match the top discard card's color, and does not match the top discard's symbol
 - **THEN** the card is not playable
 
-### Requirement: Active color tracking
-The system SHALL maintain an `activeColor` field in the game state that represents the current color for matching.
-
-#### Scenario: Active color set on normal card play
-- **WHEN** a player plays a card with a color (number or action card)
-- **THEN** `activeColor` is set to that card's color
-
-#### Scenario: Active color set on wild card play
-- **WHEN** a player plays a wild card with a chosen color
-- **THEN** `activeColor` is set to the chosen color
-
-#### Scenario: Active color on game start
-- **WHEN** the game starts and the first discard card has a color
-- **THEN** `activeColor` is set to that card's color
-
-#### Scenario: Active color on wild first card
-- **WHEN** the game starts and the first discard card is a wild (no color)
-- **THEN** `activeColor` is set to `null`
-- **AND** the first player may play any card
+### Requirement: Active color derivation
+The `useGamePlay` hook SHALL expose a derived `activeColor` getter that reads the top discard card's `color` property, returning `null` when the top card has no color.
 
 ### Requirement: Skip card effect
 The system SHALL apply the Skip effect when a Skip card is played.
@@ -45,7 +32,6 @@ The system SHALL apply the Skip effect when a Skip card is played.
 #### Scenario: Skip card played
 - **WHEN** a player plays a Skip card
 - **THEN** the next player in the current direction is skipped
-- **AND** `activeColor` is set to the Skip card's color
 
 ### Requirement: Reverse card effect
 The system SHALL reverse the play direction when a Reverse card is played.
@@ -53,7 +39,6 @@ The system SHALL reverse the play direction when a Reverse card is played.
 #### Scenario: Reverse card played
 - **WHEN** a player plays a Reverse card
 - **THEN** the `direction` value in game state is flipped (`1` becomes `-1`, `-1` becomes `1`)
-- **AND** `activeColor` is set to the Reverse card's color
 
 ### Requirement: Draw Two card effect
 The system SHALL force the next player to draw 2 cards when a Draw Two is played.
@@ -64,7 +49,6 @@ The system SHALL force the next player to draw 2 cards when a Draw Two is played
 - **AND** those cards are added to the next player's hand in `dealtHandsMap`
 - **AND** the next player's card count is incremented by 2
 - **AND** the next player's turn is skipped
-- **AND** `activeColor` is set to the Draw Two card's color
 
 ### Requirement: Draw card action
 The system SHALL allow the current player to draw one card from the deck.

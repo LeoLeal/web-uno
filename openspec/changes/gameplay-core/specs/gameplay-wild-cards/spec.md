@@ -36,7 +36,6 @@ The system SHALL force the next player to draw 4 cards when a Wild Draw Four is 
 - **AND** those cards are added to the next player's hand in `dealtHandsMap`
 - **AND** the next player's card count is incremented by 4
 - **AND** the next player's turn is skipped
-- **AND** `activeColor` is set to the chosen color
 
 ### Requirement: SVGR wild card rendering
 The system SHALL render wild card SVGs as React components using SVGR for CSS-based color manipulation.

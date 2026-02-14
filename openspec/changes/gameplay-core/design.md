@@ -25,7 +25,7 @@ Currently:
 - Scoring system / multi-round games — deferred
 - UNO call penalties (catching players who forget) — UNO is cosmetic only
 - Wild Draw Four challenge mechanic — deferred
-- First-card-is-wild color assignment by first player — can be a fast-follow
+- First-card-is-wild explicit color chooser step by first player — wild first card is handled by leaving it colorless (null active color = any card playable)
 - Animated card transitions (play/draw animations) — deferred
 
 ## Decisions
@@ -56,24 +56,26 @@ type PlayerAction =
 1. Player writes action to `actionsMap.set(String(myClientId), action)`
 2. Host's observer fires, reads the action
 3. Host validates (correct turn, card exists in hand, card is playable)
-4. If valid: host executes in a `doc.transact()` — updates discard, hand, counts, turn, activeColor
+4. If valid: host executes in a `doc.transact()` — updates discard, hand, counts, turn
 5. Host clears the action: `actionsMap.set(String(clientId), null)`
 6. If invalid: host clears the action (no explicit rejection feedback)
 
 **Why no rejection feedback**: The client-side UI performs local pre-validation (grays out unplayable cards, disables play when not your turn). Invalid actions reaching the host indicate a bug, not a UX scenario. Adding a rejection channel adds complexity for an edge case that shouldn't occur.
 
-### Decision 3: `activeColor` as First-Class Game State
+### Decision 3: `activeColor` Derived from Top Discard Card
 
-**Choice**: Add `activeColor: CardColor | null` to `gameStateMap`. The host sets it on every card play.
+**Choice**: `activeColor` is NOT stored in `gameStateMap`. It is derived in the `useGamePlay` hook as `topDiscard?.color ?? null`.
 
-**Rules**:
-- Normal card played: `activeColor` = card's color
-- Wild card played: `activeColor` = player's chosen color
-- Game start: `activeColor` = first discard card's color (null if first card is a wild)
+**Why this works**: Wild cards get their chosen color baked into the card object before being placed on the discard pile (see Decision 4). Therefore `topDiscard.color` always reflects the active color — there is no scenario where the active color diverges from the top discard card's color.
 
-**Card play validation**: `card.color === undefined` (wild) OR `card.color === activeColor` OR `card.symbol === topDiscard.symbol`
+**Derivation**:
+- Normal card on top: `activeColor` = `topDiscard.color` (the card's own color)
+- Wild card on top (played): `activeColor` = `topDiscard.color` (the chosen color, mutated onto the card)
+- Wild card on top (game start, no color chosen): `activeColor` = `null` (card has no color)
 
-**Why a separate field instead of deriving from discard top**: Explicit is better than derived. The host writes it authoritatively, peers read it for local pre-validation. No ambiguity about "what color is active after a wild?"
+**Card play validation**: `activeColor === null` (any card playable) OR `isWild(card)` OR `card.color === activeColor` OR `card.symbol === topDiscard.symbol`
+
+**When `activeColor` is `null`** (top discard has no color, e.g. wild first card): any card is considered a color match. This allows the first player to play any card when the opening discard is a wild.
 
 ### Decision 4: Card Type — Optional Color
 
@@ -123,7 +125,7 @@ type PlayerAction =
 **Flow**:
 1. Player clicks wild card → modal opens (card is not yet played)
 2. Player selects color → `submitAction({ type: 'PLAY_CARD', cardId, chosenColor })`
-3. Host validates → executes (mutates card color, adds to discard, sets activeColor)
+3. Host validates → executes (mutates card color, adds to discard)
 
 ### Decision 7: Cosmetic UNO Indicator
 
@@ -173,7 +175,7 @@ nextTurn(turnOrder, currentIndex, direction, skipCount):
   │ useGamePlay          │       │ useGamePlay          │
   │  - submitAction()    │       │  - submitAction()    │
   │  - canPlayCard()     │       │  - canPlayCard()     │
-  │  - activeColor       │       │  - activeColor       │
+  │  - activeColor (derived)│    │  - activeColor (derived)│
   │  - isMyTurn          │       │  - isMyTurn          │
   └─────────────────────┘       ├─────────────────────┤
   ┌─────────────────────┐       │ useGameEngine        │

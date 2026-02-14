@@ -9,21 +9,20 @@
 
 ## 2. Game State Extensions
 
-- [ ] 2.1 Add `activeColor` field to `gameStateMap` in `useGameState` hook (read `activeColor` from Yjs, expose in return value)
-- [ ] 2.2 Update `useGameEngine` to set `activeColor` during game initialization (from first discard card's color, or `null` if wild)
-- [ ] 2.3 Add `actionsMap` Yjs map: register in `useGameEngine` for host observation, provide write access for peers
-- [ ] 2.4 Write tests for `activeColor` initialization (normal first card, wild first card)
+- [ ] 2.1 Add `actionsMap` Yjs map: register in `useGameEngine` for host observation, provide write access for peers
+- [ ] 2.2 Implement first discard card effects in `initializeGame()`: Skip (skip first player), Reverse (direction = -1, start with last player), Draw Two (first player draws 2, skipped), Wild (leave colorless), Wild Draw Four (reshuffle — already implemented)
+- [ ] 2.3 Write tests for first discard card effects (Skip, Reverse, Draw Two, Wild first card, Wild Draw Four reshuffle)
 
 ## 3. Action Queue and Host Processing
 
-- [ ] 3.1 Create `useGamePlay` hook: `submitAction()`, `canPlayCard()`, `isMyTurn`, `activeColor`, `topDiscard`
+- [ ] 3.1 Create `useGamePlay` hook: `submitAction()`, `canPlayCard()`, `isMyTurn`, `activeColor` (derived from `topDiscard.color`), `topDiscard`
 - [ ] 3.2 Implement `canPlayCard(card)` local pre-validation: wild always playable, color match, symbol match
 - [ ] 3.3 Implement host action observer in `useGameEngine`: observe `actionsMap`, detect new non-null entries
 - [ ] 3.4 Implement host action validation: turn check, card ownership check, playability check, wild color check
-- [ ] 3.5 Implement host `PLAY_CARD` execution: remove from hand, add to discard, update activeColor, update card counts, apply effects, advance turn — all in one `doc.transact()`
+- [ ] 3.5 Implement host `PLAY_CARD` execution: remove from hand, add to discard (with chosen color mutated onto wild cards), update card counts, apply effects, advance turn — all in one `doc.transact()`
 - [ ] 3.6 Implement host `DRAW_CARD` execution: pop from deck, add to player hand, update card counts, advance turn
-- [ ] 3.7 Implement deck reshuffle: when deck empty, take all discard except top, shuffle, use as new deck
-- [ ] 3.8 Write tests for `canPlayCard()` (color match, symbol match, wild, no match, null activeColor)
+- [ ] 3.7 Implement deck reshuffle: when deck empty, take all discard except top, shuffle, use as new deck. For forced draws (Draw Two, Wild Draw Four), deal as many cards as available if deck is insufficient even after reshuffle.
+- [ ] 3.8 Write tests for `canPlayCard()` (color match, symbol match, wild, no match, null top discard color — any card playable)
 - [ ] 3.9 Write tests for host action validation (wrong turn, missing card, unplayable card, wild without color)
 - [ ] 3.10 Write tests for host action execution (card play updates state, draw updates state, deck reshuffle)
 
@@ -39,14 +38,14 @@
 - [ ] 4.8 Write tests for Skip (normal, two-player)
 - [ ] 4.9 Write tests for Reverse (normal, two-player, direction flip)
 - [ ] 4.10 Write tests for Draw Two (cards dealt, turn skipped, card counts updated)
-- [ ] 4.11 Write tests for Wild Draw Four (cards dealt, turn skipped, activeColor set)
+- [ ] 4.11 Write tests for Wild Draw Four (cards dealt, turn skipped, chosen color on discard card)
 
 ## 5. Win Condition
 
 - [ ] 5.1 Implement win detection in host action execution: after card play, check if player's hand is empty
 - [ ] 5.2 Implement game end transition: set `status` to `ENDED`, set `winner`, stop processing actions
 - [ ] 5.3 Ensure action card effects are applied before win (Draw Two/Wild Draw Four still force draws even on last card)
-- [ ] 5.4 Write tests for win by normal card, win by action card, win by wild card
+- [ ] 5.4 Write tests for win by normal card, win by action card (Skip, Reverse, Draw Two), win by wild card
 - [ ] 5.5 Write test that no actions are processed after game end
 
 ## 6. SVGR Setup and Wild Card Rendering
@@ -89,6 +88,5 @@
 
 - [ ] 10.1 Wire `useGamePlay` hook into the room page component tree, passing action handlers to `GameBoard`
 - [ ] 10.2 Ensure `usePlayerHand` write methods (`addCard`, `removeCard`, `setHand`) are only called by the host's game engine (remove or gate peer access)
-- [ ] 10.3 Update `useGameEngine` `initializeGame()` to set `activeColor` in the initial transaction
-- [ ] 10.4 End-to-end manual testing: play a full game with 3+ players through to win condition
+- [ ] 10.3 End-to-end manual testing: play a full game with 3+ players through to win condition
 - [ ] 10.5 Verify session resilience still works correctly with the new action queue (pause/resume, disconnect handling)
