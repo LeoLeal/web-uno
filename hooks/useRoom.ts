@@ -199,6 +199,7 @@ export const useRoom = (roomId: string) => {
     return () => {
       gameState.unobserve(handleGameStateChange);
       awareness.off('change', handleAwarenessChange);
+      newProvider.disconnect();
       newProvider.destroy();
       hasAttemptedClaim.current = false;
     };

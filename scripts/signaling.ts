@@ -61,8 +61,8 @@ wss.on('connection', (ws) => {
     }
   });
 
-  ws.on('close', () => {
-    console.log('Client disconnected');
+  ws.on('close', (code) => {
+    console.log('Client disconnected (code):', code);
     subscribedTopics.forEach(topicName => {
       topics.get(topicName)?.delete(ws);
       // Clean up empty topics
