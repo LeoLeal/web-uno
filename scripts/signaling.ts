@@ -39,6 +39,10 @@ wss.on('connection', (ws) => {
         (msg.topics || []).forEach((topicName: string) => {
           subscribedTopics.delete(topicName);
           topics.get(topicName)?.delete(ws);
+          if (topics.get(topicName)?.size === 0) {
+            console.log('Removing empty topic:', topicName);
+            topics.delete(topicName);
+          }
         });
         break;
 
