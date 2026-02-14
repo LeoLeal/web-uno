@@ -27,12 +27,17 @@ interface UseSessionResilienceOptions {
   activePlayers: Array<{ clientId: number; name: string }>;
   /** Host's deck reference for reshuffling */
   deckRef: React.RefObject<Card[]>;
+  /** Whether this peer is the host */
+  isHost: boolean;
 }
 
 interface UseSessionResilienceReturn {
   /** Remove an orphan hand and continue without that player */
   continueWithout: (orphanClientId: number) => void;
 }
+
+/** Grace period before confirming a disconnect (milliseconds) */
+const DISCONNECT_GRACE_PERIOD_MS = 5000;
 
 /**
  * Levenshtein distance for string similarity matching.
@@ -75,13 +80,31 @@ export const useSessionResilience = ({
   playerCardCounts,
   activePlayers,
   deckRef,
+  isHost,
 }: UseSessionResilienceOptions): UseSessionResilienceReturn => {
   const { doc } = useGame();
   const lastActivePlayerCount = useRef<number>(0);
+  const pendingDisconnectsRef = useRef<Set<number>>(new Set());
+  const activePlayersRef = useRef(activePlayers);
+  const gracePeriodTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detect disconnections and trigger pause
+  // Sync activePlayersRef with latest activePlayers
   useEffect(() => {
-    if (!doc || (status !== 'PLAYING' && status !== 'PAUSED_WAITING_PLAYER')) return;
+    activePlayersRef.current = activePlayers;
+  }, [activePlayers]);
+
+  // Detect disconnections and trigger pause (with grace period)
+  useEffect(() => {
+    if (!isHost) return;
+    if (!doc || (status !== 'PLAYING' && status !== 'PAUSED_WAITING_PLAYER')) {
+      // Clear timer and pending disconnects when leaving active statuses
+      if (gracePeriodTimerRef.current) {
+        clearTimeout(gracePeriodTimerRef.current);
+        gracePeriodTimerRef.current = null;
+      }
+      pendingDisconnectsRef.current.clear();
+      return;
+    }
 
     const lockedClientIds = lockedPlayers.map((p) => p.clientId);
     const activeClientIds = activePlayers.map((p) => p.clientId);
@@ -90,48 +113,107 @@ export const useSessionResilience = ({
 
     // Detect if we've lost locked players (excluding those already tracked as orphans)
     const expectedConnectedCount = lockedPlayers.length - orphanHands.length;
-    if (activeLocked.length < expectedConnectedCount) {
-      // Find disconnected players not already in orphanHands
-      const disconnectedIds = lockedClientIds.filter(
-        (id) => !activeClientIds.includes(id) && !orphanClientIds.includes(id)
-      );
 
-      if (disconnectedIds.length === 0) return;
+    // Find currently disconnected players
+    const disconnectedIds = lockedClientIds.filter(
+      (id) => !activeClientIds.includes(id) && !orphanClientIds.includes(id)
+    );
 
-      console.log('Detected player disconnect:', disconnectedIds);
+    // Check if previously-pending players have returned
+    const currentPending = pendingDisconnectsRef.current;
+    const returnedPlayers: number[] = [];
+    currentPending.forEach((id) => {
+      if (activeClientIds.includes(id)) {
+        returnedPlayers.push(id);
+      }
+    });
 
-      // Read their hands from dealtHands and create orphan entries
-      const dealtHandsMap = doc.getMap('dealtHands');
-      const gameStateMap = doc.getMap('gameState');
-      const newOrphans: OrphanHand[] = [];
+    // Remove returned players from pending
+    if (returnedPlayers.length > 0) {
+      console.log('Players returned within grace period:', returnedPlayers);
+      returnedPlayers.forEach((id) => currentPending.delete(id));
 
-      for (const disconnectedId of disconnectedIds) {
-        const lockedPlayer = lockedPlayers.find((p) => p.clientId === disconnectedId);
-        const hand = dealtHandsMap.get(String(disconnectedId)) as Card[] | undefined;
+      // Clear timer if no suspects remain
+      if (currentPending.size === 0 && gracePeriodTimerRef.current) {
+        clearTimeout(gracePeriodTimerRef.current);
+        gracePeriodTimerRef.current = null;
+      }
+    }
 
-        if (lockedPlayer && hand) {
-          newOrphans.push({
-            originalClientId: disconnectedId,
-            originalName: lockedPlayer.name,
-            cards: hand,
-          });
+    // Add newly-missing players to pending disconnects
+    if (activeLocked.length < expectedConnectedCount && disconnectedIds.length > 0) {
+      const newDisconnects = disconnectedIds.filter((id) => !currentPending.has(id));
+
+      if (newDisconnects.length > 0) {
+        console.log('Detected potential disconnect (grace period starting):', newDisconnects);
+        newDisconnects.forEach((id) => currentPending.add(id));
+
+        // Start grace period timer if not already running
+        if (!gracePeriodTimerRef.current) {
+          gracePeriodTimerRef.current = setTimeout(() => {
+            // Re-check after grace period: compare current awareness against lockedPlayers
+            const currentActiveIds = activePlayersRef.current.map((p) => p.clientId);
+            const currentOrphanIds = orphanHands.map((o) => o.originalClientId);
+            const stillMissing = lockedClientIds.filter(
+              (id) => !currentActiveIds.includes(id) && !currentOrphanIds.includes(id)
+            );
+
+            if (stillMissing.length === 0) {
+              console.log('All suspected disconnects returned — no pause needed');
+              pendingDisconnectsRef.current.clear();
+              gracePeriodTimerRef.current = null;
+              return;
+            }
+
+            console.log('Confirmed disconnect after grace period:', stillMissing);
+
+            // Read their hands from dealtHands and create orphan entries
+            const dealtHandsMap = doc.getMap('dealtHands');
+            const gameStateMap = doc.getMap('gameState');
+            const newOrphans: OrphanHand[] = [];
+
+            for (const disconnectedId of stillMissing) {
+              const lockedPlayer = lockedPlayers.find((p) => p.clientId === disconnectedId);
+              const hand = dealtHandsMap.get(String(disconnectedId)) as Card[] | undefined;
+
+              if (lockedPlayer && hand) {
+                newOrphans.push({
+                  originalClientId: disconnectedId,
+                  originalName: lockedPlayer.name,
+                  cards: hand,
+                });
+              }
+            }
+
+            // Transition to pause or add to existing pause (no auto-walkover on disconnect)
+            doc.transact(() => {
+              if (status === 'PLAYING') {
+                gameStateMap.set('status', 'PAUSED_WAITING_PLAYER');
+              }
+              gameStateMap.set('orphanHands', [...orphanHands, ...newOrphans]);
+            });
+
+            pendingDisconnectsRef.current.clear();
+            gracePeriodTimerRef.current = null;
+          }, DISCONNECT_GRACE_PERIOD_MS);
         }
       }
-
-      // Transition to pause or add to existing pause (no auto-walkover on disconnect)
-      doc.transact(() => {
-        if (status === 'PLAYING') {
-          gameStateMap.set('status', 'PAUSED_WAITING_PLAYER');
-        }
-        gameStateMap.set('orphanHands', [...orphanHands, ...newOrphans]);
-      });
     }
 
     lastActivePlayerCount.current = activeLocked.length;
-  }, [doc, status, lockedPlayers, activePlayers, orphanHands]);
+
+    // Cleanup: clear timer on unmount or dependency change
+    return () => {
+      if (gracePeriodTimerRef.current) {
+        clearTimeout(gracePeriodTimerRef.current);
+        gracePeriodTimerRef.current = null;
+      }
+    };
+  }, [doc, status, lockedPlayers, activePlayers, orphanHands, isHost]);
 
   // Handle replacement player joining during pause
   useEffect(() => {
+    if (!isHost) return;
     if (!doc || status !== 'PAUSED_WAITING_PLAYER' || orphanHands.length === 0) return;
 
     const lockedClientIds = lockedPlayers.map((p) => p.clientId);
@@ -216,11 +298,11 @@ export const useSessionResilience = ({
         console.log('All orphan hands assigned - resuming game');
       }
     });
-  }, [doc, status, orphanHands, lockedPlayers, activePlayers, currentTurn, turnOrder, playerCardCounts]);
+  }, [doc, status, orphanHands, lockedPlayers, activePlayers, currentTurn, turnOrder, playerCardCounts, isHost]);
 
   // Continue without a specific player (host action)
   const continueWithout = useCallback((orphanClientId: number) => {
-    if (!doc) return;
+    if (!isHost || !doc) return;
 
     const orphan = orphanHands.find((o) => o.originalClientId === orphanClientId);
     if (!orphan) return;
@@ -271,7 +353,7 @@ export const useSessionResilience = ({
         console.log('All orphans removed - resuming game');
       }
     });
-  }, [doc, orphanHands, turnOrder, currentTurn, playerCardCounts, lockedPlayers, deckRef]);
+  }, [doc, orphanHands, turnOrder, currentTurn, playerCardCounts, lockedPlayers, deckRef, isHost]);
 
   return { continueWithout };
 };

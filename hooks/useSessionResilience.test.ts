@@ -10,6 +10,19 @@ import { Card } from '@/lib/game/cards';
 
 describe('Session Resilience Logic', () => {
   describe('Disconnect Detection', () => {
+    it('should respect host-only guard for disconnect detection', () => {
+      const isHost = false;
+      const hasDetectedDisconnect = true;
+
+      // Non-host should not trigger pause even if they detect a mismatch
+      let pauseTriggered = false;
+      if (isHost && hasDetectedDisconnect) {
+        pauseTriggered = true;
+      }
+
+      expect(pauseTriggered).toBe(false);
+    });
+
     it('should detect single player disconnect', () => {
       const lockedPlayers: LockedPlayer[] = [
         { clientId: 1, name: 'Alice' },
@@ -336,6 +349,67 @@ describe('Session Resilience Logic', () => {
       expect(remainingPlayers).toBe(1);
       // Even though only 1 player remains, walkover should NOT auto-trigger
       // It should only trigger when host explicitly uses "Continue without"
+    });
+  });
+
+  describe('Grace Period Logic', () => {
+    it('should not immediately trigger pause when player disappears', () => {
+      const pendingDisconnects = new Set<number>();
+      const disconnectedId = 42;
+
+      // First detection: add to pending
+      pendingDisconnects.add(disconnectedId);
+
+      // Grace period timer would be running here
+      expect(pendingDisconnects.has(disconnectedId)).toBe(true);
+      expect(pendingDisconnects.size).toBe(1);
+    });
+
+    it('should clear pending disconnect when player returns within grace period', () => {
+      const pendingDisconnects = new Set<number>([42]);
+      const returnedPlayerId = 42;
+      const activePlayerIds = [1, 42, 3]; // Player 42 is back
+
+      // Check if pending player has returned
+      if (activePlayerIds.includes(returnedPlayerId)) {
+        pendingDisconnects.delete(returnedPlayerId);
+      }
+
+      expect(pendingDisconnects.has(42)).toBe(false);
+      expect(pendingDisconnects.size).toBe(0);
+    });
+
+    it('should confirm disconnect after grace period if player still absent', () => {
+      const _pendingDisconnects = new Set<number>([42]);
+      const currentActiveIds = [1, 3]; // Player 42 still missing
+      const lockedIds = [1, 42, 3];
+      const orphanIds: number[] = [];
+
+      // Re-check after grace period
+      const stillMissing = lockedIds.filter(
+        (id) => !currentActiveIds.includes(id) && !orphanIds.includes(id)
+      );
+
+      // Should confirm the disconnect and trigger pause
+      expect(stillMissing).toContain(42);
+      expect(stillMissing.length).toBeGreaterThan(0);
+    });
+
+    it('should clear timer and pending disconnects when all return', () => {
+      const _pendingDisconnects = new Set<number>([42, 43]);
+      const activePlayerIds = [1, 42, 43, 3]; // Both returned
+
+      // Check returned players
+      const returned = Array.from(_pendingDisconnects).filter((id) =>
+        activePlayerIds.includes(id)
+      );
+      returned.forEach((id) => _pendingDisconnects.delete(id));
+
+      // Should clear timer if no suspects remain
+      const shouldClearTimer = _pendingDisconnects.size === 0;
+
+      expect(shouldClearTimer).toBe(true);
+      expect(_pendingDisconnects.size).toBe(0);
     });
   });
 

@@ -47,6 +47,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     playerCardCounts,
     activePlayers: players,
     deckRef,
+    isHost: amIHost,
   });
 
   // Initialize Game State
