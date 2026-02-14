@@ -37,21 +37,21 @@ The system SHALL force the next player to draw 4 cards when a Wild Draw Four is 
 - **AND** the next player's card count is incremented by 4
 - **AND** the next player's turn is skipped
 
-### Requirement: SVGR wild card rendering
-The system SHALL render wild card SVGs as React components using SVGR for CSS-based color manipulation.
+### Requirement: Inlined SVG wild card rendering
+The system SHALL render wild card designs using inlined SVG paths in a React component for CSS-based color manipulation.
 
-#### Scenario: SVGR configuration
-- **WHEN** the project is built
-- **THEN** `@svgr/webpack` is configured in Next.js to import SVG files as React components
-- **AND** wild card SVGs are importable as React components
+#### Scenario: Inlined SVG component
+- **WHEN** the `WildCardSvg` component is rendered
+- **THEN** the SVG path data is defined inline in the component
+- **AND** color paths use CSS class `className="quad-{color}"` (quad-red, quad-blue, quad-yellow, quad-green)
+- **AND** inline `style` fill attributes are NOT used on color paths
 
 #### Scenario: SVG path CSS classes
-- **WHEN** the wild card SVGs are modified for SVGR usage
+- **WHEN** the wild card SVG paths are defined
 - **THEN** all red quadrant paths use CSS class `quad-red`
 - **AND** all blue quadrant paths use CSS class `quad-blue`
 - **AND** all yellow quadrant paths use CSS class `quad-yellow`
 - **AND** all green quadrant paths use CSS class `quad-green`
-- **AND** inline `style` fill attributes are removed from color paths
 
 ### Requirement: Wild card discard rendering with chosen color
 The system SHALL display played wild cards on the discard pile with only the chosen color visible.

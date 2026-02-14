@@ -346,6 +346,7 @@ export const useSessionResilience = ({
       if (updatedLockedPlayers.length <= 1) {
         gameStateMap.set('status', 'ENDED');
         gameStateMap.set('winner', updatedLockedPlayers[0]?.clientId ?? null);
+        gameStateMap.set('winType', 'WALKOVER');
         console.log('Walkover win after removal:', updatedLockedPlayers[0]?.name);
       } else if (updatedOrphans.length === 0) {
         // All orphans resolved, resume game

@@ -11,9 +11,11 @@ console.log(`✅ Signaling server running at ws://localhost:${port}`);
 
 wss.on('connection', (ws) => {
   const subscribedTopics = new Set<string>();
+  console.log('Client connected');
 
   ws.on('message', (message) => {
     let msg: { type?: string; topics?: string[]; topic?: string };
+    console.log('Received message:', message.toString());
     try {
       msg = JSON.parse(message.toString());
     } catch (_e) {
@@ -60,10 +62,12 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    console.log('Client disconnected');
     subscribedTopics.forEach(topicName => {
       topics.get(topicName)?.delete(ws);
       // Clean up empty topics
       if (topics.get(topicName)?.size === 0) {
+        console.log('Removing empty topic:', topicName);
         topics.delete(topicName);
       }
     });

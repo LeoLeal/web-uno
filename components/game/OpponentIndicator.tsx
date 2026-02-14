@@ -2,8 +2,10 @@
 
 import { cn } from '@/lib/utils';
 import { CardCountFan } from '@/components/ui/CardCountFan';
+import styles from './OpponentIndicator.module.css';
 
 interface OpponentIndicatorProps {
+  clientId: number;
   name: string;
   avatar: string;
   cardCount: number;
@@ -19,6 +21,7 @@ interface OpponentIndicatorProps {
  * Shows a crown icon above the avatar for the host.
  */
 export const OpponentIndicator = ({
+  clientId,
   name,
   avatar,
   cardCount,
@@ -27,6 +30,8 @@ export const OpponentIndicator = ({
   isDisconnected = false,
   className,
 }: OpponentIndicatorProps) => {
+  const anchorName = `--opponent-avatar-${clientId}`;
+
   return (
     <div className={cn('flex flex-col items-center gap-1.5', className)}>
       {/* Avatar circle with optional crown */}
@@ -47,6 +52,7 @@ export const OpponentIndicator = ({
               ? 'border-yellow-400 ring-4 ring-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.6)]'
               : 'border-(--copper-border)'
           )}
+          style={{ anchorName } as React.CSSProperties}
         >
           {avatar}
 
@@ -57,6 +63,26 @@ export const OpponentIndicator = ({
             </div>
           )}
         </div>
+
+        {/* UNO! indicator balloon - shown when player has 1 card */}
+        {cardCount === 1 && (
+          <div
+            className={cn(
+              styles.unoBalloon,
+              'z-30',
+              'px-3 py-1.5 rounded-lg',
+              'bg-white',
+              'text-black font-black text-sm',
+              'shadow-lg',
+              'animate-bounce'
+            )}
+            style={{ positionAnchor: anchorName } as React.CSSProperties}
+          >
+            UNO!
+            {/* Speech bubble tail pointing down */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[8px] border-t-white border-r-[6px] border-r-transparent" />
+          </div>
+        )}
       </div>
 
       {/* Player name - positioned to overlap with avatar bottom */}

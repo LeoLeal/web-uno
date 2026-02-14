@@ -32,6 +32,7 @@ export const OpponentRow = ({ opponents, currentTurn, className }: OpponentRowPr
       {opponents.map((opponent) => (
         <OpponentIndicator
           key={opponent.clientId}
+          clientId={opponent.clientId}
           name={opponent.name}
           avatar={opponent.avatar}
           cardCount={opponent.cardCount}

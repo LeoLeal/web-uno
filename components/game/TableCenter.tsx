@@ -9,6 +9,10 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 interface TableCenterProps {
   discardPile: Card[];
   className?: string;
+  /** Whether it's the current player's turn */
+  isMyTurn?: boolean;
+  /** Called when the deck is clicked to draw a card */
+  onDrawCard?: () => void;
 }
 
 // Mobile: 80x120, Desktop: ~130x195 (~60% larger = ~20% less than 2x)
@@ -20,7 +24,7 @@ const DESKTOP_HEIGHT = 195;
 /**
  * Center table area containing the deck pile and discard pile side by side.
  */
-export const TableCenter = ({ discardPile, className }: TableCenterProps) => {
+export const TableCenter = ({ discardPile, className, isMyTurn, onDrawCard }: TableCenterProps) => {
   const breakpoint = useBreakpoint();
   const isDesktop = breakpoint === 'desktop';
   const cardWidth = isDesktop ? DESKTOP_WIDTH : MOBILE_WIDTH;
@@ -35,7 +39,12 @@ export const TableCenter = ({ discardPile, className }: TableCenterProps) => {
     >
       {/* Deck pile */}
       <div className="flex flex-col items-center gap-2">
-        <DeckPile cardWidth={cardWidth} cardHeight={cardHeight} />
+        <DeckPile
+          cardWidth={cardWidth}
+          cardHeight={cardHeight}
+          isMyTurn={isMyTurn}
+          onClick={onDrawCard}
+        />
         <span className="text-xs text-(--cream-dark) opacity-50 font-mono">Draw</span>
       </div>
 

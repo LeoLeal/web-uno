@@ -42,9 +42,11 @@ describe('UnoCard', () => {
     expect(img).toHaveAttribute('src', expect.stringContaining('red-7.svg'));
   });
 
-  it('uses correct SVG file path for wild cards', () => {
-    render(<UnoCard color="red" symbol="wild" />);
-    const img = screen.getByAltText('red wild card');
-    expect(img).toHaveAttribute('src', expect.stringContaining('wild.svg'));
+  it('renders wild cards with inline SVG', () => {
+    const { container } = render(<UnoCard color="red" symbol="wild" />);
+    // Wild cards now use inline SVG instead of Image component
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveAttribute('viewBox', '0 0 60 90');
   });
 });

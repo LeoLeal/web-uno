@@ -1,11 +1,13 @@
 'use client';
 
-import { Card } from '@/lib/game/cards';
+import { useState } from 'react';
+import { Card, CardColor, isWildCard } from '@/lib/game/cards';
 import { Player } from '@/hooks/useRoom';
 import { OrphanHand } from '@/hooks/useGameState';
 import { OpponentRow } from './OpponentRow';
 import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
+import { WildColorModal } from './WildColorModal';
 import { cn } from '@/lib/utils';
 
 interface GameBoardProps {
@@ -27,6 +29,12 @@ interface GameBoardProps {
   orphanHands?: OrphanHand[];
   /** Whether interaction is frozen (e.g., during pause) */
   isFrozen?: boolean;
+  /** Handler for playing a card (with optional color for wilds) */
+  onPlayCard?: (cardId: string, chosenColor?: CardColor) => void;
+  /** Handler for drawing a card */
+  onDrawCard?: () => void;
+  /** Function to check if a card can be played */
+  canPlayCard?: (card: Card) => boolean;
   className?: string;
 }
 
@@ -44,8 +52,13 @@ export const GameBoard = ({
   playerCardCounts,
   orphanHands = [],
   isFrozen = false,
+  onPlayCard,
+  onDrawCard,
+  canPlayCard,
   className,
 }: GameBoardProps) => {
+  const [selectedWildCard, setSelectedWildCard] = useState<Card | null>(null);
+
   // Get disconnected player IDs from orphan hands
   const disconnectedIds = orphanHands.map((o) => o.originalClientId);
 
@@ -63,6 +76,36 @@ export const GameBoard = ({
 
   const isMyTurn = currentTurn === myClientId && !isFrozen;
 
+  // Handle card click
+  const handleCardClick = (card: Card) => {
+    if (!isMyTurn || !onPlayCard || !canPlayCard) return;
+
+    // Check if card is playable
+    if (!canPlayCard(card)) return;
+
+    // Wild cards need color selection
+    if (isWildCard(card)) {
+      setSelectedWildCard(card);
+      return;
+    }
+
+    // Normal cards can be played immediately
+    onPlayCard(card.id);
+  };
+
+  // Handle wild color selection
+  const handleColorSelect = (color: CardColor) => {
+    if (selectedWildCard && onPlayCard) {
+      onPlayCard(selectedWildCard.id, color);
+    }
+    setSelectedWildCard(null);
+  };
+
+  // Handle modal cancel
+  const handleColorCancel = () => {
+    setSelectedWildCard(null);
+  };
+
   return (
     <div
       className={cn(
@@ -78,11 +121,27 @@ export const GameBoard = ({
 
       {/* Table center — grows to fill available space, centered */}
       <div className="flex-1 flex items-center justify-center">
-        <TableCenter discardPile={discardPile} />
+        <TableCenter
+          discardPile={discardPile}
+          isMyTurn={isMyTurn}
+          onDrawCard={onDrawCard}
+        />
       </div>
 
       {/* Player's hand - now fixed positioned in PlayerHand component */}
-      <PlayerHand cards={hand} isMyTurn={isMyTurn} />
+      <PlayerHand
+        cards={hand}
+        isMyTurn={isMyTurn}
+        onCardClick={handleCardClick}
+        canPlayCard={canPlayCard}
+      />
+
+      {/* Wild color selection modal */}
+      <WildColorModal
+        isOpen={selectedWildCard !== null}
+        onSelect={handleColorSelect}
+        onCancel={handleColorCancel}
+      />
     </div>
   );
 };

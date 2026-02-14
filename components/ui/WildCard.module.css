@@ -1,0 +1,41 @@
+/* Base quadrant colors for wild cards */
+:global(.quad-red) {
+  fill: #ed1c24;
+}
+
+:global(.quad-blue) {
+  fill: #0077c0;
+}
+
+:global(.quad-yellow) {
+  fill: #ffcc00;
+}
+
+:global(.quad-green) {
+  fill: #00a651;
+}
+
+/* Chosen color overrides - grayscale non-chosen quadrants */
+.chosen-red :global(.quad-blue),
+.chosen-red :global(.quad-yellow),
+.chosen-red :global(.quad-green) {
+  fill: #9ca3af;
+}
+
+.chosen-blue :global(.quad-red),
+.chosen-blue :global(.quad-yellow),
+.chosen-blue :global(.quad-green) {
+  fill: #9ca3af;
+}
+
+.chosen-yellow :global(.quad-red),
+.chosen-yellow :global(.quad-blue),
+.chosen-yellow :global(.quad-green) {
+  fill: #9ca3af;
+}
+
+.chosen-green :global(.quad-red),
+.chosen-green :global(.quad-blue),
+.chosen-green :global(.quad-yellow) {
+  fill: #9ca3af;
+}

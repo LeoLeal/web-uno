@@ -9,13 +9,15 @@ import { useGameSettings } from '@/hooks/useGameSettings';
 import { usePlayerHand } from '@/hooks/usePlayerHand';
 import { useGameEngine } from '@/hooks/useGameEngine';
 import { useSessionResilience } from '@/hooks/useSessionResilience';
+import { useGamePlay } from '@/hooks/useGamePlay';
+import { CardColor } from '@/lib/game/cards';
 import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/modals/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
 import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
 import { GameAlreadyStartedModal } from '@/components/modals/GameAlreadyStartedModal';
 import { WaitingForPlayerModal } from '@/components/modals/WaitingForPlayerModal';
-import { WinByWalkoverModal } from '@/components/modals/WinByWalkoverModal';
+import { GameEndModal } from '@/components/modals/GameEndModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
 import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
@@ -25,7 +27,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
 
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
-  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, initGame } = useGameState();
+  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, winType, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
@@ -35,6 +37,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     players,
     myClientId,
     startingHandSize: settings.startingHandSize,
+    isHost: amIHost,
   });
 
   // Session resilience — host-only disconnect handling and pause management
@@ -49,6 +52,9 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     deckRef,
     isHost: amIHost,
   });
+
+  // Gameplay — action submission and validation
+  const { submitAction, canPlayCard } = useGamePlay(myClientId);
 
   // Initialize Game State
   useEffect(() => {
@@ -67,6 +73,15 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     if (amIHost) {
       initializeGame();
     }
+  };
+
+  // Gameplay action handlers
+  const handlePlayCard = (cardId: string, chosenColor?: CardColor) => {
+    submitAction({ type: 'PLAY_CARD', cardId, chosenColor });
+  };
+
+  const handleDrawCard = () => {
+    submitAction({ type: 'DRAW_CARD' });
   };
 
   // Late joiner detection: game is playing but I'm not in locked players list
@@ -132,6 +147,9 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
               playerCardCounts={playerCardCounts}
               orphanHands={orphanHands}
               isFrozen={status === 'PAUSED_WAITING_PLAYER'}
+              onPlayCard={handlePlayCard}
+              onDrawCard={handleDrawCard}
+              canPlayCard={canPlayCard}
             />
           )}
         </div>
@@ -160,9 +178,10 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           isHost={amIHost}
           onContinueWithout={amIHost ? continueWithout : undefined}
         />
-        <WinByWalkoverModal
+        <GameEndModal
           isOpen={status === 'ENDED' && winner !== null}
           isWinner={myClientId === winner}
+          isWalkover={winType === 'WALKOVER'}
         />
 
       </div>

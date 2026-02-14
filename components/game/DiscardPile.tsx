@@ -66,7 +66,7 @@ export const DiscardPile = ({ cards, className, cardWidth = DEFAULT_WIDTH, cardH
             }}
           >
             <UnoCard
-              color={card.color === 'wild' ? 'red' : card.color}
+              color={card.color}
               symbol={card.symbol}
               style={{ width: cardWidth, height: cardHeight }}
             />

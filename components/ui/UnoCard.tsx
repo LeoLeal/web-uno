@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { WildCardSvg } from './WildCardSvg';
 
 type CardColor = 'red' | 'blue' | 'yellow' | 'green';
 type CardSymbol = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'reverse' | 'skip' | 'draw2' | 'wild' | 'wild-draw4' | 'back';
@@ -48,6 +49,36 @@ export const UnoCard = ({
   size = 'md',
 }: UnoCardProps) => {
   const dimensions = sizeMap[size];
+
+  // Render wild cards using WildCardSvg component
+  if (symbol === 'wild' || symbol === 'wild-draw4') {
+    // Extract width/height from custom style if provided
+    const customWidth = style?.width ? Number(style.width) : undefined;
+    const customHeight = style?.height ? Number(style.height) : undefined;
+
+    return (
+      <div
+        className={cn('relative flex-shrink-0', className)}
+        style={{
+          width: dimensions.width,
+          height: dimensions.height,
+          transform: `rotate(${rotation}deg)`,
+          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))',
+          ...style,
+        }}
+      >
+        <WildCardSvg
+          symbol={symbol}
+          color={color}
+          size={size}
+          width={customWidth}
+          height={customHeight}
+        />
+      </div>
+    );
+  }
+
+  // Non-wild cards use Image
   const cardPath = getCardPath(color, symbol);
   const altText = symbol === 'back'
     ? 'Card back'

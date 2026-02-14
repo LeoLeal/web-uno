@@ -1,0 +1,17 @@
+.unoBalloon {
+  /* Fallback positioning for browsers without anchor positioning */
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.5rem);
+}
+
+@supports (anchor-name: --test) {
+  .unoBalloon {
+    /* Modern anchor positioning - center horizontally on the avatar */
+    position: fixed;
+    bottom: anchor(top);
+    left: anchor(50%);
+    translate: -50% -0.5rem;
+  }
+}

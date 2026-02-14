@@ -6,9 +6,6 @@
 export const CARD_COLORS = ['red', 'blue', 'green', 'yellow'] as const;
 export type CardColor = (typeof CARD_COLORS)[number];
 
-/** Wild cards use a special 'wild' color */
-export type CardColorWithWild = CardColor | 'wild';
-
 export const CARD_SYMBOLS = [
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   'skip', 'reverse', 'draw2',
@@ -30,12 +27,13 @@ export type WildSymbol = (typeof WILD_SYMBOLS)[number];
 
 /**
  * A single Uno card.
+ * Wild cards have no color until played (color is undefined in deck/hand).
  */
 export interface Card {
   /** Unique identifier for tracking this specific card */
   id: string;
-  /** Card color ('red' | 'blue' | 'green' | 'yellow' | 'wild') */
-  color: CardColorWithWild;
+  /** Card color ('red' | 'blue' | 'green' | 'yellow'). Undefined for unplayed wild cards. */
+  color?: CardColor;
   /** Card symbol ('0'-'9', 'skip', 'reverse', 'draw2', 'wild', 'wild-draw4') */
   symbol: CardSymbol;
 }
@@ -63,3 +61,11 @@ export const isActionCard = (card: Card): boolean =>
  */
 export const isNumberCard = (card: Card): boolean =>
   Number(card.symbol) >= 0 && Number(card.symbol) <= 9 && !isNaN(Number(card.symbol));
+
+/**
+ * Player action types for the action queue system.
+ * Peers submit actions to the host for validation and execution.
+ */
+export type PlayerAction =
+  | { type: 'PLAY_CARD'; cardId: string; chosenColor?: CardColor }
+  | { type: 'DRAW_CARD' };

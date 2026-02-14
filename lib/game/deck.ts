@@ -52,14 +52,14 @@ export const createDeck = (): Card[] => {
     }
   }
 
-  // 4 Wild cards
+  // 4 Wild cards (no color until played)
   for (let i = 0; i < 4; i++) {
-    deck.push({ id: generateId(), color: 'wild', symbol: 'wild' });
+    deck.push({ id: generateId(), symbol: 'wild' });
   }
 
-  // 4 Wild Draw Four cards
+  // 4 Wild Draw Four cards (no color until played)
   for (let i = 0; i < 4; i++) {
-    deck.push({ id: generateId(), color: 'wild', symbol: 'wild-draw4' });
+    deck.push({ id: generateId(), symbol: 'wild-draw4' });
   }
 
   return deck;

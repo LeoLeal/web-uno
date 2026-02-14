@@ -10,6 +10,8 @@ interface PlayerHandProps {
   isMyTurn?: boolean;
   onUno?: () => void;
   hasCalledUno?: boolean;
+  onCardClick?: (card: Card) => void;
+  canPlayCard?: (card: Card) => boolean;
   className?: string;
 }
 
@@ -18,12 +20,14 @@ interface PlayerHandProps {
  * Cards are rotated to follow an arc curve with the center card highest.
  * Cards scale to fit within the screen width.
  */
-export const PlayerHand = ({ 
-  cards, 
-  isMyTurn = false, 
+export const PlayerHand = ({
+  cards,
+  isMyTurn = false,
   onUno,
   hasCalledUno = false,
-  className 
+  onCardClick,
+  canPlayCard,
+  className
 }: PlayerHandProps) => {
   const cardCount = cards.length;
   const canCallUno = cardCount === 2;
@@ -96,11 +100,19 @@ export const PlayerHand = ({
         {cards.map((card, index) => {
           const { rotation, translateY } = getCardTransform(index);
           const marginLeft = index === 0 ? 0 : cardSpacing;
+          const isPlayable = canPlayCard ? canPlayCard(card) : true;
+          const canClick = isMyTurn && onCardClick && isPlayable;
 
           return (
             <div
               key={card.id}
-              className="transition-transform duration-200 ease-out hover:-translate-y-6 hover:z-50 cursor-pointer"
+              onClick={() => canClick && onCardClick(card)}
+              className={cn(
+                "transition-transform duration-200 ease-out",
+                canClick && "hover:-translate-y-6 hover:z-50 cursor-pointer",
+                isMyTurn && !isPlayable && "cursor-not-allowed",
+                !isMyTurn && "cursor-default"
+              )}
               style={{
                 marginLeft,
                 transform: `rotate(${rotation}deg) translateY(${translateY}px)`,
@@ -108,7 +120,7 @@ export const PlayerHand = ({
               }}
             >
               <UnoCard
-                color={card.color === 'wild' ? 'red' : card.color}
+                color={card.color}
                 symbol={card.symbol}
                 size="md"
               />

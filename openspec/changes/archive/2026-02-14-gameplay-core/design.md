@@ -87,13 +87,13 @@ type PlayerAction =
 
 **Rationale**: There is no 'wild' color in Uno. A wild card simply has no color until the player chooses one. The `UnoCard` component already treats `color` as optional. This aligns the data model with reality.
 
-### Decision 5: SVGR for Wild Card Rendering
+### Decision 5: Inlined SVGs for Wild Card Rendering
 
-**Choice**: Use `@svgr/webpack` to import wild card SVGs (`wild.svg`, `wild-draw4.svg`) as React components. Modify the SVGs to use CSS classes on color paths instead of inline `style` attributes. Apply CSS classes on a wrapper element to control which quadrants are colored vs. grayscale.
+**Choice**: Wild card SVGs are inlined directly in a `WildCardSvg` React component. Color paths use CSS classes (`quad-red`, `quad-blue`, `quad-yellow`, `quad-green`) applied to SVG path elements. A CSS module defines base fills for each color class and grayscale overrides when a `chosen-{color}` class is applied to the wrapper.
 
-**SVG modifications**:
-- Replace `style="fill:#ed1c24"` with `class="quad-red"` (and similarly for blue, yellow, green)
-- Apply to both main quadrants and corner mini-quadrants
+**Implementation**:
+- In `WildCardSvg.tsx`: SVG paths defined inline with `className="quad-{color}"` attributes
+- In `WildCard.module.css`: Base `.quad-*` fills and `.chosen-{color}` overrides
 
 **CSS approach**:
 ```css
@@ -109,12 +109,12 @@ type PlayerAction =
 ```
 
 **Rendering logic**:
-- Wild cards in hand (no color): render via SVGR with all colors visible
-- Wild cards on discard (with color): render via SVGR with `chosen-{color}` class
+- Wild cards in hand (no color): render via `WildCardSvg` with all colors visible
+- Wild cards on discard (with color): render via `WildCardSvg` with `chosen-{color}` class applied
 - All non-wild cards: continue using `<Image>` as before
 
 **Alternatives considered**:
-- *Inline SVG manually*: Same result but harder to maintain if SVGs change
+- *SVGR webpack plugin*: Import SVGs as React components, modify source SVG files with CSS classes. Rejected due to Turbopack compatibility issues in Next.js 16.
 - *Pre-generate variant SVG files*: 8 extra files (4 colors × 2 wild types), no CSS flexibility
 - *CSS filters on `<img>`*: Can't target individual SVG paths through `<img>` tag
 
@@ -194,7 +194,7 @@ nextTurn(turnOrder, currentIndex, direction, skipCount):
 
 **[Host disconnection during gameplay]** → If the host disconnects, the deck is lost and no actions can be processed. Existing session resilience handles host disconnect detection. Host migration (transferring deck to another player) is out of scope — the game pauses and waits for the host to return or ends by walkover.
 
-**[SVGR bundle size]** → Importing wild SVGs as React components adds them to the JS bundle instead of being optimized images. Only 2 SVGs (wild + wild-draw4) are affected, and they're small (~2KB each). Negligible impact.
+**[Inlined SVG bundle size]** → Wild card SVG paths are inlined in the JavaScript bundle (~3KB for both wild and wild-draw4). Negligible impact, and avoids Turbopack compatibility issues with SVGR.
 
 **[Action queue ordering]** → Yjs maps don't guarantee observation order if multiple players write simultaneously. Since Uno is strictly turn-based (only the current player's action is valid), simultaneous writes are rejected by validation. No ordering issue in practice.
 

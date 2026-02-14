@@ -3,6 +3,7 @@ import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
 
 export type GameStatus = 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED';
+export type WinType = 'LEGITIMATE' | 'WALKOVER';
 
 export interface LockedPlayer {
   clientId: number;
@@ -26,6 +27,7 @@ export const useGameState = () => {
   const [lockedPlayers, setLockedPlayers] = useState<LockedPlayer[]>([]);
   const [orphanHands, setOrphanHands] = useState<OrphanHand[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
+  const [winType, setWinType] = useState<WinType | null>(null);
 
   useEffect(() => {
     if (!doc) return;
@@ -66,6 +68,9 @@ export const useGameState = () => {
 
       const gameWinner = gameStateMap.get('winner') as number | undefined;
       setWinner(gameWinner ?? null);
+
+      const gameWinType = gameStateMap.get('winType') as WinType | undefined;
+      setWinType(gameWinType ?? null);
     };
 
     gameStateMap.observe(handleChange);
@@ -101,6 +106,7 @@ export const useGameState = () => {
     lockedPlayers,
     orphanHands,
     winner,
+    winType,
     startGame,
     initGame,
   };

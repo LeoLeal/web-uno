@@ -4,6 +4,7 @@ import { OpponentIndicator } from './OpponentIndicator';
 
 describe('OpponentIndicator', () => {
   const defaultProps = {
+    clientId: 1,
     name: 'Alice',
     avatar: '🐱',
     cardCount: 5,
@@ -136,6 +137,64 @@ describe('OpponentIndicator', () => {
 
       expect(screen.getByText('👑')).toBeInTheDocument();
       expect(screen.getByText('⚠️')).toBeInTheDocument();
+    });
+  });
+
+  describe('UNO Balloon', () => {
+    it('should show UNO balloon when player has 1 card', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          cardCount={1}
+        />
+      );
+
+      expect(screen.getByText('UNO!')).toBeInTheDocument();
+    });
+
+    it('should not show UNO balloon when player has 0 cards', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          cardCount={0}
+        />
+      );
+
+      expect(screen.queryByText('UNO!')).not.toBeInTheDocument();
+    });
+
+    it('should not show UNO balloon when player has 2 cards', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          cardCount={2}
+        />
+      );
+
+      expect(screen.queryByText('UNO!')).not.toBeInTheDocument();
+    });
+
+    it('should not show UNO balloon when player has many cards', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          cardCount={7}
+        />
+      );
+
+      expect(screen.queryByText('UNO!')).not.toBeInTheDocument();
+    });
+
+    it('should show UNO balloon even when player is disconnected', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          cardCount={1}
+          isDisconnected={true}
+        />
+      );
+
+      expect(screen.getByText('UNO!')).toBeInTheDocument();
     });
   });
 });

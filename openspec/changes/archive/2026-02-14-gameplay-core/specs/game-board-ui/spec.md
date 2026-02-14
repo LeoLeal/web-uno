@@ -75,6 +75,6 @@ The system SHALL display the discard pile with the top card face-up, including w
 
 #### Scenario: Wild card on discard with chosen color
 - **WHEN** the top discard card is a wild card with an assigned color
-- **THEN** the card is rendered using the SVGR wild card component
+- **THEN** the card is rendered using the `WildCardSvg` component
 - **AND** the `chosen-{color}` CSS class is applied
 - **AND** all quadrants except the chosen color appear grayscale

@@ -20,7 +20,7 @@ describe('createDeck', () => {
 
   it('should have one 0 per color (4 total)', () => {
     const deck = createDeck();
-    const zeros = deck.filter((c) => c.symbol === '0' && c.color !== 'wild');
+    const zeros = deck.filter((c) => c.symbol === '0' && c.color !== undefined);
     expect(zeros).toHaveLength(4);
     for (const color of CARD_COLORS) {
       expect(zeros.filter((c) => c.color === color)).toHaveLength(1);
@@ -43,7 +43,7 @@ describe('createDeck', () => {
     const deck = createDeck();
     const numbers = deck.filter((c) => {
       const n = Number(c.symbol);
-      return !isNaN(n) && n >= 0 && n <= 9 && c.color !== 'wild';
+      return !isNaN(n) && n >= 0 && n <= 9 && c.color !== undefined;
     });
     expect(numbers).toHaveLength(76);
   });
@@ -68,7 +68,7 @@ describe('createDeck', () => {
   it('should have 4 Wild cards', () => {
     const deck = createDeck();
     const wilds = deck.filter(
-      (c) => c.color === 'wild' && c.symbol === 'wild'
+      (c) => c.color === undefined && c.symbol === 'wild'
     );
     expect(wilds).toHaveLength(4);
   });
@@ -76,14 +76,14 @@ describe('createDeck', () => {
   it('should have 4 Wild Draw Four cards', () => {
     const deck = createDeck();
     const wd4s = deck.filter(
-      (c) => c.color === 'wild' && c.symbol === 'wild-draw4'
+      (c) => c.color === undefined && c.symbol === 'wild-draw4'
     );
     expect(wd4s).toHaveLength(4);
   });
 
   it('should have 8 wild cards total', () => {
     const deck = createDeck();
-    const wilds = deck.filter((c) => c.color === 'wild');
+    const wilds = deck.filter((c) => c.color === undefined);
     expect(wilds).toHaveLength(8);
   });
 });

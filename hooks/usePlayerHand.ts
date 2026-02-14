@@ -1,13 +1,14 @@
 /**
- * Hook for managing the local player's hand.
+ * Hook for reading the local player's hand.
  *
  * Reads the player's dealt hand from the Yjs 'dealtHands' map (keyed by clientId),
  * then stores it locally. The hand is private — only the local player's entry is used.
  *
- * Also supports adding/removing cards for gameplay (draw, play actions).
+ * The hand is read-only from the player's perspective. Only the host modifies hands
+ * via the Yjs dealtHandsMap (in useGameEngine).
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
 
@@ -16,16 +17,8 @@ interface UsePlayerHandOptions {
 }
 
 interface UsePlayerHandReturn {
-  /** Current cards in the player's hand */
+  /** Current cards in the player's hand (read-only, synced from Yjs) */
   hand: Card[];
-  /** Set the entire hand (used when receiving dealt cards) */
-  setHand: (cards: Card[]) => void;
-  /** Add a card to the hand (e.g., drawing from deck) */
-  addCard: (card: Card) => void;
-  /** Remove a card from the hand by ID (e.g., playing a card) */
-  removeCard: (cardId: string) => Card | undefined;
-  /** Clear the entire hand */
-  clearHand: () => void;
 }
 
 export const usePlayerHand = ({ myClientId }: UsePlayerHandOptions): UsePlayerHandReturn => {
@@ -55,24 +48,5 @@ export const usePlayerHand = ({ myClientId }: UsePlayerHandOptions): UsePlayerHa
     };
   }, [doc, myClientId]);
 
-  const addCard = useCallback((card: Card) => {
-    setHand((prev) => [...prev, card]);
-  }, []);
-
-  const removeCard = useCallback((cardId: string): Card | undefined => {
-    let removed: Card | undefined;
-    setHand((prev) => {
-      const index = prev.findIndex((c) => c.id === cardId);
-      if (index === -1) return prev;
-      removed = prev[index];
-      return [...prev.slice(0, index), ...prev.slice(index + 1)];
-    });
-    return removed;
-  }, []);
-
-  const clearHand = useCallback(() => {
-    setHand([]);
-  }, []);
-
-  return { hand, setHand, addCard, removeCard, clearHand };
+  return { hand };
 };

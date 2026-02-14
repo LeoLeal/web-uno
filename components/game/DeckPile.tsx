@@ -8,6 +8,10 @@ interface DeckPileProps {
   /** Card dimensions - defaults to mobile size (80x120) */
   cardWidth?: number;
   cardHeight?: number;
+  /** Whether it's the current player's turn */
+  isMyTurn?: boolean;
+  /** Called when the deck is clicked to draw a card */
+  onClick?: () => void;
 }
 
 const DEFAULT_WIDTH = 80;
@@ -17,9 +21,26 @@ const DEFAULT_HEIGHT = 120;
  * Deck pile shown as stacked card backs with slight offset for depth illusion.
  * Uses UnoCard with symbol='back' for consistent sizing with the discard pile.
  */
-export const DeckPile = ({ className, cardWidth = DEFAULT_WIDTH, cardHeight = DEFAULT_HEIGHT }: DeckPileProps) => {
+export const DeckPile = ({
+  className,
+  cardWidth = DEFAULT_WIDTH,
+  cardHeight = DEFAULT_HEIGHT,
+  isMyTurn = false,
+  onClick
+}: DeckPileProps) => {
+  const canClick = isMyTurn && onClick;
+
   return (
-    <div className={cn('relative', className)} style={{ width: cardWidth, height: cardHeight }}>
+    <div
+      className={cn(
+        'relative',
+        canClick && 'cursor-pointer hover:scale-105 active:scale-95 transition-transform',
+        !canClick && 'cursor-default',
+        className
+      )}
+      style={{ width: cardWidth, height: cardHeight }}
+      onClick={() => canClick && onClick()}
+    >
       {/* Stack layers for depth effect */}
       {[2, 1, 0].map((offset) => (
         <div
