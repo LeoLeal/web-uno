@@ -12,6 +12,7 @@ import { useGame } from '@/components/providers/GameProvider';
 import { Card, isWildDrawFour, CardSymbol, PlayerAction, isWildCard } from '@/lib/game/cards';
 import { createDeck, shuffle } from '@/lib/game/deck';
 import { Player } from '@/hooks/useRoom';
+import { calculateHandPoints } from '@/lib/game/scoring';
 import type * as Y from 'yjs';
 
 interface UseGameEngineOptions {
@@ -23,11 +24,15 @@ interface UseGameEngineOptions {
   startingHandSize: number;
   /** Whether this client is the host */
   isHost: boolean;
+  /** Score limit for multi-round games (null = single round) */
+  scoreLimit: number | null;
 }
 
 interface UseGameEngineReturn {
   /** Initialize the game: create deck, deal hands, set first card, update Yjs state */
   initializeGame: () => void;
+  /** Initialize a new round in a multi-round game */
+  initializeRound: () => void;
   /** Reference to the deck (host-only, used for reshuffling orphan cards) */
   deckRef: React.RefObject<Card[]>;
 }
@@ -37,75 +42,83 @@ export const useGameEngine = ({
   myClientId,
   startingHandSize,
   isHost,
+  scoreLimit,
 }: UseGameEngineOptions): UseGameEngineReturn => {
   const { doc } = useGame();
   // Host keeps the deck in memory only — never in shared state
   const deckRef = useRef<Card[]>([]);
 
-  const initializeGame = useCallback(() => {
-    if (!doc || !myClientId || players.length < 2) return;
-
-    // 1. Create and shuffle deck
+  /**
+   * Helper: Prepare a new deck, deal cards, and select first card.
+   * Returns deck, hands, card counts, and first card.
+   */
+  const prepareDeckAndDeal = useCallback((playerList: Array<{ clientId: number; name: string }>) => {
     const deck = createDeck();
     shuffle(deck);
 
-    // 2. Determine turn order from current player list order
-    const turnOrder = players.map((p) => p.clientId);
-
-    // 3. Deal cards to each player
     const playerCardCounts: Record<number, number> = {};
     const hands: Record<string, Card[]> = {};
 
-    for (const player of players) {
+    for (const player of playerList) {
       const hand = deck.splice(0, startingHandSize);
       playerCardCounts[player.clientId] = hand.length;
       hands[String(player.clientId)] = hand;
     }
 
-    // 4. Flip first card for discard pile (with Wild Draw 4 reshuffle rule)
+    // Flip first card (reshuffle Wild Draw 4)
     let firstCard = deck.shift()!;
     while (isWildDrawFour(firstCard)) {
-      // Return Wild Draw 4 to deck and reshuffle
       deck.push(firstCard);
       shuffle(deck);
       firstCard = deck.shift()!;
     }
 
-    // Store remaining deck in host memory only
-    deckRef.current = deck;
+    return { deck, hands, playerCardCounts, firstCard };
+  }, [startingHandSize]);
 
-    // 5. Apply first card effects
-    let initialTurn = turnOrder[0];
-    let initialDirection = 1;
-    const initialHands = { ...hands };
-    const initialCardCounts = { ...playerCardCounts };
+  /**
+   * Helper: Apply first card effects to determine initial turn and direction.
+   * Modifies hands and card counts in place based on first card effects.
+   */
+  const applyFirstCardEffects = useCallback((
+    firstCard: Card,
+    baseStartingPlayer: number,
+    turnOrder: number[],
+    hands: Record<string, Card[]>,
+    playerCardCounts: Record<number, number>
+  ): { initialTurn: number; initialDirection: 1 | -1 } => {
+    let initialTurn = baseStartingPlayer;
+    let initialDirection: 1 | -1 = 1;
+
+    const baseIndex = turnOrder.indexOf(baseStartingPlayer);
 
     switch (firstCard.symbol as CardSymbol) {
       case 'skip':
-        // Skip first player, start with second
-        initialTurn = turnOrder[1 % turnOrder.length];
+        // Skip starting player, advance to next
+        const skipIndex = (baseIndex + 1) % turnOrder.length;
+        initialTurn = turnOrder[skipIndex];
         break;
 
       case 'reverse':
-        // Reverse direction, start with last player
+        // Reverse direction, start with previous player
         initialDirection = -1;
-        initialTurn = turnOrder[turnOrder.length - 1];
+        const reverseIndex = (baseIndex - 1 + turnOrder.length) % turnOrder.length;
+        initialTurn = turnOrder[reverseIndex];
         break;
 
       case 'draw2': {
-        // First player draws 2 and is skipped
-        const firstPlayerId = turnOrder[0];
+        // Starting player draws 2 and is skipped
         const drawnCards = deckRef.current.splice(0, 2);
-        initialHands[String(firstPlayerId)].push(...drawnCards);
-        initialCardCounts[firstPlayerId] += drawnCards.length;
-        initialTurn = turnOrder[1 % turnOrder.length];
+        hands[String(baseStartingPlayer)].push(...drawnCards);
+        playerCardCounts[baseStartingPlayer] += drawnCards.length;
+        const draw2Index = (baseIndex + 1) % turnOrder.length;
+        initialTurn = turnOrder[draw2Index];
         break;
       }
 
       case 'wild':
       case 'wild-draw4':
-        // Wild stays colorless (already has no color)
-        // Wild Draw Four would have been reshuffled, but handled here for clarity
+        // Wild stays colorless
         break;
 
       default:
@@ -113,17 +126,35 @@ export const useGameEngine = ({
         break;
     }
 
-    // Update hands and counts after first card effects
-    Object.assign(hands, initialHands);
-    Object.assign(playerCardCounts, initialCardCounts);
+    return { initialTurn, initialDirection };
+  }, []);
 
-    // 6. Build locked players list
+  const initializeGame = useCallback(() => {
+    if (!doc || !myClientId || players.length < 2) return;
+
+    // 1. Determine turn order from current player list order
+    const turnOrder = players.map((p) => p.clientId);
+
+    // 2. Build locked players list
     const lockedPlayers = players.map((p) => ({
       clientId: p.clientId,
       name: p.name,
     }));
 
-    // 7. Update Yjs shared state in a single transaction
+    // 3. Prepare deck and deal cards
+    const { deck, hands, playerCardCounts, firstCard } = prepareDeckAndDeal(lockedPlayers);
+    deckRef.current = deck;
+
+    // 4. Apply first card effects
+    const { initialTurn, initialDirection } = applyFirstCardEffects(
+      firstCard,
+      turnOrder[0], // Start with first player in order
+      turnOrder,
+      hands,
+      playerCardCounts
+    );
+
+    // 5. Update Yjs shared state in a single transaction
     const gameStateMap = doc.getMap('gameState');
     const dealtHandsMap = doc.getMap('dealtHands');
     const actionsMap = doc.getMap('actions');
@@ -137,6 +168,16 @@ export const useGameEngine = ({
       gameStateMap.set('turnOrder', turnOrder);
       gameStateMap.set('lockedPlayers', lockedPlayers);
 
+      // Initialize multi-round game state
+      if (scoreLimit !== null) {
+        const initialScores: Record<number, number> = {};
+        for (const player of players) {
+          initialScores[player.clientId] = 0;
+        }
+        gameStateMap.set('scores', initialScores);
+        gameStateMap.set('currentRound', 1);
+      }
+
       // Distribute hands via Yjs (each player reads only their own key)
       for (const [clientId, hand] of Object.entries(hands)) {
         dealtHandsMap.set(clientId, hand);
@@ -145,7 +186,61 @@ export const useGameEngine = ({
       // Initialize actions map (clear any stale actions)
       actionsMap.clear();
     });
-  }, [doc, myClientId, players, startingHandSize]);
+  }, [doc, myClientId, players, scoreLimit, prepareDeckAndDeal, applyFirstCardEffects]);
+
+  const initializeRound = useCallback(() => {
+    if (!doc || !myClientId) return;
+
+    const gameStateMap = doc.getMap('gameState');
+    const dealtHandsMap = doc.getMap('dealtHands');
+    const actionsMap = doc.getMap('actions');
+
+    // 1. Read preserved multi-round state
+    const turnOrder = (gameStateMap.get('turnOrder') as number[]) || [];
+    const lockedPlayers = (gameStateMap.get('lockedPlayers') as Array<{ clientId: number; name: string }>) || [];
+    const currentRound = (gameStateMap.get('currentRound') as number) || 1;
+
+    if (turnOrder.length < 2 || lockedPlayers.length < 2) return;
+
+    // 2. Prepare deck and deal cards
+    const { deck, hands, playerCardCounts, firstCard } = prepareDeckAndDeal(lockedPlayers);
+    deckRef.current = deck;
+
+    // 3. Calculate starting player with rotation
+    const newRound = currentRound + 1;
+    const startingPlayerIndex = currentRound % turnOrder.length;
+    const baseStartingPlayer = turnOrder[startingPlayerIndex];
+
+    // 4. Apply first card effects
+    const { initialTurn, initialDirection } = applyFirstCardEffects(
+      firstCard,
+      baseStartingPlayer,
+      turnOrder,
+      hands,
+      playerCardCounts
+    );
+
+    // 5. Update Yjs shared state in a single transaction
+    doc.transact(() => {
+      gameStateMap.set('status', 'PLAYING');
+      gameStateMap.set('currentTurn', initialTurn);
+      gameStateMap.set('direction', initialDirection);
+      gameStateMap.set('discardPile', [firstCard]);
+      gameStateMap.set('playerCardCounts', playerCardCounts);
+      gameStateMap.set('currentRound', newRound);
+      gameStateMap.set('orphanHands', []); // Clear orphan hands
+      // turnOrder and lockedPlayers are preserved (not modified)
+      // scores are preserved (not modified)
+
+      // Distribute hands via Yjs
+      for (const [clientId, hand] of Object.entries(hands)) {
+        dealtHandsMap.set(clientId, hand);
+      }
+
+      // Clear actions map
+      actionsMap.clear();
+    });
+  }, [doc, myClientId, prepareDeckAndDeal, applyFirstCardEffects]);
 
   // Action processing loop (host only)
   useEffect(() => {
@@ -205,7 +300,7 @@ export const useGameEngine = ({
     // Action observer
     const observer = (event: Y.YMapEvent<unknown>) => {
       const status = gameStateMap.get('status') as string;
-      if (status !== 'PLAYING') return;
+      if (status !== 'PLAYING') return; // Don't process actions during LOBBY, PAUSED_WAITING_PLAYER, ROUND_ENDED, or ENDED
 
       event.keysChanged.forEach((clientIdStr) => {
         const action = actionsMap.get(clientIdStr) as PlayerAction | null;
@@ -277,9 +372,46 @@ export const useGameEngine = ({
 
             // Check for win
             if (newHand.length === 0) {
-              gameStateMap.set('status', 'ENDED');
-              gameStateMap.set('winner', clientId);
-              gameStateMap.set('winType', 'LEGITIMATE');
+              if (scoreLimit === null) {
+                // Single-round game: end immediately
+                gameStateMap.set('status', 'ENDED');
+                gameStateMap.set('winner', clientId);
+                gameStateMap.set('winType', 'LEGITIMATE');
+              } else {
+                // Multi-round game: calculate round score
+                let roundPoints = 0;
+
+                // Sum points from all opponents' hands
+                for (const playerId of turnOrder) {
+                  if (playerId === clientId) continue; // Skip winner
+                  const opponentHand = (dealtHandsMap.get(String(playerId)) as Card[]) || [];
+                  roundPoints += calculateHandPoints(opponentHand);
+                }
+
+                // Include orphan hands in scoring
+                const orphanHands = (gameStateMap.get('orphanHands') as Array<{ originalClientId: number; originalName: string; cards: Card[] }>) || [];
+                for (const orphan of orphanHands) {
+                  roundPoints += calculateHandPoints(orphan.cards);
+                }
+
+                // Update winner's cumulative score
+                const scores = (gameStateMap.get('scores') as Record<number, number>) || {};
+                const newScore = (scores[clientId] || 0) + roundPoints;
+                scores[clientId] = newScore;
+                gameStateMap.set('scores', { ...scores });
+                gameStateMap.set('lastRoundPoints', roundPoints);
+
+                // Check if score limit reached
+                if (newScore >= scoreLimit) {
+                  gameStateMap.set('status', 'ENDED');
+                  gameStateMap.set('winner', clientId);
+                  gameStateMap.set('winType', 'LEGITIMATE');
+                } else {
+                  gameStateMap.set('status', 'ROUND_ENDED');
+                  gameStateMap.set('winner', clientId);
+                }
+              }
+
               actionsMap.set(clientIdStr, null);
               return; // Don't advance turn
             }
@@ -362,7 +494,7 @@ export const useGameEngine = ({
 
     actionsMap.observe(observer);
     return () => actionsMap.unobserve(observer);
-  }, [doc, myClientId, isHost]);
+  }, [doc, myClientId, isHost, scoreLimit]);
 
-  return { initializeGame, deckRef };
+  return { initializeGame, initializeRound, deckRef };
 };

@@ -93,10 +93,78 @@ export const useSessionResilience = ({
     activePlayersRef.current = activePlayers;
   }, [activePlayers]);
 
+  /**
+   * Start a grace period timer that reads current state from Yjs when it fires,
+   * avoiding stale closure issues.
+   */
+  const startGracePeriodTimer = useCallback((yDoc: NonNullable<typeof doc>) => {
+    gracePeriodTimerRef.current = setTimeout(() => {
+      // Read ALL state from Yjs directly to avoid stale closures
+      const gameStateMap = yDoc.getMap('gameState');
+      const dealtHandsMap = yDoc.getMap('dealtHands');
+      const currentActiveIds = activePlayersRef.current.map((p) => p.clientId);
+      const currentLockedPlayers = (gameStateMap.get('lockedPlayers') as LockedPlayer[]) || [];
+      const currentOrphanHands = (gameStateMap.get('orphanHands') as OrphanHand[]) || [];
+      const currentOrphanIds = currentOrphanHands.map((o) => o.originalClientId);
+      const currentLockedIds = currentLockedPlayers.map((p) => p.clientId);
+
+      const stillMissing = currentLockedIds.filter(
+        (id) => !currentActiveIds.includes(id) && !currentOrphanIds.includes(id)
+      );
+
+      if (stillMissing.length === 0) {
+        console.log('All suspected disconnects returned — no pause needed');
+        pendingDisconnectsRef.current.clear();
+        gracePeriodTimerRef.current = null;
+        return;
+      }
+
+      console.log('Confirmed disconnect after grace period:', stillMissing);
+
+      // Read their hands from dealtHands and create orphan entries
+      const newOrphans: OrphanHand[] = [];
+
+      for (const disconnectedId of stillMissing) {
+        const lockedPlayer = currentLockedPlayers.find((p) => p.clientId === disconnectedId);
+        const hand = dealtHandsMap.get(String(disconnectedId)) as Card[] | undefined;
+
+        if (lockedPlayer && hand) {
+          newOrphans.push({
+            originalClientId: disconnectedId,
+            originalName: lockedPlayer.name,
+            cards: hand,
+          });
+        }
+      }
+
+      // Transition to pause or add to existing pause
+      const currentStatus = gameStateMap.get('status') as GameStatus;
+      yDoc.transact(() => {
+        if (currentStatus === 'PLAYING' || currentStatus === 'ROUND_ENDED') {
+          gameStateMap.set('statusBeforePause', currentStatus);
+          gameStateMap.set('status', 'PAUSED_WAITING_PLAYER');
+        }
+        gameStateMap.set('orphanHands', [...currentOrphanHands, ...newOrphans]);
+      });
+
+      pendingDisconnectsRef.current.clear();
+      gracePeriodTimerRef.current = null;
+    }, DISCONNECT_GRACE_PERIOD_MS);
+  }, []);
+
+  // Clean up grace period timer on unmount only
+  useEffect(() => {
+    return () => {
+      if (gracePeriodTimerRef.current) {
+        clearTimeout(gracePeriodTimerRef.current);
+      }
+    };
+  }, []);
+
   // Detect disconnections and trigger pause (with grace period)
   useEffect(() => {
     if (!isHost) return;
-    if (!doc || (status !== 'PLAYING' && status !== 'PAUSED_WAITING_PLAYER')) {
+    if (!doc || (status !== 'PLAYING' && status !== 'ROUND_ENDED' && status !== 'PAUSED_WAITING_PLAYER')) {
       // Clear timer and pending disconnects when leaving active statuses
       if (gracePeriodTimerRef.current) {
         clearTimeout(gracePeriodTimerRef.current);
@@ -150,66 +218,18 @@ export const useSessionResilience = ({
 
         // Start grace period timer if not already running
         if (!gracePeriodTimerRef.current) {
-          gracePeriodTimerRef.current = setTimeout(() => {
-            // Re-check after grace period: compare current awareness against lockedPlayers
-            const currentActiveIds = activePlayersRef.current.map((p) => p.clientId);
-            const currentOrphanIds = orphanHands.map((o) => o.originalClientId);
-            const stillMissing = lockedClientIds.filter(
-              (id) => !currentActiveIds.includes(id) && !currentOrphanIds.includes(id)
-            );
-
-            if (stillMissing.length === 0) {
-              console.log('All suspected disconnects returned — no pause needed');
-              pendingDisconnectsRef.current.clear();
-              gracePeriodTimerRef.current = null;
-              return;
-            }
-
-            console.log('Confirmed disconnect after grace period:', stillMissing);
-
-            // Read their hands from dealtHands and create orphan entries
-            const dealtHandsMap = doc.getMap('dealtHands');
-            const gameStateMap = doc.getMap('gameState');
-            const newOrphans: OrphanHand[] = [];
-
-            for (const disconnectedId of stillMissing) {
-              const lockedPlayer = lockedPlayers.find((p) => p.clientId === disconnectedId);
-              const hand = dealtHandsMap.get(String(disconnectedId)) as Card[] | undefined;
-
-              if (lockedPlayer && hand) {
-                newOrphans.push({
-                  originalClientId: disconnectedId,
-                  originalName: lockedPlayer.name,
-                  cards: hand,
-                });
-              }
-            }
-
-            // Transition to pause or add to existing pause (no auto-walkover on disconnect)
-            doc.transact(() => {
-              if (status === 'PLAYING') {
-                gameStateMap.set('status', 'PAUSED_WAITING_PLAYER');
-              }
-              gameStateMap.set('orphanHands', [...orphanHands, ...newOrphans]);
-            });
-
-            pendingDisconnectsRef.current.clear();
-            gracePeriodTimerRef.current = null;
-          }, DISCONNECT_GRACE_PERIOD_MS);
+          startGracePeriodTimer(doc);
         }
       }
     }
 
-    lastActivePlayerCount.current = activeLocked.length;
+    // Restart timer if pending disconnects exist but timer was cleared by effect re-run
+    if (pendingDisconnectsRef.current.size > 0 && !gracePeriodTimerRef.current) {
+      startGracePeriodTimer(doc);
+    }
 
-    // Cleanup: clear timer on unmount or dependency change
-    return () => {
-      if (gracePeriodTimerRef.current) {
-        clearTimeout(gracePeriodTimerRef.current);
-        gracePeriodTimerRef.current = null;
-      }
-    };
-  }, [doc, status, lockedPlayers, activePlayers, orphanHands, isHost]);
+    lastActivePlayerCount.current = activeLocked.length;
+  }, [doc, status, lockedPlayers, activePlayers, orphanHands, isHost, startGracePeriodTimer]);
 
   // Handle replacement player joining during pause
   useEffect(() => {
@@ -234,6 +254,7 @@ export const useSessionResilience = ({
       let updatedTurnOrder = [...turnOrder];
       let updatedCurrentTurn = currentTurn;
       let updatedCardCounts = { ...playerCardCounts };
+      let updatedScores = gameStateMap.get('scores') as Record<number, number> | undefined;
 
       for (const newPlayer of newPlayers) {
         if (updatedOrphans.length === 0) break;
@@ -281,6 +302,14 @@ export const useSessionResilience = ({
         newCardCounts[newPlayer.clientId] = closestOrphan.cards.length;
         updatedCardCounts = newCardCounts;
 
+        // Inherit cumulative score (if multi-round game)
+        if (updatedScores) {
+          const inheritedScore = updatedScores[closestOrphan.originalClientId] || 0;
+          updatedScores = { ...updatedScores };
+          delete updatedScores[closestOrphan.originalClientId];
+          updatedScores[newPlayer.clientId] = inheritedScore;
+        }
+
         // Remove this orphan from the list
         updatedOrphans = updatedOrphans.filter((o) => o.originalClientId !== closestOrphan.originalClientId);
       }
@@ -291,11 +320,16 @@ export const useSessionResilience = ({
       gameStateMap.set('turnOrder', updatedTurnOrder);
       gameStateMap.set('currentTurn', updatedCurrentTurn);
       gameStateMap.set('playerCardCounts', updatedCardCounts);
+      if (updatedScores) {
+        gameStateMap.set('scores', updatedScores);
+      }
 
       // If all orphans resolved, resume game
       if (updatedOrphans.length === 0) {
-        gameStateMap.set('status', 'PLAYING');
-        console.log('All orphan hands assigned - resuming game');
+        const statusBefore = gameStateMap.get('statusBeforePause') as GameStatus | null;
+        gameStateMap.set('status', statusBefore || 'PLAYING');
+        gameStateMap.set('statusBeforePause', null);
+        console.log('All orphan hands assigned - resuming game to status:', statusBefore || 'PLAYING');
       }
     });
   }, [doc, status, orphanHands, lockedPlayers, activePlayers, currentTurn, turnOrder, playerCardCounts, isHost]);
@@ -350,8 +384,10 @@ export const useSessionResilience = ({
         console.log('Walkover win after removal:', updatedLockedPlayers[0]?.name);
       } else if (updatedOrphans.length === 0) {
         // All orphans resolved, resume game
-        gameStateMap.set('status', 'PLAYING');
-        console.log('All orphans removed - resuming game');
+        const statusBefore = gameStateMap.get('statusBeforePause') as GameStatus | null;
+        gameStateMap.set('status', statusBefore || 'PLAYING');
+        gameStateMap.set('statusBeforePause', null);
+        console.log('All orphans removed - resuming game to status:', statusBefore || 'PLAYING');
       }
     });
   }, [doc, orphanHands, turnOrder, currentTurn, playerCardCounts, lockedPlayers, deckRef, isHost]);

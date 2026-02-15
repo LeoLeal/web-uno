@@ -25,6 +25,10 @@ interface GameBoardProps {
   discardPile: Card[];
   /** Map of clientId -> card count */
   playerCardCounts: Record<number, number>;
+  /** Cumulative scores (multi-round games only) */
+  scores?: Record<number, number>;
+  /** Score limit for multi-round games (null = single round) */
+  scoreLimit?: number | null;
   /** Orphan hands for disconnected players */
   orphanHands?: OrphanHand[];
   /** Whether interaction is frozen (e.g., during pause) */
@@ -50,6 +54,8 @@ export const GameBoard = ({
   hand,
   discardPile,
   playerCardCounts,
+  scores,
+  scoreLimit,
   orphanHands = [],
   isFrozen = false,
   onPlayCard,
@@ -116,7 +122,7 @@ export const GameBoard = ({
     >
       {/* Opponents row */}
       <div className="pt-2 mt-4 flex-shrink-0">
-        <OpponentRow opponents={opponents} currentTurn={currentTurn} />
+        <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} />
       </div>
 
       {/* Table center — grows to fill available space, centered */}
@@ -134,6 +140,8 @@ export const GameBoard = ({
         isMyTurn={isMyTurn}
         onCardClick={handleCardClick}
         canPlayCard={canPlayCard}
+        score={myClientId !== null ? scores?.[myClientId] : undefined}
+        showScore={scoreLimit !== null && scoreLimit !== undefined}
       />
 
       {/* Wild color selection modal */}

@@ -18,6 +18,7 @@ import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
 import { GameAlreadyStartedModal } from '@/components/modals/GameAlreadyStartedModal';
 import { WaitingForPlayerModal } from '@/components/modals/WaitingForPlayerModal';
 import { GameEndModal } from '@/components/modals/GameEndModal';
+import { RoundEndModal } from '@/components/modals/RoundEndModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
 import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
@@ -27,17 +28,18 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
 
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
-  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, winType, initGame } = useGameState();
+  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, winType, scores, lastRoundPoints, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
 
   // Game engine — host-only deck management and dealing (hands delivered via Yjs)
-  const { initializeGame, deckRef } = useGameEngine({
+  const { initializeGame, initializeRound, deckRef } = useGameEngine({
     players,
     myClientId,
     startingHandSize: settings.startingHandSize,
     isHost: amIHost,
+    scoreLimit: settings.scoreLimit,
   });
 
   // Session resilience — host-only disconnect handling and pause management
@@ -92,6 +94,19 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     myClientId !== null &&
     !lockedPlayers.some((p) => p.clientId === myClientId);
 
+  // Prepare standings for round-end and game-end modals
+  const standings = lockedPlayers
+    .map((player) => ({
+      clientId: player.clientId,
+      name: player.name,
+      score: scores[player.clientId] || 0,
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  const winnerName = winner !== null ? lockedPlayers.find((p) => p.clientId === winner)?.name || 'Player' : 'Player';
+
+  const roundPoints = lastRoundPoints;
+
   return (
     <main className="relative z-10 flex flex-col h-screen items-center p-4 pb-8 md:pb-4">
       <div className="w-full max-w-6xl flex-1 flex flex-col">
@@ -145,8 +160,10 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
               hand={hand}
               discardPile={discardPile}
               playerCardCounts={playerCardCounts}
+              scores={scores}
+              scoreLimit={settings.scoreLimit}
               orphanHands={orphanHands}
-              isFrozen={status === 'PAUSED_WAITING_PLAYER'}
+              isFrozen={status === 'PAUSED_WAITING_PLAYER' || status === 'ROUND_ENDED'}
               onPlayCard={handlePlayCard}
               onDrawCard={handleDrawCard}
               canPlayCard={canPlayCard}
@@ -178,10 +195,21 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           isHost={amIHost}
           onContinueWithout={amIHost ? continueWithout : undefined}
         />
+        <RoundEndModal
+          isOpen={status === 'ROUND_ENDED'}
+          winnerName={winnerName}
+          roundPoints={roundPoints}
+          standings={standings}
+          scoreLimit={settings.scoreLimit || 0}
+          isHost={amIHost}
+          onNextRound={amIHost ? initializeRound : undefined}
+        />
         <GameEndModal
           isOpen={status === 'ENDED' && winner !== null}
           isWinner={myClientId === winner}
           isWalkover={winType === 'WALKOVER'}
+          standings={settings.scoreLimit !== null ? standings : undefined}
+          isMultiRound={settings.scoreLimit !== null}
         />
 
       </div>

@@ -12,6 +12,8 @@ interface PlayerHandProps {
   hasCalledUno?: boolean;
   onCardClick?: (card: Card) => void;
   canPlayCard?: (card: Card) => boolean;
+  score?: number;
+  showScore?: boolean;
   className?: string;
 }
 
@@ -27,6 +29,8 @@ export const PlayerHand = ({
   hasCalledUno = false,
   onCardClick,
   canPlayCard,
+  score,
+  showScore = false,
   className
 }: PlayerHandProps) => {
   const cardCount = cards.length;
@@ -133,6 +137,13 @@ export const PlayerHand = ({
       {isMyTurn && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-yellow-400 text-sm font-bold uppercase tracking-widest animate-bounce">
           Your Turn!
+        </div>
+      )}
+
+      {/* Player score (multi-round games only) */}
+      {showScore && (
+        <div className="absolute -top-8 right-8 text-sm text-(--cream-dark) opacity-70 font-medium">
+          {score ?? 0} pts
         </div>
       )}
     </div>

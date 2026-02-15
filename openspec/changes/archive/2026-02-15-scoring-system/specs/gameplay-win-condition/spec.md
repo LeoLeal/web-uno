@@ -1,10 +1,4 @@
-# Spec: Gameplay Win Condition
-
-## Purpose
-
-Defines win detection mechanics in Uno - how the game detects when a player wins and transitions to an ended state.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Win by empty hand
 The system SHALL detect when a player empties their hand and either end the game (single-round) or end the round (multi-round).

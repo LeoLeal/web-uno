@@ -10,18 +10,23 @@ interface Opponent {
   cardCount: number;
   isHost: boolean;
   isDisconnected?: boolean;
+  score?: number;
 }
 
 interface OpponentRowProps {
   opponents: Opponent[];
   currentTurn: number | null;
+  scores?: Record<number, number>;
+  scoreLimit?: number | null;
   className?: string;
 }
 
 /**
  * Horizontal row of opponents positioned evenly at the top of the game area.
  */
-export const OpponentRow = ({ opponents, currentTurn, className }: OpponentRowProps) => {
+export const OpponentRow = ({ opponents, currentTurn, scores, scoreLimit, className }: OpponentRowProps) => {
+  const showScore = scoreLimit !== null && scoreLimit !== undefined;
+
   return (
     <div
       className={cn(
@@ -39,6 +44,8 @@ export const OpponentRow = ({ opponents, currentTurn, className }: OpponentRowPr
           isCurrentTurn={currentTurn === opponent.clientId}
           isHost={opponent.isHost}
           isDisconnected={opponent.isDisconnected}
+          score={scores?.[opponent.clientId]}
+          showScore={showScore}
         />
       ))}
     </div>
