@@ -8,6 +8,7 @@ import { StartGameButton } from './StartGameButton';
 import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
 import { GameSettingsPanel } from './GameSettingsPanel';
 import { DEFAULT_SETTINGS } from '@/lib/game/settings';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 
 // Mock HTMLDialogElement methods for jsdom
 beforeAll(() => {
@@ -130,7 +131,7 @@ describe('Lobby Components Accessibility', () => {
   describe('StartGameButton', () => {
     it('should have no accessibility violations when host', async () => {
       const { container } = render(
-        <StartGameButton isHost={true} playerCount={3} onStart={vi.fn()} />
+        <StartGameButton isHost={true} playerCount={MIN_PLAYERS} onStart={vi.fn()} />
       );
       const results = await axe(container);
       expect(results).toHaveNoViolations();
@@ -138,30 +139,49 @@ describe('Lobby Components Accessibility', () => {
 
     it('should have no accessibility violations when not host', async () => {
       const { container } = render(
-        <StartGameButton isHost={false} playerCount={3} onStart={vi.fn()} />
+        <StartGameButton isHost={false} playerCount={MIN_PLAYERS} onStart={vi.fn()} />
       );
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
     it('should have accessible button when enabled', () => {
-      render(<StartGameButton isHost={true} playerCount={3} onStart={vi.fn()} />);
+      render(<StartGameButton isHost={true} playerCount={MIN_PLAYERS} onStart={vi.fn()} />);
       
       const button = screen.getByRole('button', { name: /start game/i });
       expect(button).toBeEnabled();
     });
 
-    it('should indicate disabled state accessibly', () => {
-      render(<StartGameButton isHost={true} playerCount={2} onStart={vi.fn()} />);
+    it('should indicate disabled state accessibly when below minimum', () => {
+      render(<StartGameButton isHost={true} playerCount={MIN_PLAYERS - 1} onStart={vi.fn()} />);
       
       const button = screen.getByRole('button', { name: /waiting for players/i });
       expect(button).toBeDisabled();
     });
 
+    it('should indicate disabled state accessibly when above maximum', () => {
+      render(<StartGameButton isHost={true} playerCount={MAX_PLAYERS + 1} onStart={vi.fn()} />);
+      
+      const button = screen.getByRole('button', { name: /too many players/i });
+      expect(button).toBeDisabled();
+    });
+
     it('should show waiting message for non-hosts', () => {
-      render(<StartGameButton isHost={false} playerCount={3} onStart={vi.fn()} />);
+      render(<StartGameButton isHost={false} playerCount={MIN_PLAYERS} onStart={vi.fn()} />);
       
       expect(screen.getByText(/waiting for host to start/i)).toBeVisible();
+    });
+
+    it('should show correct message for minimum players', () => {
+      render(<StartGameButton isHost={true} playerCount={MIN_PLAYERS - 1} onStart={vi.fn()} />);
+      
+      expect(screen.getByText(new RegExp(`waiting for players.*${MIN_PLAYERS - 1}/${MIN_PLAYERS}`, 'i'))).toBeVisible();
+    });
+
+    it('should show correct message for maximum exceeded', () => {
+      render(<StartGameButton isHost={true} playerCount={MAX_PLAYERS + 1} onStart={vi.fn()} />);
+      
+      expect(screen.getByText(new RegExp(`too many players.*${MAX_PLAYERS + 1}/${MAX_PLAYERS}`, 'i'))).toBeVisible();
     });
   });
 
@@ -273,7 +293,7 @@ describe('Lobby Components Accessibility', () => {
 
     it('StartGameButton can be activated via keyboard', async () => {
       const onStart = vi.fn();
-      render(<StartGameButton isHost={true} playerCount={3} onStart={onStart} />);
+      render(<StartGameButton isHost={true} playerCount={MIN_PLAYERS} onStart={onStart} />);
       
       const button = screen.getByRole('button', { name: /start game/i });
       button.focus();

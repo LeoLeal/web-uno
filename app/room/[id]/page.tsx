@@ -2,7 +2,8 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { LogOut, Users } from 'lucide-react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSettings } from '@/hooks/useGameSettings';
@@ -11,6 +12,7 @@ import { useGameEngine } from '@/hooks/useGameEngine';
 import { useSessionResilience } from '@/hooks/useSessionResilience';
 import { useGamePlay } from '@/hooks/useGamePlay';
 import { CardColor } from '@/lib/game/cards';
+import { MAX_PLAYERS } from '@/lib/game/constants';
 import { PlayerList } from '@/components/lobby/PlayerList';
 import { JoinGameModal } from '@/components/modals/JoinGameModal';
 import { StartGameButton } from '@/components/lobby/StartGameButton';
@@ -26,9 +28,10 @@ import { formatRoomId } from '@/lib/room-code';
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
 
-  const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected } = useRoom(id);
-  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, winType, scores, lastRoundPoints, initGame } = useGameState();
+  const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected, isGameFull } = useRoom(id);
+  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, endType, scores, lastRoundPoints, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
@@ -64,6 +67,9 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
       initGame();
     }
   }, [isSynced, initGame]);
+
+  // Compute game full state declaratively
+  const showGameFullModal = isSynced && !hasJoined && status === 'LOBBY' && (players.length >= MAX_PLAYERS || isGameFull);
 
   const handleJoin = (name: string) => {
     updateMyState({ name, avatar: getAvatar(myClientId || 0) });
@@ -146,7 +152,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           {status === 'LOBBY' ? (
             <>
               <div className="mb-6 mt-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-(--cream)">Lobby <span className="text-(--cream-dark) opacity-60 text-sm ml-2">({players.length} Players)</span></h2>
+                <h2 className="text-xl font-bold text-(--cream)">Lobby <span className="text-(--cream-dark) opacity-60 text-sm ml-2 align-middle inline-flex items-center justify-center gap-1"><Users className="w-4 h-4" /> {players.length}/{MAX_PLAYERS} players</span></h2>
                 {amIHost && <span className="text-xs text-yellow-500 uppercase font-bold tracking-widest border border-yellow-500/30 px-2 py-1 rounded">You are Host</span>}
               </div>
               <PlayerList players={players} myClientId={myClientId} hostId={hostId} />
@@ -186,7 +192,31 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         )}
 
         {/* Modals */}
-        <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false} onJoin={handleJoin} />
+        <JoinGameModal isOpen={isSynced && !hasJoined && isHostConnected !== false && !showGameFullModal} onJoin={handleJoin} />
+        
+        {/* Game Full Modal - shown when room is at capacity */}
+        {showGameFullModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="panel-felt p-8 max-w-md mx-4 text-center">
+              <div className="text-6xl mb-4">🚫</div>
+              <h2 className="text-2xl font-bold text-(--cream) mb-2">
+                Game Full
+              </h2>
+              <p className="text-(--cream-dark) opacity-70 mb-2">
+                This game already has {MAX_PLAYERS} players.
+              </p>
+              <p className="text-(--cream-dark) opacity-50 text-sm mb-6">
+                Please create a new game or join a different room.
+              </p>
+              <button 
+                onClick={() => router.push('/')}
+                className="btn-copper"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        )}
         {isHostConnected === false && <HostDisconnectModal />}
         <GameAlreadyStartedModal isOpen={isLateJoiner} />
         <WaitingForPlayerModal
@@ -205,9 +235,9 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           onNextRound={amIHost ? initializeRound : undefined}
         />
         <GameEndModal
-          isOpen={status === 'ENDED' && winner !== null}
-          isWinner={myClientId === winner}
-          isWalkover={winType === 'WALKOVER'}
+          isOpen={status === 'ENDED'}
+          isWinner={winner !== null && myClientId === winner}
+          endType={endType}
           standings={settings.scoreLimit !== null ? standings : undefined}
           isMultiRound={settings.scoreLimit !== null}
         />

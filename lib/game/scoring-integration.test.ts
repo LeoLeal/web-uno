@@ -112,7 +112,7 @@ describe('Multi-Round Scoring Integration', () => {
       // Simulate win detection logic
       let finalStatus: GameStatus;
       let winner: number | null = null;
-      let winType: string | null = null;
+      let endType: string | null = null;
 
       if (playerHand.length === 0) {
         if (scoreLimit === null) {
@@ -121,7 +121,7 @@ describe('Multi-Round Scoring Integration', () => {
           // Multi-round mode
           if (newScore >= scoreLimit) {
             finalStatus = 'ENDED';
-            winType = 'LEGITIMATE';
+            endType = 'WIN';
           } else {
             finalStatus = 'ROUND_ENDED';
           }
@@ -133,7 +133,7 @@ describe('Multi-Round Scoring Integration', () => {
 
       expect(finalStatus).toBe('ENDED');
       expect(winner).toBe(1);
-      expect(winType).toBe('LEGITIMATE');
+      expect(endType).toBe('WIN');
       expect(roundPoints).toBe(50);
       expect(newScore).toBe(525);
       expect(newScore).toBeGreaterThanOrEqual(scoreLimit);

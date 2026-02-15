@@ -13,6 +13,7 @@ import { Card, isWildDrawFour, CardSymbol, PlayerAction, isWildCard } from '@/li
 import { createDeck, shuffle } from '@/lib/game/deck';
 import { Player } from '@/hooks/useRoom';
 import { calculateHandPoints } from '@/lib/game/scoring';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 import type * as Y from 'yjs';
 
 interface UseGameEngineOptions {
@@ -130,7 +131,12 @@ export const useGameEngine = ({
   }, []);
 
   const initializeGame = useCallback(() => {
-    if (!doc || !myClientId || players.length < 2) return;
+    if (!doc || !myClientId || players.length < MIN_PLAYERS) return;
+    
+    // Defensive check: log warning if MAX_PLAYERS exceeded
+    if (players.length > MAX_PLAYERS) {
+      console.warn(`Game has ${players.length} players, exceeding MAX_PLAYERS (${MAX_PLAYERS})`);
+    }
 
     // 1. Determine turn order from current player list order
     const turnOrder = players.map((p) => p.clientId);
@@ -200,7 +206,7 @@ export const useGameEngine = ({
     const lockedPlayers = (gameStateMap.get('lockedPlayers') as Array<{ clientId: number; name: string }>) || [];
     const currentRound = (gameStateMap.get('currentRound') as number) || 1;
 
-    if (turnOrder.length < 2 || lockedPlayers.length < 2) return;
+    if (turnOrder.length < MIN_PLAYERS || lockedPlayers.length < MIN_PLAYERS) return;
 
     // 2. Prepare deck and deal cards
     const { deck, hands, playerCardCounts, firstCard } = prepareDeckAndDeal(lockedPlayers);
@@ -376,7 +382,7 @@ export const useGameEngine = ({
                 // Single-round game: end immediately
                 gameStateMap.set('status', 'ENDED');
                 gameStateMap.set('winner', clientId);
-                gameStateMap.set('winType', 'LEGITIMATE');
+                gameStateMap.set('endType', 'WIN');
               } else {
                 // Multi-round game: calculate round score
                 let roundPoints = 0;
@@ -405,7 +411,7 @@ export const useGameEngine = ({
                 if (newScore >= scoreLimit) {
                   gameStateMap.set('status', 'ENDED');
                   gameStateMap.set('winner', clientId);
-                  gameStateMap.set('winType', 'LEGITIMATE');
+                gameStateMap.set('endType', 'WIN');
                 } else {
                   gameStateMap.set('status', 'ROUND_ENDED');
                   gameStateMap.set('winner', clientId);

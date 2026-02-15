@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { WebrtcProvider } from 'y-webrtc';
 import { useGame } from '@/components/providers/GameProvider';
+import { MAX_PLAYERS } from '@/lib/game/constants';
 
 export interface Player {
   clientId: number;
@@ -18,6 +19,7 @@ export const useRoom = (roomId: string) => {
   const [myClientId, setMyClientId] = useState<number | null>(null);
   const [hostId, setHostId] = useState<number | null>(null);
   const [isHostConnected, setIsHostConnected] = useState<boolean | null>(null);
+  const [isGameFull, setIsGameFull] = useState(false);
   const hasAttemptedClaim = useRef(false);
   const isExplicitCreator = useRef(false);
 
@@ -106,18 +108,80 @@ export const useRoom = (roomId: string) => {
     const handleAwarenessChange = () => {
       const states = awareness.getStates();
       const activePlayers: Player[] = [];
+      const status = gameState.get('status') as string | undefined;
+      const isLobby = status === 'LOBBY' || !status;
+      const isPausedWaiting = status === 'PAUSED_WAITING_PLAYER';
+      const isPlaying = status === 'PLAYING' || status === 'ROUND_ENDED' || status === 'ENDED';
+      const lockedPlayersList = (gameState.get('lockedPlayers') as Array<{ clientId: number; name: string }>) || [];
+      const lockedClientIds = new Set(lockedPlayersList.map(p => p.clientId));
+      let myStateWasRejected = false;
 
-      states.forEach((state, clientId) => {
+      // Convert states to array to maintain insertion order
+      const stateEntries = Array.from(states.entries());
+      
+      stateEntries.forEach(([clientId, state]) => {
         if (state.user) {
-          activePlayers.push({
-            clientId,
-            name: state.user.name || `Player ${clientId}`,
-            isHost: state.user.isHost || false,
-            color: state.user.color,
-            avatar: state.user.avatar,
-          });
+          // During gameplay, only allow locked players (no new joins)
+          if (isPlaying && !lockedClientIds.has(clientId)) {
+            console.log(`Rejecting player ${clientId}: new joins not allowed during ${status}`);
+            if (clientId === myId) {
+              myStateWasRejected = true;
+            }
+            return;
+          }
+
+          // Check if we're at capacity (only relevant in lobby or paused)
+          const currentPlayerCount = activePlayers.length;
+          const wouldExceedMax = currentPlayerCount >= MAX_PLAYERS;
+          
+          // Allow if:
+          // 1. In lobby and not at capacity
+          // 2. Paused waiting for replacements (to fill orphan hands)
+          if (isLobby && !wouldExceedMax) {
+            activePlayers.push({
+              clientId,
+              name: state.user.name || `Player ${clientId}`,
+              isHost: state.user.isHost || false,
+              color: state.user.color,
+              avatar: state.user.avatar,
+            });
+          } else if (isPausedWaiting) {
+            // During pause, allow if not at capacity OR if replacing an orphan
+            activePlayers.push({
+              clientId,
+              name: state.user.name || `Player ${clientId}`,
+              isHost: state.user.isHost || false,
+              color: state.user.color,
+              avatar: state.user.avatar,
+            });
+          } else if (isPlaying && lockedClientIds.has(clientId)) {
+            // During gameplay, only existing locked players
+            activePlayers.push({
+              clientId,
+              name: state.user.name || `Player ${clientId}`,
+              isHost: state.user.isHost || false,
+              color: state.user.color,
+              avatar: state.user.avatar,
+            });
+          } else if (!isPlaying && !isLobby && !isPausedWaiting) {
+            // Unknown state - reject to be safe
+            console.log(`Rejecting player ${clientId}: unknown game status ${status}`);
+            if (clientId === myId) {
+              myStateWasRejected = true;
+            }
+          } else {
+            console.log(`Rejecting player ${clientId}: game at capacity (${MAX_PLAYERS}/${MAX_PLAYERS}) or invalid state`);
+            if (clientId === myId) {
+              myStateWasRejected = true;
+            }
+          }
         }
       });
+
+      // If we were rejected, mark game as full
+      if (myStateWasRejected) {
+        setIsGameFull(true);
+      }
 
       // Sort: Host first, then alphabetically by name
       const currentHostId = gameState.get('hostId') as number | null;
@@ -216,6 +280,7 @@ export const useRoom = (roomId: string) => {
     hostId,
     amIHost,
     isHostConnected,
+    isGameFull,
     updateMyState 
   };
 };

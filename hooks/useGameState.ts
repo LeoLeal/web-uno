@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
+import { EndType } from '@/lib/game/constants';
 
 export type GameStatus = 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ROUND_ENDED' | 'ENDED';
-export type WinType = 'LEGITIMATE' | 'WALKOVER';
+export type { EndType };
 
 export interface LockedPlayer {
   clientId: number;
@@ -27,7 +28,7 @@ export const useGameState = () => {
   const [lockedPlayers, setLockedPlayers] = useState<LockedPlayer[]>([]);
   const [orphanHands, setOrphanHands] = useState<OrphanHand[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
-  const [winType, setWinType] = useState<WinType | null>(null);
+  const [endType, setEndType] = useState<EndType | null>(null);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [lastRoundPoints, setLastRoundPoints] = useState<number>(0);
@@ -73,8 +74,8 @@ export const useGameState = () => {
       const gameWinner = gameStateMap.get('winner') as number | undefined;
       setWinner(gameWinner ?? null);
 
-      const gameWinType = gameStateMap.get('winType') as WinType | undefined;
-      setWinType(gameWinType ?? null);
+      const gameEndType = gameStateMap.get('endType') as EndType | undefined;
+      setEndType(gameEndType ?? null);
 
       const gameScores = gameStateMap.get('scores') as Record<number, number> | undefined;
       setScores(gameScores ?? {});
@@ -122,7 +123,7 @@ export const useGameState = () => {
     lockedPlayers,
     orphanHands,
     winner,
-    winType,
+    endType,
     scores,
     currentRound,
     lastRoundPoints,

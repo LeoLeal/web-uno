@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { LockedPlayer, OrphanHand } from './useGameState';
 import { Card } from '@/lib/game/cards';
+import { MIN_PLAYERS } from '@/lib/game/constants';
 
 /**
  * Tests for session resilience logic patterns.
  * Tests the core logic for disconnect detection, orphan management,
- * and walkover scenarios without complex React/Yjs mocking.
+ * and insufficient players scenarios without complex React/Yjs mocking.
  */
 
 describe('Session Resilience Logic', () => {
@@ -329,7 +330,7 @@ describe('Session Resilience Logic', () => {
       expect(closest.orphan.originalClientId).toBe(2);
     });
 
-    it('should NOT auto-trigger walkover on disconnect', () => {
+    it('should NOT auto-trigger game end on disconnect (waits for host action)', () => {
       const lockedPlayers: LockedPlayer[] = [
         { clientId: 1, name: 'Host' },
         { clientId: 2, name: 'Alice' },
@@ -347,8 +348,9 @@ describe('Session Resilience Logic', () => {
 
       expect(totalOrphans).toBe(2);
       expect(remainingPlayers).toBe(1);
-      // Even though only 1 player remains, walkover should NOT auto-trigger
-      // It should only trigger when host explicitly uses "Continue without"
+      // Even though only 1 player remains, game should NOT auto-end
+      // It should only end when host explicitly uses "Continue without"
+      // and that would drop below MIN_PLAYERS
     });
   });
 
@@ -413,56 +415,79 @@ describe('Session Resilience Logic', () => {
     });
   });
 
-  describe('Walkover Detection (via Continue Without)', () => {
-    it('should detect walkover condition when only one player would remain', () => {
-      const lockedPlayers: LockedPlayer[] = [
-        { clientId: 1, name: 'Winner' },
-        { clientId: 2, name: 'Disconnected1' },
-        { clientId: 3, name: 'Disconnected2' },
+  describe('Insufficient Players Detection (via Continue Without)', () => {
+    it(`should detect insufficient players when fewer than ${MIN_PLAYERS} would remain`, () => {
+      const _lockedPlayers: LockedPlayer[] = [
+        { clientId: 1, name: 'Host' },
+        { clientId: 2, name: 'Alice' },
+        { clientId: 3, name: 'Bob' },
       ];
 
-      const disconnectedIds = [2, 3];
-      const remainingCount = lockedPlayers.length - disconnectedIds.length;
+      const updatedLockedPlayers = [{ clientId: 1, name: 'Host' }];
 
-      expect(remainingCount).toBe(1);
-      expect(remainingCount <= 1).toBe(true);
+      expect(updatedLockedPlayers.length < MIN_PLAYERS).toBe(true);
     });
 
-    it('should identify the winner after continue-without removes all others', () => {
-      const lockedPlayers: LockedPlayer[] = [
-        { clientId: 1, name: 'Winner' },
-        { clientId: 2, name: 'Disconnected' },
-      ];
-
-      // After host clicks "Continue without" for player 2
-      const updatedLockedPlayers = lockedPlayers.filter((p) => p.clientId !== 2);
-      const winner = updatedLockedPlayers[0];
-
-      expect(winner).toBeDefined();
-      expect(winner?.clientId).toBe(1);
-      expect(winner?.name).toBe('Winner');
-    });
-
-    it('should set status to ENDED when continue-without leaves one player', () => {
+    it(`should end game when continue-without leaves fewer than ${MIN_PLAYERS} players`, () => {
       let status: 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED' = 'PAUSED_WAITING_PLAYER';
-      const updatedLockedPlayers = [{ clientId: 1, name: 'Winner' }];
+      const updatedLockedPlayers = [{ clientId: 1, name: 'Host' }];
 
-      // After removing disconnected player via continue-without
-      if (updatedLockedPlayers.length <= 1) {
+      // After removing disconnected players via continue-without
+      if (updatedLockedPlayers.length < MIN_PLAYERS) {
         status = 'ENDED';
       }
 
       expect(status).toBe('ENDED');
     });
 
-    it('should store winner clientId when walkover triggered by continue-without', () => {
+    it('should set endType to INSUFFICIENT_PLAYERS when game ends due to player count', () => {
+      let endType: 'WIN' | 'INSUFFICIENT_PLAYERS' | null = null;
       let winner: number | null = null;
-      const updatedLockedPlayers = [{ clientId: 42, name: 'LastStanding' }];
+      const updatedLockedPlayers = [{ clientId: 1, name: 'Host' }];
 
-      // After all others removed via continue-without
-      winner = updatedLockedPlayers[0]?.clientId ?? null;
+      // After removing players would drop below minimum
+      if (updatedLockedPlayers.length < MIN_PLAYERS) {
+        endType = 'INSUFFICIENT_PLAYERS';
+        winner = null; // No winner when insufficient players
+      }
 
-      expect(winner).toBe(42);
+      expect(endType).toBe('INSUFFICIENT_PLAYERS');
+      expect(winner).toBeNull();
+    });
+
+    it('should NOT end game when sufficient players remain after removal', () => {
+      let status: 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED' = 'PAUSED_WAITING_PLAYER';
+      // 4 players, remove 1 = 3 remaining (minimum)
+      const lockedPlayers: LockedPlayer[] = [
+        { clientId: 1, name: 'Host' },
+        { clientId: 2, name: 'Alice' },
+        { clientId: 3, name: 'Bob' },
+        { clientId: 4, name: 'Charlie' },
+      ];
+      const updatedLockedPlayers = lockedPlayers.filter((p) => p.clientId !== 4);
+
+      // After removing one player
+      if (updatedLockedPlayers.length < MIN_PLAYERS) {
+        status = 'ENDED';
+      } else {
+        // Resume game if all orphans resolved
+        status = 'PLAYING';
+      }
+
+      expect(updatedLockedPlayers.length).toBe(MIN_PLAYERS);
+      expect(status).toBe('PLAYING');
+    });
+  });
+
+  describe('Minimum Players Boundary', () => {
+    it(`should not allow game to continue with ${MIN_PLAYERS - 1} players`, () => {
+      const remainingPlayers = MIN_PLAYERS - 1;
+      expect(remainingPlayers < MIN_PLAYERS).toBe(true);
+    });
+
+    it(`should allow game to continue with exactly ${MIN_PLAYERS} players`, () => {
+      const remainingPlayers = MIN_PLAYERS;
+      expect(remainingPlayers >= MIN_PLAYERS).toBe(true);
     });
   });
 });

@@ -29,10 +29,6 @@ The system SHALL skip the next player's turn when a Skip card is played.
 - **THEN** the turn advances past the next player in the current direction
 - **AND** the skipped player does not get to act
 
-#### Scenario: Skip in two-player game
-- **WHEN** a player plays a Skip card in a two-player game
-- **THEN** the playing player effectively gets another turn
-
 ### Requirement: Reverse card effect on turns
 The system SHALL reverse the play direction when a Reverse card is played.
 
@@ -40,11 +36,6 @@ The system SHALL reverse the play direction when a Reverse card is played.
 - **WHEN** a player plays a Reverse card
 - **THEN** the direction changes from `1` to `-1` or from `-1` to `1`
 - **AND** the turn advances one position in the new direction
-
-#### Scenario: Reverse in two-player game
-- **WHEN** a player plays a Reverse card in a two-player game
-- **THEN** the Reverse acts as a Skip (the playing player effectively gets another turn)
-- **AND** the direction still flips
 
 ### Requirement: Draw Two effect on turns
 The system SHALL skip the next player's turn when a Draw Two is played.

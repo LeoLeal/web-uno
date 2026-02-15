@@ -1,5 +1,6 @@
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 
 interface StartGameButtonProps {
   isHost: boolean;
@@ -16,7 +17,18 @@ export const StartGameButton = ({ isHost, playerCount, onStart }: StartGameButto
     );
   }
 
-  const canStart = playerCount >= 3;
+  const canStart = playerCount >= MIN_PLAYERS && playerCount <= MAX_PLAYERS;
+  const tooManyPlayers = playerCount > MAX_PLAYERS;
+
+  const getButtonText = () => {
+    if (tooManyPlayers) {
+      return `Too many players (${playerCount}/${MAX_PLAYERS} max)`;
+    }
+    if (playerCount < MIN_PLAYERS) {
+      return `Waiting for players (${playerCount}/${MIN_PLAYERS})`;
+    }
+    return "Start Game";
+  };
 
   return (
     <button
@@ -28,7 +40,7 @@ export const StartGameButton = ({ isHost, playerCount, onStart }: StartGameButto
       )}
     >
       <Play className="w-5 h-5 fill-current" />
-      {canStart ? "Start Game" : `Waiting for players (${playerCount}/3)`}
+      {getButtonText()}
     </button>
   );
 };

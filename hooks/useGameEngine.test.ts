@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createDeck, shuffle } from '@/lib/game/deck';
 import { Card, isWildDrawFour } from '@/lib/game/cards';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 
 /**
  * Tests for game engine logic (deck dealing, turn order, etc.)
@@ -265,6 +266,84 @@ describe('Game Engine Logic', () => {
       );
 
       expect(isLateJoiner).toBe(false);
+    });
+  });
+
+  describe('Player Limits', () => {
+    it(`should require at least ${MIN_PLAYERS} players to initialize`, () => {
+      const players = [
+        { clientId: 1, name: 'Host' },
+        { clientId: 2, name: 'Alice' },
+      ];
+
+      // Below minimum - should not initialize
+      expect(players.length < MIN_PLAYERS).toBe(true);
+    });
+
+    it(`should allow game with ${MIN_PLAYERS} players`, () => {
+      const players = [
+        { clientId: 1, name: 'Host' },
+        { clientId: 2, name: 'Alice' },
+        { clientId: 3, name: 'Bob' },
+      ];
+
+      expect(players.length >= MIN_PLAYERS && players.length <= MAX_PLAYERS).toBe(true);
+    });
+
+    it(`should allow game with up to ${MAX_PLAYERS} players`, () => {
+      const players = Array.from({ length: MAX_PLAYERS }, (_, i) => ({
+        clientId: i + 1,
+        name: `Player ${i + 1}`,
+      }));
+
+      expect(players.length <= MAX_PLAYERS).toBe(true);
+    });
+
+    it(`should reject more than ${MAX_PLAYERS} players`, () => {
+      const players = Array.from({ length: MAX_PLAYERS + 1 }, (_, i) => ({
+        clientId: i + 1,
+        name: `Player ${i + 1}`,
+      }));
+
+      expect(players.length > MAX_PLAYERS).toBe(true);
+    });
+
+    it('should deal correct cards for minimum players', () => {
+      const deck = createDeck();
+      const playerIds = Array.from({ length: MIN_PLAYERS }, (_, i) => i + 1);
+      const handSize = 7;
+      const hands: Record<number, Card[]> = {};
+
+      for (const playerId of playerIds) {
+        hands[playerId] = deck.splice(0, handSize);
+      }
+
+      // All players get correct hand size
+      for (const playerId of playerIds) {
+        expect(hands[playerId]).toHaveLength(handSize);
+      }
+
+      // Remaining deck should be 108 - (3 * 7) = 87
+      expect(deck).toHaveLength(108 - MIN_PLAYERS * handSize);
+    });
+
+    it('should deal correct cards for maximum players', () => {
+      const deck = createDeck();
+      const playerIds = Array.from({ length: MAX_PLAYERS }, (_, i) => i + 1);
+      const handSize = 7;
+      const hands: Record<number, Card[]> = {};
+
+      for (const playerId of playerIds) {
+        hands[playerId] = deck.splice(0, handSize);
+      }
+
+      // All players get correct hand size
+      for (const playerId of playerIds) {
+        expect(hands[playerId]).toHaveLength(handSize);
+      }
+
+      // Remaining deck should be 108 - (10 * 7) = 38
+      expect(deck).toHaveLength(108 - MAX_PLAYERS * handSize);
     });
   });
 });

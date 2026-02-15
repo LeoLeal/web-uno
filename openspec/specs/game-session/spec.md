@@ -96,7 +96,7 @@ The system SHALL store disconnected players' hands as orphan hands in the Yjs `g
 
 ### Requirement: Player Replacement via Hand Handover
 
-The system SHALL allow a new player joining during a pause to receive an orphaned hand, matched by name similarity. In multi-round games, the replacement player also inherits the original player's cumulative score.
+The system SHALL allow a new player joining during a pause to receive an orphaned hand, matched by name similarity. In multi-round games, the replacement player also inherits the original player's cumulative score. Replacement players bypass the MAX_PLAYERS limit because they fill existing orphan slots rather than adding new capacity.
 
 #### Scenario: Replacement player joins during pause
 - **WHEN** a new player joins the room while status is `PAUSED_WAITING_PLAYER`
@@ -106,6 +106,7 @@ The system SHALL allow a new player joining during a pause to receive an orphane
 - **AND** the new player is added to `lockedPlayers` replacing the original player
 - **AND** `turnOrder` is updated to replace the original clientId with the new clientId
 - **AND** the orphan entry is removed from `orphanHands`
+- **AND** this bypasses MAX_PLAYERS validation (filling an orphan slot, not adding capacity)
 
 #### Scenario: Replacement player inherits cumulative score
 - **WHEN** a replacement player takes over an orphaned seat in a multi-round game
@@ -128,7 +129,7 @@ The system SHALL allow a new player joining during a pause to receive an orphane
 
 ### Requirement: Host Continue Without Player
 
-The system SHALL allow the host to remove a disconnected player and continue the game without them.
+The system SHALL allow the host to remove a disconnected player and continue the game without them. If removing a player would result in fewer than MIN_PLAYERS remaining, the game SHALL end instead with an appropriate message.
 
 #### Scenario: Host removes disconnected player
 
@@ -145,30 +146,17 @@ The system SHALL allow the host to remove a disconnected player and continue the
 
 #### Scenario: All orphans resolved via removal
 - **WHEN** the last orphan hand is removed (not replaced)
-- **AND** more than one player remains
+- **AND** at least MIN_PLAYERS remain
 - **THEN** the host sets `gameState.status` to the value stored in `gameStateMap.statusBeforePause`
 - **AND** `gameStateMap.statusBeforePause` is set to `null`
 
-### Requirement: Win by Walkover
+#### Scenario: Removal results in insufficient players
 
-The system SHALL declare a winner by walkover only when the host explicitly removes all opponents via "Continue without". Disconnections alone SHALL pause the game, never auto-end it.
+- **WHEN** the host removes a disconnected player via "Continue without"
+- **AND** fewer than MIN_PLAYERS would remain after removal
+- **THEN** the game ends immediately
+- **AND** `gameState.status` is set to `ENDED`
+- **AND** `gameState.endType` is set to "INSUFFICIENT_PLAYERS"
+- **AND** `gameState.winner` is set to `null` (no winner)
+- **AND** all players see a "Not enough players to continue" message
 
-#### Scenario: Walkover via host removal
-- **WHEN** the host removes disconnected players via "Continue without"
-- **AND** only one player remains after removal
-- **THEN** the host sets `gameState.status` to `ENDED`
-- **AND** the remaining player is recorded as the winner
-- **AND** a walkover victory is indicated
-
-#### Scenario: Walkover in multi-round game
-- **WHEN** a walkover occurs during a multi-round game
-- **THEN** the game status is set to `ENDED` (not `ROUND_ENDED`)
-- **AND** the game is over regardless of current scores
-
-#### Scenario: All opponents disconnect (no auto-walkover)
-
-- **WHEN** all locked players except one have disconnected
-- **THEN** the game remains in `PAUSED_WAITING_PLAYER` status
-- **AND** the host sees "Continue without" buttons for each disconnected player
-- **AND** disconnected players may still rejoin and reclaim their hands
-- **AND** walkover is NOT automatically triggered

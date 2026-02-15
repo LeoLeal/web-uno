@@ -5,89 +5,84 @@ import { GameEndModal } from './GameEndModal';
 describe('GameEndModal', () => {
   describe('Basic Rendering', () => {
     it('should render when open', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByText(/You Win/i)).toBeInTheDocument();
     });
 
     it('should not render when closed', () => {
-      render(<GameEndModal isOpen={false} isWinner={true} />);
+      render(<GameEndModal isOpen={false} isWinner={true} endType="WIN" />);
       expect(screen.queryByText(/You Win/i)).not.toBeInTheDocument();
     });
   });
 
   describe('Single-round game (victory)', () => {
     it('should show winner title', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByText('You Win! 🎉')).toBeInTheDocument();
     });
 
     it('should show winner trophy', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByText('🏆')).toBeInTheDocument();
     });
 
     it('should show congratulations message', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByText(/got rid of all your cards/i)).toBeInTheDocument();
     });
 
     it('should show celebration note', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByText(/Well played/i)).toBeInTheDocument();
     });
 
     it('should show back to lobby button', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} />);
+      render(<GameEndModal isOpen={true} isWinner={true} endType="WIN" />);
       expect(screen.getByRole('link', { name: /Back to Lobby/i })).toBeInTheDocument();
     });
   });
 
   describe('Single-round game (loss)', () => {
     it('should show game over title', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} />);
+      render(<GameEndModal isOpen={true} isWinner={false} endType="WIN" />);
       expect(screen.getByText('Game Over')).toBeInTheDocument();
     });
 
     it('should show sad face', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} />);
+      render(<GameEndModal isOpen={true} isWinner={false} endType="WIN" />);
       expect(screen.getByText('😔')).toBeInTheDocument();
     });
 
     it('should show better luck message', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} />);
+      render(<GameEndModal isOpen={true} isWinner={false} endType="WIN" />);
       expect(screen.getByText(/Better luck next time/i)).toBeInTheDocument();
     });
 
     it('should not show celebration note', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} />);
+      render(<GameEndModal isOpen={true} isWinner={false} endType="WIN" />);
       expect(screen.queryByText(/Well played/i)).not.toBeInTheDocument();
     });
   });
 
-  describe('Walkover (single-round)', () => {
-    it('should show walkover title when winner', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} isWalkover={true} />);
-      expect(screen.getByText('Victory by Walkover!')).toBeInTheDocument();
-    });
-
-    it('should show walkover message when winner', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} isWalkover={true} />);
-      expect(screen.getByText(/All other players disconnected/i)).toBeInTheDocument();
-    });
-
-    it('should show walkover title when not winner', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} isWalkover={true} />);
+  describe('Insufficient players (game abandoned)', () => {
+    it('should show game ended title', () => {
+      render(<GameEndModal isOpen={true} isWinner={false} endType="INSUFFICIENT_PLAYERS" />);
       expect(screen.getByText('Game Ended')).toBeInTheDocument();
     });
 
-    it('should show appropriate message for non-winner walkover', () => {
-      render(<GameEndModal isOpen={true} isWinner={false} isWalkover={true} />);
-      expect(screen.getByText(/All players disconnected/i)).toBeInTheDocument();
+    it('should show insufficient players message', () => {
+      render(<GameEndModal isOpen={true} isWinner={false} endType="INSUFFICIENT_PLAYERS" />);
+      expect(screen.getByText(/Not enough players to continue/i)).toBeInTheDocument();
     });
 
-    it('should show walkover note when winner', () => {
-      render(<GameEndModal isOpen={true} isWinner={true} isWalkover={true} />);
-      expect(screen.getByText(/Not the most exciting win/i)).toBeInTheDocument();
+    it('should show explanation note', () => {
+      render(<GameEndModal isOpen={true} isWinner={false} endType="INSUFFICIENT_PLAYERS" />);
+      expect(screen.getByText(/Too many players disconnected/i)).toBeInTheDocument();
+    });
+
+    it('should show back to lobby button', () => {
+      render(<GameEndModal isOpen={true} isWinner={false} endType="INSUFFICIENT_PLAYERS" />);
+      expect(screen.getByRole('link', { name: /Back to Lobby/i })).toBeInTheDocument();
     });
   });
 
@@ -103,6 +98,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -115,6 +111,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -129,6 +126,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -143,6 +141,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -155,6 +154,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={false}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -167,6 +167,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={standings}
         />
@@ -184,6 +185,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={twoPlayerStandings}
         />
@@ -206,6 +208,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={false}
+          endType="WIN"
           isMultiRound={true}
           standings={manyPlayerStandings}
         />
@@ -216,77 +219,13 @@ describe('GameEndModal', () => {
     });
   });
 
-  describe('Multi-round game with walkover', () => {
-    const standings = [
-      { clientId: 1, name: 'Alice', score: 350 },
-      { clientId: 2, name: 'Bob', score: 200 },
-    ];
-
-    it('should show final standings with walkover note', () => {
-      render(
-        <GameEndModal
-          isOpen={true}
-          isWinner={true}
-          isMultiRound={true}
-          isWalkover={true}
-          standings={standings}
-        />
-      );
-
-      expect(screen.getByText('Final Standings')).toBeInTheDocument();
-      expect(screen.getByText(/Game ended early due to walkover/i)).toBeInTheDocument();
-    });
-
-    it('should show current scores even though game ended early', () => {
-      render(
-        <GameEndModal
-          isOpen={true}
-          isWinner={true}
-          isMultiRound={true}
-          isWalkover={true}
-          standings={standings}
-        />
-      );
-
-      expect(screen.getByText('350 pts')).toBeInTheDocument();
-      expect(screen.getByText('200 pts')).toBeInTheDocument();
-    });
-
-    it('should show walkover title', () => {
-      render(
-        <GameEndModal
-          isOpen={true}
-          isWinner={true}
-          isMultiRound={true}
-          isWalkover={true}
-          standings={standings}
-        />
-      );
-
-      expect(screen.getByText('Victory by Walkover!')).toBeInTheDocument();
-    });
-
-    it('should show walkover message', () => {
-      render(
-        <GameEndModal
-          isOpen={true}
-          isWinner={true}
-          isMultiRound={true}
-          isWalkover={true}
-          standings={standings}
-        />
-      );
-
-      expect(screen.getByText(/All other players disconnected/i)).toBeInTheDocument();
-    });
-  });
-
   describe('Edge cases', () => {
     it('should handle empty standings array', () => {
       render(
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={[]}
         />
@@ -301,6 +240,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
         />
       );
@@ -318,6 +258,7 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={singleStanding}
         />
@@ -337,12 +278,18 @@ describe('GameEndModal', () => {
         <GameEndModal
           isOpen={true}
           isWinner={true}
+          endType="WIN"
           isMultiRound={true}
           standings={zeroScores}
         />
       );
 
       expect(screen.getAllByText('0 pts')).toHaveLength(2);
+    });
+
+    it('should handle null endType (defaults to WIN view)', () => {
+      render(<GameEndModal isOpen={true} isWinner={true} endType={null} />);
+      expect(screen.getByText('You Win! 🎉')).toBeInTheDocument();
     });
   });
 });

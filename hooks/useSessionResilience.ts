@@ -9,6 +9,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
 import { GameStatus, LockedPlayer, OrphanHand } from '@/hooks/useGameState';
+import { MIN_PLAYERS, EndType } from '@/lib/game/constants';
 
 interface UseSessionResilienceOptions {
   /** Current game status */
@@ -376,12 +377,12 @@ export const useSessionResilience = ({
         console.log('Turn advanced to:', nextTurn);
       }
 
-      // Check for walkover
-      if (updatedLockedPlayers.length <= 1) {
+      // Check if removal results in insufficient players
+      if (updatedLockedPlayers.length < MIN_PLAYERS) {
         gameStateMap.set('status', 'ENDED');
-        gameStateMap.set('winner', updatedLockedPlayers[0]?.clientId ?? null);
-        gameStateMap.set('winType', 'WALKOVER');
-        console.log('Walkover win after removal:', updatedLockedPlayers[0]?.name);
+        gameStateMap.set('winner', null);
+        gameStateMap.set('endType', 'INSUFFICIENT_PLAYERS' as EndType);
+        console.log('Game ended: insufficient players after removal');
       } else if (updatedOrphans.length === 0) {
         // All orphans resolved, resume game
         const statusBefore = gameStateMap.get('statusBeforePause') as GameStatus | null;

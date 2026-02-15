@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { EndType } from '@/lib/game/constants';
 
 interface PlayerStanding {
   clientId: number;
@@ -13,8 +14,8 @@ interface GameEndModalProps {
   isOpen: boolean;
   /** Whether the current user is the winner */
   isWinner: boolean;
-  /** Whether the win was by walkover (all others disconnected) */
-  isWalkover?: boolean;
+  /** The type of game end (WIN or INSUFFICIENT_PLAYERS) */
+  endType: EndType | null;
   /** Final standings for multi-round games (sorted by score descending) */
   standings?: PlayerStanding[];
   /** Whether this is a multi-round game */
@@ -22,39 +23,70 @@ interface GameEndModalProps {
 }
 
 /**
- * Modal shown when the game ends - either by legitimate win or walkover.
+ * Modal shown when the game ends - either by win or insufficient players.
  */
 export const GameEndModal = ({
   isOpen,
   isWinner,
-  isWalkover = false,
+  endType,
   standings,
   isMultiRound = false,
 }: GameEndModalProps) => {
   if (!isOpen) return null;
 
+  // Handle insufficient players (game abandoned)
+  if (endType === 'INSUFFICIENT_PLAYERS') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="panel-felt p-8 max-w-md mx-4 text-center">
+          {/* Icon */}
+          <div className="text-6xl mb-4">👥</div>
+
+          {/* Title */}
+          <h2 className="text-2xl font-bold text-(--cream) mb-2">
+            Game Ended
+          </h2>
+
+          {/* Message */}
+          <p className="text-(--cream-dark) opacity-70 mb-6">
+            Not enough players to continue
+          </p>
+
+          {/* Note */}
+          <div className="mb-6 p-4 bg-(--felt-dark) border border-(--copper-border) rounded-lg">
+            <p className="text-sm text-(--cream-dark) opacity-60">
+              Too many players disconnected. The game cannot continue with fewer than 3 players.
+            </p>
+          </div>
+
+          {/* Back to lobby button */}
+          <Link href="/" className="btn-copper">
+            ← Back to Lobby
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle normal win
   const getTitle = () => {
     if (isWinner) {
-      return isWalkover ? 'Victory by Walkover!' : 'You Win! 🎉';
+      return 'You Win! 🎉';
     }
-    return isWalkover ? 'Game Ended' : 'Game Over';
+    return 'Game Over';
   };
 
   const getMessage = () => {
-    if (isMultiRound && !isWalkover) {
+    if (isMultiRound) {
       if (isWinner) {
         return 'You reached the score limit first!';
       }
       return 'Someone reached the score limit!';
     }
     if (isWinner) {
-      return isWalkover
-        ? 'All other players disconnected. You win by default!'
-        : 'Congratulations! You got rid of all your cards!';
+      return 'Congratulations! You got rid of all your cards!';
     }
-    return isWalkover
-      ? 'All players disconnected. The game has ended.'
-      : 'Better luck next time!';
+    return 'Better luck next time!';
   };
 
   return (
@@ -75,13 +107,11 @@ export const GameEndModal = ({
           {getMessage()}
         </p>
 
-        {/* Celebration or note */}
+        {/* Celebration */}
         {isWinner && !isMultiRound && (
           <div className="mb-6 p-4 bg-(--felt-dark) border border-(--copper-border) rounded-lg">
             <p className="text-sm text-(--cream-dark) opacity-60">
-              {isWalkover
-                ? 'Not the most exciting win, but a win is a win! 🎉'
-                : 'Well played! 🎊'}
+              Well played! 🎊
             </p>
           </div>
         )}
@@ -107,21 +137,11 @@ export const GameEndModal = ({
                 </div>
               ))}
             </div>
-            {isWalkover && (
-              <div className="mt-3 pt-3 border-t border-(--copper-border)">
-                <p className="text-xs text-(--cream-dark) opacity-60">
-                  Game ended early due to walkover
-                </p>
-              </div>
-            )}
           </div>
         )}
 
         {/* Back to lobby button */}
-        <Link
-          href="/"
-          className="btn-copper"
-        >
+        <Link href="/" className="btn-copper">
           ← Back to Lobby
         </Link>
       </div>
