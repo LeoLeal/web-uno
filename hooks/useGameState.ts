@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
 import { Card } from '@/lib/game/cards';
 
-export type GameStatus = 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ENDED';
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'PAUSED_WAITING_PLAYER' | 'ROUND_ENDED' | 'ENDED';
 export type WinType = 'LEGITIMATE' | 'WALKOVER';
 
 export interface LockedPlayer {
@@ -28,6 +28,10 @@ export const useGameState = () => {
   const [orphanHands, setOrphanHands] = useState<OrphanHand[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
   const [winType, setWinType] = useState<WinType | null>(null);
+  const [scores, setScores] = useState<Record<number, number>>({});
+  const [currentRound, setCurrentRound] = useState<number>(0);
+  const [lastRoundPoints, setLastRoundPoints] = useState<number>(0);
+  const [statusBeforePause, setStatusBeforePause] = useState<GameStatus | null>(null);
 
   useEffect(() => {
     if (!doc) return;
@@ -71,6 +75,18 @@ export const useGameState = () => {
 
       const gameWinType = gameStateMap.get('winType') as WinType | undefined;
       setWinType(gameWinType ?? null);
+
+      const gameScores = gameStateMap.get('scores') as Record<number, number> | undefined;
+      setScores(gameScores ?? {});
+
+      const round = gameStateMap.get('currentRound') as number | undefined;
+      setCurrentRound(round ?? 0);
+
+      const lrp = gameStateMap.get('lastRoundPoints') as number | undefined;
+      setLastRoundPoints(lrp ?? 0);
+
+      const statusBefore = gameStateMap.get('statusBeforePause') as GameStatus | null | undefined;
+      setStatusBeforePause(statusBefore ?? null);
     };
 
     gameStateMap.observe(handleChange);
@@ -107,6 +123,10 @@ export const useGameState = () => {
     orphanHands,
     winner,
     winType,
+    scores,
+    currentRound,
+    lastRoundPoints,
+    statusBeforePause,
     startGame,
     initGame,
   };

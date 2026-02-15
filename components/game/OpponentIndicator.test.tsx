@@ -197,4 +197,83 @@ describe('OpponentIndicator', () => {
       expect(screen.getByText('UNO!')).toBeInTheDocument();
     });
   });
+
+  describe('Score Display (Multi-round)', () => {
+    it('should show score when showScore is true (multi-round game)', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={150}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('150 pts')).toBeInTheDocument();
+    });
+
+    it('should not show score when showScore is false (single-round game)', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={150}
+          showScore={false}
+        />
+      );
+
+      expect(screen.queryByText('150 pts')).not.toBeInTheDocument();
+    });
+
+    it('should show score of 0 in multi-round game', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={0}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('0 pts')).toBeInTheDocument();
+    });
+
+    it('should show high score values correctly', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={999}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('999 pts')).toBeInTheDocument();
+    });
+
+    it('should not show score when showScore is false even if score is provided', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={500}
+          showScore={false}
+        />
+      );
+
+      expect(screen.queryByText(/pts/)).not.toBeInTheDocument();
+    });
+
+    it('should show score with all other indicators (turn, host, disconnected)', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          score={250}
+          showScore={true}
+          isCurrentTurn={true}
+          isHost={true}
+          isDisconnected={true}
+        />
+      );
+
+      expect(screen.getByText('250 pts')).toBeInTheDocument();
+      expect(screen.getByText('👑')).toBeInTheDocument();
+      expect(screen.getByText('⚠️')).toBeInTheDocument();
+    });
+  });
 });

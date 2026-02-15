@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlayerHand } from './PlayerHand';
 import { Card } from '@/lib/game/cards';
@@ -139,6 +139,109 @@ describe('PlayerHand', () => {
 
       const defaultCursor = container.querySelector('[class*="cursor-default"]');
       expect(defaultCursor).toBeInTheDocument();
+    });
+  });
+
+  describe('Score Display (Multi-round)', () => {
+    it('should show score when showScore is true', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={150}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('150 pts')).toBeInTheDocument();
+    });
+
+    it('should not show score when showScore is false', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={150}
+          showScore={false}
+        />
+      );
+
+      expect(screen.queryByText('150 pts')).not.toBeInTheDocument();
+    });
+
+    it('should show score of 0', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={0}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('0 pts')).toBeInTheDocument();
+    });
+
+    it('should show high score values correctly', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={999}
+          showScore={true}
+        />
+      );
+
+      expect(screen.getByText('999 pts')).toBeInTheDocument();
+    });
+
+    it('should show score when score prop is undefined (defaults to 0)', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          showScore={true}
+        />
+      );
+
+      // When showScore is true, score defaults to 0
+      expect(screen.getByText('0 pts')).toBeInTheDocument();
+    });
+
+    it('should show score alongside UNO button when applicable', () => {
+      render(
+        <PlayerHand
+          cards={[mockCards[0], mockCards[1]]} // 2 cards to enable UNO
+          score={250}
+          showScore={true}
+          onUno={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText('250 pts')).toBeInTheDocument();
+      // The button shows "UNO" (not "UNO!") when canCallUno is true and hasCalledUno is false
+      expect(screen.getByRole('button', { name: /Call UNO/i })).toBeInTheDocument();
+    });
+
+    it('should show score during player turn', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={175}
+          showScore={true}
+          isMyTurn={true}
+        />
+      );
+
+      expect(screen.getByText('175 pts')).toBeInTheDocument();
+    });
+
+    it('should show score when not player turn', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          score={100}
+          showScore={true}
+          isMyTurn={false}
+        />
+      );
+
+      expect(screen.getByText('100 pts')).toBeInTheDocument();
     });
   });
 });

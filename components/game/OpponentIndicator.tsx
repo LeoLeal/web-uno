@@ -12,6 +12,8 @@ interface OpponentIndicatorProps {
   isCurrentTurn: boolean;
   isHost?: boolean;
   isDisconnected?: boolean;
+  score?: number;
+  showScore?: boolean;
   className?: string;
 }
 
@@ -28,6 +30,8 @@ export const OpponentIndicator = ({
   isCurrentTurn,
   isHost = false,
   isDisconnected = false,
+  score,
+  showScore = false,
   className,
 }: OpponentIndicatorProps) => {
   const anchorName = `--opponent-avatar-${clientId}`;
@@ -102,6 +106,13 @@ export const OpponentIndicator = ({
           {name}
         </span>
       </div>
+
+      {/* Score display (multi-round games only) */}
+      {showScore && (
+        <div className="text-xs text-(--cream-dark) opacity-60 font-medium">
+          {score ?? 0} pts
+        </div>
+      )}
 
       {/* Card count indicator — fan of card backs */}
       <CardCountFan cardCount={cardCount} />
