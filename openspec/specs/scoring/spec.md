@@ -82,7 +82,7 @@ The system SHALL end the game when a player's cumulative score reaches or exceed
 - **AND** the round winner's updated cumulative score is greater than or equal to `scoreLimit`
 - **THEN** `gameStateMap.status` is set to `ENDED`
 - **AND** `gameStateMap.winner` is set to the winning player's `clientId`
-- **AND** `gameStateMap.winType` is set to `LEGITIMATE`
+- **AND** `gameStateMap.endType` is set to `WIN`
 
 #### Scenario: Score limit not reached
 - **WHEN** a round ends in a multi-round game

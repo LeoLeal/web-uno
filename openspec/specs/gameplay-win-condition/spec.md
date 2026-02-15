@@ -30,7 +30,7 @@ The system SHALL detect when a player empties their hand and either end the game
 - **AND** the player's updated cumulative score is greater than or equal to `scoreLimit`
 - **THEN** the game status transitions to `ENDED`
 - **AND** `winner` in `gameStateMap` is set to that player's `clientId`
-- **AND** `winType` is set to `LEGITIMATE`
+- **AND** `endType` is set to `WIN`
 - **AND** no further turn advancement occurs
 
 #### Scenario: Win check timing
@@ -59,7 +59,7 @@ The system SHALL maintain a clean end state when the game ends.
 - **WHEN** a player wins a round and their cumulative score reaches or exceeds the score limit
 - **THEN** `gameStateMap.status` is `ENDED`
 - **AND** `gameStateMap.winner` is the winning player's `clientId`
-- **AND** `gameStateMap.winType` is `LEGITIMATE`
+- **AND** `gameStateMap.endType` is `WIN`
 - **AND** `gameStateMap.scores` reflects the final cumulative scores
 
 #### Scenario: No actions processed after game end

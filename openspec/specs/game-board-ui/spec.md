@@ -249,25 +249,11 @@ The system SHALL display final standings in the game end modal for multi-round g
 - **WHEN** the game status changes to `ENDED` in a single-round game (`scoreLimit === null`)
 - **THEN** the existing game end modal behavior is preserved (win/loss message, no scores)
 
-#### Scenario: Walkover game end modal in multi-round
-- **WHEN** the game ends as a walkover during a multi-round game
-- **THEN** the modal indicates a walkover victory
-- **AND** the modal shows current cumulative scores at the time of walkover
-
-### Requirement: Win by Walkover Modal
-
-The system SHALL display a victory modal when a player wins by walkover.
-
-#### Scenario: Winner sees walkover modal
-
-- **WHEN** all other players disconnect and the game ends as a walkover
-- **THEN** the remaining player sees a modal: "You win! All other players disconnected."
-- **AND** the modal has a "Back to Lobby" or "Return Home" action
-
-#### Scenario: Walkover visual distinction
-
-- **WHEN** displaying the walkover win modal
-- **THEN** the modal visually distinguishes a walkover from a normal win (e.g., different icon or message)
+#### Scenario: Insufficient players game end modal
+- **WHEN** the game ends with `endType` = `INSUFFICIENT_PLAYERS`
+- **THEN** the modal displays "Game Ended" with a "Not enough players to continue" message
+- **AND** no winner is declared
+- **AND** the modal includes a "Back to Lobby" action
 
 ### Requirement: Card click interaction
 

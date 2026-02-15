@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Manages game session resilience including player disconnection detection, pause/resume flow, hand handover to replacement players, and win-by-walkover scenarios.
+Manages game session resilience including player disconnection detection, pause/resume flow, hand handover to replacement players, and insufficient-players game ending.
 
 ## Requirements
 
