@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { WildCardSvg } from './WildCardSvg';
 
@@ -95,15 +94,14 @@ export const UnoCard = ({
         ...style,
       }}
     >
-      <Image
+      <img
         src={cardPath}
         alt={altText}
         width={dimensions.width}
         height={dimensions.height}
         className="w-full h-full rounded-sm object-cover"
-        priority
+        loading="eager"
       />
     </div>
   );
 };
-

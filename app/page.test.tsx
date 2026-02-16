@@ -1,15 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { axe } from 'vitest-axe';
 import Home from './page';
 import cardFanStyles from '../components/ui/CardFan.module.css';
-
-// Mock next/navigation
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -21,15 +15,21 @@ const sessionStorageMock = {
 Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
 
 describe('Homepage', () => {
+  const renderHome = () => render(
+    <MemoryRouter>
+      <Home />
+    </MemoryRouter>
+  );
+
   describe('Accessibility', () => {
     it('should have no accessibility violations', async () => {
-      const { container } = render(<Home />);
+      const { container } = renderHome();
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
     it('should have sufficient color contrast on buttons', async () => {
-      const { container } = render(<Home />);
+      const { container } = renderHome();
       const results = await axe(container, {
         rules: {
           'color-contrast': { enabled: true },
@@ -39,7 +39,7 @@ describe('Homepage', () => {
     });
 
     it('should have accessible form elements', async () => {
-      render(<Home />);
+      renderHome();
       
       // Input should have aria-label
       const input = screen.getByPlaceholderText('Enter room code...');
@@ -51,7 +51,7 @@ describe('Homepage', () => {
     });
 
     it('should have accessible buttons', async () => {
-      render(<Home />);
+      renderHome();
       
       // Create game button should be accessible
       const createButton = screen.getByRole('button', { name: /create new game/i });
@@ -61,7 +61,7 @@ describe('Homepage', () => {
 
   describe('Keyboard Navigation', () => {
     it('should have focusable interactive elements', async () => {
-      render(<Home />);
+      renderHome();
       
       // All interactive elements should be focusable
       const createButton = screen.getByRole('button', { name: /create new game/i });
@@ -77,7 +77,7 @@ describe('Homepage', () => {
   describe('Reduced Motion', () => {
     it('should respect prefers-reduced-motion', async () => {
       // This test verifies the CSS exists - actual motion testing done via Playwright
-      const { container } = render(<Home />);
+      const { container } = renderHome();
       
       // Verify components with animations are rendered
       expect(container.querySelector('.animate-logo-fade-in')).toBeInTheDocument();

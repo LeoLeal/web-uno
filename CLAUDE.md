@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Summary
 
-P2P Uno is a serverless, peer-to-peer multiplayer Uno card game built with Next.js 16 (App Router), TypeScript (strict mode), React 19, Tailwind CSS v4, and Yjs CRDTs synced over WebRTC.
+P2P Uno is a serverless, peer-to-peer multiplayer Uno card game built with React 19 (SPA via Vite), TypeScript (strict mode), Tailwind CSS v4, and Yjs CRDTs synced over WebRTC.
 
 ## Commands
 
 | Task | Command |
 |------|---------|
-| Dev server (Next.js + signaling) | `npm run dev` |
-| Next.js only | `npm run dev:next` |
+| Dev server (SPA + signaling) | `npm run dev` |
+| SPA only | `npm run dev:web` |
 | Signaling server only | `npm run dev:signaling` |
 | Build | `npm run build` |
 | Lint | `npm run lint` |
@@ -53,14 +53,16 @@ All Yjs updates must be wrapped in `doc.transact()` for atomicity.
 ### Routing
 
 - `/` — Homepage (create/join game)
-- `/room/[id]` — Game room (renders lobby or gameplay based on game status)
+- `/room/:id` — Game room (renders lobby or gameplay based on game status)
+
+Production hosting must support SPA rewrite/fallback to `index.html` for deep links (for example `/room/:id`).
 
 Host role is claimed via a `sessionStorage` flag set during room creation.
 
 ## Code Conventions
 
 - **TypeScript**: `interface` for object shapes and props; `type` for unions/primitives. No enums — use `as const` arrays with derived types. Avoid `any`; use `unknown` and narrow. Explicit return types on exports.
-- **React**: Arrow function components. `'use client'` only where state/effects are needed. Custom hooks for all Yjs/game logic.
+- **React**: Arrow function components in a client-rendered SPA. Custom hooks for Yjs/game logic.
 - **Styling**: Tailwind utility classes. Use `cn()` (clsx + tailwind-merge) for conditional classes. Avoid arbitrary values (`w-[35px]`) — extend the theme instead. CSS modules for component-scoped styles where needed.
 - **Imports**: Absolute via `@/` alias (e.g., `@/components/ui/Modal`, `@/hooks/useRoom`).
 - **Naming**: PascalCase for components, camelCase for hooks/utils, kebab-case for directories, UPPER_SNAKE_CASE for constants.
@@ -72,7 +74,7 @@ Vitest with jsdom environment and React Testing Library. Tests live alongside so
 
 ## Environment
 
-Single env var: `NEXT_PUBLIC_SIGNALING_URL` (defaults to `ws://localhost:4444`). Set in `.env.local`.
+Single env var: `VITE_SIGNALING_URL` (required). Set in `.env.local`.
 
 ## OpenSpec
 

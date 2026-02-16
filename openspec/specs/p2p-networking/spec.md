@@ -14,7 +14,7 @@ The system SHALL initialize a `y-webrtc` provider using the Room ID as the signa
 
 - **WHEN** the room component mounts
 - **THEN** a `WebrtcProvider` is instantiated with the Room ID
-- **THEN** the provider connects to the URL specified in `NEXT_PUBLIC_SIGNALING_URL` (defaulting to `ws://localhost:4444`)
+- **THEN** the provider connects to the URL specified in `VITE_SIGNALING_URL`
 
 ### Requirement: Host Identification via Shared State
 

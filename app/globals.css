@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
 
 :root {
   /* Typography */
-  --font-display: var(--font-display, Georgia, serif);
-  --font-body: var(--font-body, system-ui, sans-serif);
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Nunito', 'Segoe UI', sans-serif;
 
   /* Table surface - felt greens */
   --felt-dark: #0d2818;
@@ -52,6 +53,7 @@ button:disabled,
 }
 
 body {
+  margin: 0;
   font-family: var(--font-body);
   color: var(--cream);
   background: radial-gradient(
@@ -282,7 +284,6 @@ body::after {
   border-radius: 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
-
 
 
 

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { LogOut, Users } from 'lucide-react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
@@ -25,10 +24,10 @@ import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
 import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
 import { formatRoomId } from '@/lib/room-code';
+import { GameProvider } from '@/components/providers/GameProvider';
 
-export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const router = useRouter();
+const RoomPageContent = ({ id }: { id: string }) => {
+  const navigate = useNavigate();
 
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected, isGameFull } = useRoom(id);
   const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, endType, scores, lastRoundPoints, initGame } = useGameState();
@@ -137,13 +136,13 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                 {isSynced ? 'Connected' : 'Connecting...'}
               </span>
             </div>
-            <Link
-              href="/"
+            <button
+              onClick={() => navigate('/')}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-400 border border-red-400/50 rounded-lg hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 transition-all"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Leave</span>
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -209,7 +208,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
                 Please create a new game or join a different room.
               </p>
               <button 
-                onClick={() => router.push('/')}
+                onClick={() => navigate('/')}
                 className="btn-copper"
               >
                 ← Back to Home
@@ -245,5 +244,18 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
       </div>
     </main>
   );
-}
+};
 
+export default function RoomPage() {
+  const { id } = useParams<{ id: string }>();
+
+  if (!id) {
+    return null;
+  }
+
+  return (
+    <GameProvider>
+      <RoomPageContent id={id} />
+    </GameProvider>
+  );
+}

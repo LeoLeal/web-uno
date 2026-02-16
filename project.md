@@ -10,7 +10,7 @@ To create a frictionless, privacy-focused Uno experience that friends can play i
 
 - **Topology**: Host-Authoritative P2P (Star Network).
 - **State Sync**: Yjs + WebRTC (Mesh for public state, Data Channels for private actions).
-- **Frontend**: Next.js (App Router), React, Tailwind CSS.
+- **Frontend**: React SPA (Vite), React Router, Tailwind CSS.
 - **Security**: "Trusted Dealer" model (Host holds the deck, Guests only know their own cards).
 
 ## Key Capabilities

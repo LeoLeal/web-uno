@@ -8,7 +8,7 @@ This document outlines the development standards, commands, and conventions for 
 
 This is a peer-to-peer multiplayer Uno game.
 
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: React SPA + Vite
 - **Language**: TypeScript (Strict Mode)
 - **Styling**: Tailwind CSS
 - **State**: React Context + Yjs (CRDT for P2P)
@@ -29,6 +29,7 @@ This is a peer-to-peer multiplayer Uno game.
   - Required for P2P discovery in dev environment.
 - **Development Server**: `npm run dev`
   - Runs on: `http://localhost:3000`
+- **Web Only (SPA)**: `npm run dev:web`
 - **Production Build**: `npm run build`
 - **Start Production**: `npm run start`
 
@@ -78,7 +79,7 @@ This is a peer-to-peer multiplayer Uno game.
   type CardColor = (typeof CARD_COLORS)[number];
   ```
 
-### React & Next.js Conventions
+### React & SPA Conventions
 
 - **Functional Components**: Use arrow functions for components.
   ```tsx
@@ -90,9 +91,9 @@ This is a peer-to-peer multiplayer Uno game.
 - **Props**:
   - Destructure props in the function signature.
   - Use default parameters instead of `defaultProps`.
-- **Client vs. Server**:
-  - Default to Server Components (Next.js App Router).
-  - Add `'use client'` directive only when state or effects are strictly needed.
+- **Client Architecture**:
+  - This project is a client-rendered SPA.
+  - Keep state/effects in components/hooks as needed and avoid server-only assumptions.
 
 ### Styling (Tailwind CSS)
 
@@ -110,10 +111,9 @@ This is a peer-to-peer multiplayer Uno game.
 - **Directories**: kebab-case (e.g., `components/game-board`, `lib/utils`).
 - **Component Files**: PascalCase (e.g., `Card.tsx`, `PlayerHand.tsx`).
 - **Utility/Hook Files**: camelCase (e.g., `useGameState.ts`, `formatDate.ts`).
-- **Next.js Routes**:
-  - **App Router Only**: Do not use the `pages/` directory (Page Router). All routes must be in `app/`.
-  - Folders define routes. Use `page.tsx` for the view.
-  - Dynamic routes: `[id]/page.tsx`.
+- **Routes**:
+  - Use `react-router-dom` route mapping in the SPA runtime.
+  - Preserve public URL compatibility for existing paths (`/`, `/room/:id`).
 - **Imports**:
   - Use Absolute Imports configured in `tsconfig.json`.
   - Pattern: `@/components/...`, `@/lib/...`, `@/hooks/...`.

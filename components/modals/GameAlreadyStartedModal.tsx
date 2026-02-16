@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 interface GameAlreadyStartedModalProps {
   isOpen: boolean;
 }
@@ -29,12 +27,12 @@ export const GameAlreadyStartedModal = ({ isOpen }: GameAlreadyStartedModalProps
         </p>
 
         {/* Home button */}
-        <Link
+        <a
           href="/"
           className="btn-copper"
         >
           ← Return to Home
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ describe('Multi-Round Scoring Integration', () => {
       // Simulate opponent hands with high-value cards
       const opponentHands: Record<number, Card[]> = {
         2: [
-          { id: '1', color: 'wild', symbol: 'wild' }, // 50
+          { id: '1', symbol: 'wild' }, // 50
         ],
       };
 
@@ -146,7 +146,7 @@ describe('Multi-Round Scoring Integration', () => {
 
       const opponentHands: Record<number, Card[]> = {
         2: [
-          { id: '1', color: 'wild', symbol: 'wild' }, // 50
+          { id: '1', symbol: 'wild' }, // 50
         ],
       };
 
@@ -212,7 +212,7 @@ describe('Multi-Round Scoring Integration', () => {
           originalName: 'Disconnected',
           cards: [
             { id: '2', color: 'blue', symbol: '7' },
-            { id: '3', color: 'wild', symbol: 'wild' },
+            { id: '3', symbol: 'wild' },
           ] as Card[],
         },
       ];
@@ -258,7 +258,7 @@ describe('Multi-Round Scoring Integration', () => {
           originalClientId: 4,
           originalName: 'Player4',
           cards: [
-            { id: '3', color: 'wild', symbol: 'wild-draw4' },
+            { id: '3', symbol: 'wild-draw4' },
           ] as Card[],
         },
       ];
