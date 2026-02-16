@@ -1,14 +1,14 @@
 'use client';
 
 import { FormEvent, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { Gamepad2, ArrowRight } from 'lucide-react';
 import { generateRoomId, normalizeRoomId } from '@/lib/room-code';
 import { Logo } from '@/components/ui/Logo';
 import { CardFan } from '@/components/ui/CardFan';
 
 export default function Home() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [roomCode, setRoomCode] = useState('');
 
   // Defensive cleanup: clear stale creator intent on home page load
@@ -19,14 +19,14 @@ export default function Home() {
   const handleCreate = () => {
     const id = generateRoomId();
     sessionStorage.setItem('room-creator', id);
-    router.push(`/room/${id}`);
+    navigate(`/room/${id}`);
   };
 
   const handleJoin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (roomCode.trim()) {
       const normalizedCode = normalizeRoomId(roomCode);
-      router.push(`/room/${normalizedCode}`);
+      navigate(`/room/${normalizedCode}`);
     }
   };
 

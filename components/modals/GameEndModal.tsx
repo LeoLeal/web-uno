@@ -1,6 +1,4 @@
 'use client';
-
-import Link from 'next/link';
 import { EndType } from '@/lib/game/constants';
 
 interface PlayerStanding {
@@ -60,9 +58,9 @@ export const GameEndModal = ({
           </div>
 
           {/* Back to lobby button */}
-          <Link href="/" className="btn-copper">
+          <a href="/" className="btn-copper">
             ← Back to Lobby
-          </Link>
+          </a>
         </div>
       </div>
     );
@@ -141,9 +139,9 @@ export const GameEndModal = ({
         )}
 
         {/* Back to lobby button */}
-        <Link href="/" className="btn-copper">
+        <a href="/" className="btn-copper">
           ← Back to Lobby
-        </Link>
+        </a>
       </div>
     </div>
   );

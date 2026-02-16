@@ -20,12 +20,14 @@ beforeAll(() => {
   });
 });
 
-// Mock next/navigation
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
+// Mock routing navigation
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
 
 // Mock the hooks
 vi.mock('@/hooks/useGameSettings', () => ({

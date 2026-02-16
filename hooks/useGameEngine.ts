@@ -94,18 +94,20 @@ export const useGameEngine = ({
     const baseIndex = turnOrder.indexOf(baseStartingPlayer);
 
     switch (firstCard.symbol as CardSymbol) {
-      case 'skip':
+      case 'skip': {
         // Skip starting player, advance to next
         const skipIndex = (baseIndex + 1) % turnOrder.length;
         initialTurn = turnOrder[skipIndex];
         break;
+      }
 
-      case 'reverse':
+      case 'reverse': {
         // Reverse direction, start with previous player
         initialDirection = -1;
         const reverseIndex = (baseIndex - 1 + turnOrder.length) % turnOrder.length;
         initialTurn = turnOrder[reverseIndex];
         break;
+      }
 
       case 'draw2': {
         // Starting player draws 2 and is skipped

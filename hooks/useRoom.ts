@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { WebrtcProvider } from 'y-webrtc';
 import { useGame } from '@/components/providers/GameProvider';
 import { MAX_PLAYERS } from '@/lib/game/constants';
+import { getSignalingUrl } from '@/lib/config/signaling';
 
 export interface Player {
   clientId: number;
@@ -51,7 +52,7 @@ export const useRoom = (roomId: string) => {
   useEffect(() => {
     if (!doc || !roomId) return;
 
-    const signalingUrl = process.env.NEXT_PUBLIC_SIGNALING_URL || 'ws://localhost:4444';
+    const signalingUrl = getSignalingUrl();
 
     const newProvider = new WebrtcProvider(roomId, doc, {
       signaling: [signalingUrl],

@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { Modal } from '@/components/ui/Modal';
 
 export const HostDisconnectModal = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasNavigated = useRef(false);
@@ -43,10 +43,10 @@ export const HostDisconnectModal = () => {
       hasNavigated.current = true;
       // Small delay to ensure cleanup completes
       setTimeout(() => {
-        router.push('/');
+        navigate('/');
       }, 100);
     }
-  }, [countdown, router]);
+  }, [countdown, navigate]);
 
   return (
     <Modal isOpen={true} aria-labelledby="disconnect-modal-title">

@@ -11,9 +11,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to start playing.
 
+Run only the web app:
+```bash
+npm run dev:web
+```
+
+Run only the signaling server:
+```bash
+npm run signaling
+```
+
 ## 🛠️ Technology Stack
 
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: React SPA + Vite
 - **Library**: React 19 (Hooks, Context)
 - **Language**: TypeScript (Strict)
 - **Styling**: Tailwind CSS v4
@@ -32,6 +42,17 @@ Open [http://localhost:3000](http://localhost:3000) to start playing.
 - **`AGENTS.md`**: Guidelines for AI agents and developers.
 - **`project.md`**: High-level project status and vision.
 - **`openspec/`**: Detailed specifications and change history.
+
+## 🌐 Deployment Requirements
+
+This project is a browser-routed SPA and **requires host rewrite/fallback support**.
+
+- Required behavior: non-asset routes (for example `/room/abcd-1234`) must serve `index.html` while preserving the URL.
+- Required parity checks after deploy:
+  - Open `/room/<id>` directly from a fresh tab.
+  - Refresh while on `/room/<id>`.
+  - Confirm both cases load the room flow instead of host 404.
+- Unsupported hosts: providers that cannot configure SPA rewrites are not supported for production deployment.
 
 ## License
 

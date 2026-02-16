@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -34,13 +33,13 @@ export const Logo = ({ className }: LogoProps) => {
           filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))',
         }}
       >
-        <Image
+        <img
           src="/cards/wild.svg"
           alt="wild card"
           width={36}
           height={54}
           className="w-9 h-[54px] sm:w-11 sm:h-[66px] md:w-13 md:h-[78px]"
-          priority
+          loading="eager"
         />
       </div>
     </div>
