@@ -123,6 +123,7 @@ async function main(): Promise<void> {
   }
 
   console.log('\nDone!');
+  process.exit(0);
 }
 
 main().catch((err) => {
