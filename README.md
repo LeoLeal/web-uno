@@ -2,6 +2,7 @@
 
 A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the browser.
 
+[![pages-build-deployment](https://github.com/LeoLeal/web-uno/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/LeoLeal/web-uno/actions/workflows/pages/pages-build-deployment)
 ![Cron job status](https://api.cron-job.org/jobs/7282731/52dcf81063c01d9e/status-1.svg)
 
 ## 🚀 How to Run
