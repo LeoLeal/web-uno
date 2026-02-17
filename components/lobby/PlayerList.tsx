@@ -7,7 +7,7 @@ import styles from './PlayerList.module.css';
 interface PlayerListProps {
   players: Player[];
   myClientId: number | null;
-  hostId: number | null;
+  hostId: number | null | undefined;
 }
 
 export const PlayerList = ({ players, myClientId, hostId }: PlayerListProps) => {

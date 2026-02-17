@@ -16,7 +16,7 @@ interface GameBoardProps {
   /** Current player's client ID */
   myClientId: number | null;
   /** Host's client ID */
-  hostId: number | null;
+  hostId: number | null | undefined;
   /** Whose turn it is */
   currentTurn: number | null;
   /** Current player's hand */
@@ -79,7 +79,7 @@ export const GameBoard = ({
       name: p.name,
       avatar: p.avatar || '🎮',
       cardCount: playerCardCounts[p.clientId] || 0,
-      isHost: hostId !== null && p.clientId === hostId,
+      isHost: typeof hostId === 'number' && p.clientId === hostId,
       isDisconnected: disconnectedIds.includes(p.clientId),
     }));
 

@@ -13,16 +13,18 @@ export interface Player {
 }
 
 export const useRoom = (roomId: string) => {
+  const HOST_RESOLUTION_GRACE_MS = 3000;
   const { doc } = useGame();
   const [provider, setProvider] = useState<WebrtcProvider | null>(null);
   const [isSynced, setIsSynced] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [myClientId, setMyClientId] = useState<number | null>(null);
-  const [hostId, setHostId] = useState<number | null>(null);
+  const [hostId, setHostId] = useState<number | null | undefined>(undefined);
   const [isHostConnected, setIsHostConnected] = useState<boolean | null>(null);
   const [isGameFull, setIsGameFull] = useState(false);
   const hasAttemptedClaim = useRef(false);
   const isExplicitCreator = useRef(false);
+  const unresolvedHostTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for creation intent flag (sessionStorage) on mount
   useEffect(() => {
@@ -64,6 +66,25 @@ export const useRoom = (roomId: string) => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing state from external WebRTC provider
     setMyClientId(myId);
 
+    const clearUnresolvedHostTimer = () => {
+      if (unresolvedHostTimerRef.current) {
+        clearTimeout(unresolvedHostTimerRef.current);
+        unresolvedHostTimerRef.current = null;
+      }
+    };
+
+    const scheduleUnresolvedHostTimeout = () => {
+      if (unresolvedHostTimerRef.current) return;
+
+      unresolvedHostTimerRef.current = setTimeout(() => {
+        unresolvedHostTimerRef.current = null;
+        const latestHostId = gameState.get('hostId') as number | null | undefined;
+        if (latestHostId === undefined) {
+          setIsHostConnected(false);
+        }
+      }, HOST_RESOLUTION_GRACE_MS);
+    };
+
     // Host claiming - only called once per session
     // Claims host if:
     // 1. We explicitly created the room (sessionStorage flag)
@@ -94,14 +115,21 @@ export const useRoom = (roomId: string) => {
 
     // Watch for hostId changes in shared state
     const handleGameStateChange = () => {
-      const currentHostId = gameState.get('hostId') as number | null;
+      const currentHostId = gameState.get('hostId') as number | null | undefined;
       setHostId(currentHostId);
       
       // Check if host is still connected
-      if (currentHostId !== null) {
+      if (typeof currentHostId === 'number') {
+        clearUnresolvedHostTimer();
         const states = awareness.getStates();
         const hostConnected = currentHostId === myId || states.has(currentHostId);
         setIsHostConnected(hostConnected);
+      } else if (currentHostId === undefined) {
+        scheduleUnresolvedHostTimeout();
+        setIsHostConnected((prev) => (prev === false ? false : null));
+      } else {
+        clearUnresolvedHostTimer();
+        setIsHostConnected(null);
       }
     };
 
@@ -185,7 +213,7 @@ export const useRoom = (roomId: string) => {
       }
 
       // Sort: Host first, then alphabetically by name
-      const currentHostId = gameState.get('hostId') as number | null;
+      const currentHostId = gameState.get('hostId') as number | null | undefined;
       activePlayers.sort((a, b) => {
         if (a.clientId === currentHostId) return -1;
         if (b.clientId === currentHostId) return 1;
@@ -194,9 +222,16 @@ export const useRoom = (roomId: string) => {
       setPlayers(activePlayers);
       
       // Check host presence on every awareness change
-      if (currentHostId !== null) {
+      if (typeof currentHostId === 'number') {
+        clearUnresolvedHostTimer();
         const hostConnected = currentHostId === myId || states.has(currentHostId);
         setIsHostConnected(hostConnected);
+      } else if (currentHostId === undefined) {
+        scheduleUnresolvedHostTimeout();
+        setIsHostConnected((prev) => (prev === false ? false : null));
+      } else {
+        clearUnresolvedHostTimer();
+        setIsHostConnected(null);
       }
     };
 
@@ -264,6 +299,7 @@ export const useRoom = (roomId: string) => {
     return () => {
       gameState.unobserve(handleGameStateChange);
       awareness.off('change', handleAwarenessChange);
+      clearUnresolvedHostTimer();
       newProvider.disconnect();
       newProvider.destroy();
       hasAttemptedClaim.current = false;
@@ -271,7 +307,7 @@ export const useRoom = (roomId: string) => {
   }, [doc, roomId]);
 
   // Determine if I'm host by comparing hostId with my clientId
-  const amIHost = myClientId !== null && hostId !== null && hostId === myClientId;
+  const amIHost = myClientId !== null && typeof hostId === 'number' && hostId === myClientId;
 
   return { 
     provider, 

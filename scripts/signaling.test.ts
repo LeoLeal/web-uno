@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { createServer, get, IncomingMessage, ServerResponse } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 
 // Recreate the HTTP handler from signaling.ts for isolated testing
@@ -96,7 +96,7 @@ afterAll(async () => {
 
 function fetchHealth(path: string): Promise<{ status: number; body: string }> {
   return new Promise((resolve, reject) => {
-    const req = require('http').get(`http://localhost:${TEST_PORT}${path}`, (res: IncomingMessage) => {
+    const req = get(`http://localhost:${TEST_PORT}${path}`, (res: IncomingMessage) => {
       let body = '';
       res.on('data', (chunk: Buffer) => (body += chunk.toString()));
       res.on('end', () => resolve({ status: res.statusCode!, body }));
