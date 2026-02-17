@@ -20,7 +20,13 @@ let wss: WebSocketServer;
 
 beforeAll(async () => {
   server = createServer(httpHandler);
-  wss = new WebSocketServer({ server });
+  wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
 
   // Store subscriptions: topic -> Set of clients
   const topics = new Map<string, Set<WebSocket>>();
