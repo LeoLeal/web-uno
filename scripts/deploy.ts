@@ -7,12 +7,13 @@ import { resolve } from 'path';
 
 // Load env files (.env.local first, then .env.production as fallback)
 // Earlier files take priority — existing vars are not overwritten
+// Skip VITE_* vars so Vite's own env-file resolution applies during build
 for (const envFile of ['.env.local', '.env.production']) {
   try {
     const envContent = readFileSync(resolve(process.cwd(), envFile), 'utf-8');
     for (const line of envContent.split('\n')) {
       const match = line.match(/^\s*([\w]+)\s*=\s*(.*)$/);
-      if (match && !process.env[match[1]]) {
+      if (match && !process.env[match[1]] && !match[1].startsWith('VITE_')) {
         process.env[match[1]] = match[2].trim().replace(/^['"]|['"]$/g, '');
       }
     }
