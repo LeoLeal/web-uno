@@ -33,6 +33,8 @@ interface GameBoardProps {
   orphanHands?: OrphanHand[];
   /** Whether interaction is frozen (e.g., during pause) */
   isFrozen?: boolean;
+  /** Whether local game room audio feedback is muted */
+  isMuted?: boolean;
   /** Handler for playing a card (with optional color for wilds) */
   onPlayCard?: (cardId: string, chosenColor?: CardColor) => void;
   /** Handler for drawing a card */
@@ -58,6 +60,7 @@ export const GameBoard = ({
   scoreLimit,
   orphanHands = [],
   isFrozen = false,
+  isMuted = false,
   onPlayCard,
   onDrawCard,
   canPlayCard,
@@ -122,7 +125,7 @@ export const GameBoard = ({
     >
       {/* Opponents row */}
       <div className="pt-2 mt-4 flex-shrink-0">
-        <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} />
+        <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} isMuted={isMuted} />
       </div>
 
       {/* Table center — grows to fill available space, centered */}

@@ -1,7 +1,10 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { OpponentIndicator } from './OpponentIndicator';
 import { cn } from '@/lib/utils';
+import { getOpponentsWithUnoBubbleAppearance } from '@/lib/game/audioFeedback';
+import { speakText } from '@/lib/audio/playback';
 
 interface Opponent {
   clientId: number;
@@ -18,14 +21,30 @@ interface OpponentRowProps {
   currentTurn: number | null;
   scores?: Record<number, number>;
   scoreLimit?: number | null;
+  isMuted?: boolean;
   className?: string;
 }
 
 /**
  * Horizontal row of opponents positioned evenly at the top of the game area.
  */
-export const OpponentRow = ({ opponents, currentTurn, scores, scoreLimit, className }: OpponentRowProps) => {
+export const OpponentRow = ({
+  opponents,
+  currentTurn,
+  scores,
+  scoreLimit,
+  isMuted = false,
+  className,
+}: OpponentRowProps) => {
   const showScore = scoreLimit !== null && scoreLimit !== undefined;
+  const previousUnoVisibleByOpponentRef = useRef<Map<number, boolean>>(new Map());
+
+  useEffect(() => {
+    const appearances = getOpponentsWithUnoBubbleAppearance(opponents, previousUnoVisibleByOpponentRef.current);
+    if (isMuted || appearances.length === 0) return;
+
+    speakText('Uno!');
+  }, [opponents, isMuted]);
 
   return (
     <div

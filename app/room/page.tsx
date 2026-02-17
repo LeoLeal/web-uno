@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LogOut, Users } from 'lucide-react';
+import { LogOut, Users, Volume2, VolumeX } from 'lucide-react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSettings } from '@/hooks/useGameSettings';
@@ -10,6 +10,7 @@ import { usePlayerHand } from '@/hooks/usePlayerHand';
 import { useGameEngine } from '@/hooks/useGameEngine';
 import { useSessionResilience } from '@/hooks/useSessionResilience';
 import { useGamePlay } from '@/hooks/useGamePlay';
+import { useGameAudioFeedback } from '@/hooks/useGameAudioFeedback';
 import { CardColor } from '@/lib/game/cards';
 import { MAX_PLAYERS } from '@/lib/game/constants';
 import { PlayerList } from '@/components/lobby/PlayerList';
@@ -34,6 +35,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Game engine — host-only deck management and dealing (hands delivered via Yjs)
   const { initializeGame, initializeRound, deckRef } = useGameEngine({
@@ -59,6 +61,15 @@ const RoomPageContent = ({ id }: { id: string }) => {
 
   // Gameplay — action submission and validation
   const { submitAction, canPlayCard } = useGamePlay(myClientId);
+
+  useGameAudioFeedback({
+    status,
+    myClientId,
+    currentTurn,
+    discardPile,
+    playerCardCounts,
+    isMuted,
+  });
 
   // Initialize Game State
   useEffect(() => {
@@ -137,6 +148,14 @@ const RoomPageContent = ({ id }: { id: string }) => {
               </span>
             </div>
             <button
+              onClick={() => setIsMuted((current) => !current)}
+              className="p-2 text-(--cream-dark) border border-(--copper-border) rounded-lg hover:text-(--cream) hover:border-(--copper-light) hover:bg-(--copper-light)/10 transition-all"
+              aria-label={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
+              title={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            <button
               onClick={() => navigate('/')}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-400 border border-red-400/50 rounded-lg hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 transition-all"
             >
@@ -169,6 +188,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
               scoreLimit={settings.scoreLimit}
               orphanHands={orphanHands}
               isFrozen={status === 'PAUSED_WAITING_PLAYER' || status === 'ROUND_ENDED'}
+              isMuted={isMuted}
               onPlayCard={handlePlayCard}
               onDrawCard={handleDrawCard}
               canPlayCard={canPlayCard}
