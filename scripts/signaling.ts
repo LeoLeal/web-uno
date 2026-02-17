@@ -1,13 +1,25 @@
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 4444;
 
-const wss = new WebSocketServer({ port });
+// HTTP request handler for health checks
+const httpHandler = (req: IncomingMessage, res: ServerResponse): void => {
+  if (req.method === 'GET' && req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok' }));
+    return;
+  }
+
+  res.writeHead(404);
+  res.end();
+};
+
+const server = createServer(httpHandler);
+const wss = new WebSocketServer({ server });
 
 // Store subscriptions: topic -> Set of clients
 const topics = new Map<string, Set<WebSocket>>();
-
-console.log(`✅ Signaling server running at ws://localhost:${port}`);
 
 wss.on('connection', (ws) => {
   const subscribedTopics = new Set<string>();
@@ -76,4 +88,10 @@ wss.on('connection', (ws) => {
       }
     });
   });
+});
+
+server.listen(port, () => {
+  console.log(`✅ Signaling server running at http://localhost:${port}`);
+  console.log(`   Health check: http://localhost:${port}/health`);
+  console.log(`   WebSocket:    ws://localhost:${port}`);
 });

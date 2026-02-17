@@ -1,0 +1,14 @@
+FROM node:22-slim
+
+WORKDIR /app
+
+# Install only runtime dependencies for the signaling server
+RUN npm init -y && npm install ws@^8.19.0 tsx@^4.21.0
+
+# Copy the signaling server source
+COPY scripts/signaling.ts scripts/signaling.ts
+
+EXPOSE 4444
+
+# Render sets PORT env var automatically
+CMD ["npx", "tsx", "scripts/signaling.ts"]

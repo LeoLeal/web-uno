@@ -1,0 +1,23 @@
+# Render Blueprint — Signaling Server
+#
+# Deploy: Connect this repo on https://dashboard.render.com/blueprints
+#         Render will auto-detect this file and create the service.
+#
+# Keepalive: Render free tier spins down after 15 min idle.
+#            Set up a cron ping to prevent this:
+#            1. Go to https://cron-job.org (free) or UptimeRobot
+#            2. Create a job that hits GET https://<your-service>.onrender.com/health
+#            3. Set interval to every 14 minutes
+#
+# Client config: Set VITE_SIGNALING_URL=wss://<your-service>.onrender.com
+#                in your SPA's environment (Render provides TLS automatically).
+
+services:
+  - type: web
+    name: uno-signaling
+    runtime: docker
+    dockerfilePath: Dockerfile.signaling
+    plan: free
+    envVars:
+      - key: PORT
+        value: "4444"
