@@ -4,6 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { AppRoutes } from '@/app/AppRoutes';
 import '@/app/globals.css';
 
+// GitHub Pages SPA redirect: restore path from 404.html fallback
+const spaRedirect = sessionStorage.getItem('spa-redirect');
+if (spaRedirect) {
+  sessionStorage.removeItem('spa-redirect');
+  window.history.replaceState(null, '', spaRedirect);
+}
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {

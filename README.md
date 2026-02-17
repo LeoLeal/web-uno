@@ -2,9 +2,12 @@
 
 A serverless, peer-to-peer (P2P) multiplayer Uno game running entirely in the browser.
 
+![Cron job status](https://api.cron-job.org/jobs/7282731/52dcf81063c01d9e/status-1.svg)
+
 ## 🚀 How to Run
 
 To run the development environment:
+
 ```bash
 npm run dev
 ```
@@ -12,11 +15,13 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) to start playing.
 
 Run only the web app:
+
 ```bash
 npm run dev:web
 ```
 
 Run only the signaling server:
+
 ```bash
 npm run signaling
 ```
