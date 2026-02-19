@@ -1,0 +1,42 @@
+/* Entrance animations for cards played onto the discard pile */
+
+@keyframes enterFromTop {
+  0% {
+    opacity: 0;
+    transform: 
+      translateY(-30vh) 
+      rotate(var(--entrance-rotation-start));
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: 
+      translate(var(--final-offset-x), var(--final-offset-y)) 
+      rotate(var(--final-rotation));
+  }
+}
+
+@keyframes enterFromBottom {
+  from {
+    opacity: 1;
+    transform: 
+      translateY(40vh) 
+      rotate(var(--entrance-rotation-start));
+  }
+  to {
+    opacity: 1;
+    transform: 
+      translate(var(--final-offset-x), var(--final-offset-y)) 
+      rotate(var(--final-rotation));
+  }
+}
+
+.enterFromTop {
+  animation: enterFromTop 600ms ease-out forwards;
+}
+
+.enterFromBottom {
+  animation: enterFromBottom 600ms ease-out forwards;
+}

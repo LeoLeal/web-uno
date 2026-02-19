@@ -48,10 +48,13 @@ The animation applies only to the **top card** (most recently played). Previous 
 ## Impact
 
 **Code affected:**
-- `hooks/useGameState.ts` - Already modified to add `lastPlayedBy` tracking
+- `hooks/useGameEngine.ts` - Set `lastPlayedBy` when host processes PLAY_CARD action
+- `hooks/useGameState.ts` - Observe and expose `lastPlayedBy` state
 - `components/game/DiscardPile.tsx` - Add animation classes and provenance detection
 - `components/game/DiscardPile.module.css` - New file for CSS keyframes
-- `components/game/TableCenter.tsx` or `GameBoard.tsx` - Pass `lastPlayedBy` to DiscardPile
+- `components/game/TableCenter.tsx` - Pass `lastPlayedBy` and `myClientId` to DiscardPile
+- `components/game/GameBoard.tsx` - Accept and forward `lastPlayedBy` prop
+- `app/room/page.tsx` - Read `lastPlayedBy` from `useGameState` and pass to `GameBoard`
 
 **Dependencies:**
 - No new external dependencies (CSS-only approach)

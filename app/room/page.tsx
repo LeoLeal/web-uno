@@ -31,7 +31,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
   const navigate = useNavigate();
 
   const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected, isGameFull } = useRoom(id);
-  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, endType, scores, lastRoundPoints, initGame } = useGameState();
+  const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, endType, scores, lastRoundPoints, lastPlayedBy, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
@@ -189,6 +189,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
               orphanHands={orphanHands}
               isFrozen={status === 'PAUSED_WAITING_PLAYER' || status === 'ROUND_ENDED'}
               isMuted={isMuted}
+              lastPlayedBy={lastPlayedBy}
               onPlayCard={handlePlayCard}
               onDrawCard={handleDrawCard}
               canPlayCard={canPlayCard}

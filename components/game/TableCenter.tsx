@@ -13,6 +13,10 @@ interface TableCenterProps {
   isMyTurn?: boolean;
   /** Called when the deck is clicked to draw a card */
   onDrawCard?: () => void;
+  /** Client ID of the player who last played a card */
+  lastPlayedBy?: number | null;
+  /** Current player's client ID */
+  myClientId?: number | null;
 }
 
 // Mobile: 80x120, Desktop: ~130x195 (~60% larger = ~20% less than 2x)
@@ -24,7 +28,14 @@ const DESKTOP_HEIGHT = 195;
 /**
  * Center table area containing the deck pile and discard pile side by side.
  */
-export const TableCenter = ({ discardPile, className, isMyTurn, onDrawCard }: TableCenterProps) => {
+export const TableCenter = ({ 
+  discardPile, 
+  className, 
+  isMyTurn, 
+  onDrawCard,
+  lastPlayedBy = null,
+  myClientId = null,
+}: TableCenterProps) => {
   const breakpoint = useBreakpoint();
   const isDesktop = breakpoint === 'desktop';
   const cardWidth = isDesktop ? DESKTOP_WIDTH : MOBILE_WIDTH;
@@ -50,7 +61,13 @@ export const TableCenter = ({ discardPile, className, isMyTurn, onDrawCard }: Ta
 
       {/* Discard pile */}
       <div className="flex flex-col items-center gap-2">
-        <DiscardPile cards={discardPile} cardWidth={cardWidth} cardHeight={cardHeight} />
+        <DiscardPile 
+          cards={discardPile} 
+          cardWidth={cardWidth} 
+          cardHeight={cardHeight}
+          lastPlayedBy={lastPlayedBy}
+          myClientId={myClientId}
+        />
         <span className="text-xs text-(--cream-dark) opacity-50 font-mono">Discard</span>
       </div>
     </div>

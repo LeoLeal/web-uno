@@ -4,13 +4,15 @@ The `DiscardPile` component currently displays up to 3 cards with random rotatio
 
 **Current state:**
 - `DiscardPile` receives `cards` array and applies random transforms via `transformsById` memo
-- `useGameState` now tracks `lastPlayedBy` (clientId of the player who just played)
 - Transform values are cached per-card to prevent jitter on re-renders
+- No tracking of who played the most recent card
 
 **Stakeholders:**
 - `DiscardPile.tsx` - needs animation logic
 - `TableCenter.tsx` - needs to pass `lastPlayedBy` prop
-- `useGameState.ts` - already provides `lastPlayedBy`
+- `GameBoard.tsx` - needs to pass `lastPlayedBy` and `myClientId` props
+- `useGameState.ts` - needs to expose `lastPlayedBy` state
+- `useGameEngine.ts` - needs to set `lastPlayedBy` when a card is played
 
 ## Goals / Non-Goals
 
@@ -47,7 +49,22 @@ const visibleCards = cards.slice(-VISIBLE_DISCARD_COUNT);
 
 ## Decisions
 
-### 1. Detecting "new" top card without ref reads during render
+### 1. Track lastPlayedBy in game state
+
+**Decision:** Add `lastPlayedBy` field to the shared Yjs game state, set by the host when processing `PLAY_CARD` actions.
+
+**Rationale:** To animate cards based on who played them, we need to know the client ID of the most recent player. This value must be synced across all clients so everyone sees the same animation direction.
+
+**Implementation:**
+- In `useGameEngine.ts`: When the host processes a valid `PLAY_CARD` action, set `gameStateMap.set('lastPlayedBy', clientId)` inside the transaction
+- In `useGameState.ts`: Observe and expose `lastPlayedBy` as `number | null`
+- Initial value is `null` (no cards played yet, e.g., game start with first card revealed)
+
+**Edge cases:**
+- `lastPlayedBy` is `null` on game start (first card is revealed, not played)
+- `lastPlayedBy` is reset to `null` when initializing a new round (consistent with game start behavior)
+
+### 2. Detecting "new" top card without ref reads during render
 
 **Decision:** Derive `topCardId` from visible cards, then detect top-card transitions inside `useEffect`. Use local state (`animatedTopCardId`) to drive class application.
 
@@ -63,6 +80,11 @@ const [animatedTopCardId, setAnimatedTopCardId] = useState<string | null>(null);
 const previousTopCardIdRef = useRef<string | null>(null);
 const hasMountedRef = useRef(false);
 
+// Detect top-card transitions after mount to trigger entrance animations.
+// We use useEffect + setState instead of useMemo because:
+// 1. Writing to previousTopCardIdRef during render (in useMemo) is a side effect
+// 2. The one-frame delay ensures the card renders in its final position first,
+//    then the animation class is applied, triggering the entrance animation cleanly
 useEffect(() => {
   if (!hasMountedRef.current) {
     hasMountedRef.current = true;
@@ -84,7 +106,7 @@ useEffect(() => {
 - Compare `cards.length` - misses replacement cases and is less explicit than top-card identity.
 - Use a `key` change to force remount - breaks transform caching and can cause visual jitter.
 
-### 2. Provenance-based animation direction
+### 3. Provenance-based animation direction
 
 **Decision:** Compare `lastPlayedBy` to `myClientId` to determine if card came from current player (bottom) or opponent (top).
 
@@ -97,7 +119,7 @@ const animationOrigin = lastPlayedBy === myClientId ? 'bottom' : 'top';
 
 **Edge case:** If `lastPlayedBy` is `null` (game start, no plays yet), skip animation.
 
-### 3. CSS animation approach
+### 4. CSS animation approach
 
 **Decision:** Use CSS keyframes with CSS custom properties (variables) for dynamic values.
 
@@ -141,7 +163,7 @@ const animationOrigin = lastPlayedBy === myClientId ? 'bottom' : 'top';
 
 **Timing:** `600ms ease-out` (prone to adjustment for stronger ease-out curve)
 
-### 4. Where to apply animation
+### 5. Where to apply animation
 
 **Decision:** Apply animation class to the wrapper `<div>` of the top card only.
 

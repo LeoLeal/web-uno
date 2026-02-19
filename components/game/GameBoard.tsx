@@ -35,6 +35,8 @@ interface GameBoardProps {
   isFrozen?: boolean;
   /** Whether local game room audio feedback is muted */
   isMuted?: boolean;
+  /** Client ID of the player who last played a card */
+  lastPlayedBy?: number | null;
   /** Handler for playing a card (with optional color for wilds) */
   onPlayCard?: (cardId: string, chosenColor?: CardColor) => void;
   /** Handler for drawing a card */
@@ -61,6 +63,7 @@ export const GameBoard = ({
   orphanHands = [],
   isFrozen = false,
   isMuted = false,
+  lastPlayedBy = null,
   onPlayCard,
   onDrawCard,
   canPlayCard,
@@ -134,6 +137,8 @@ export const GameBoard = ({
           discardPile={discardPile}
           isMyTurn={isMyTurn}
           onDrawCard={onDrawCard}
+          lastPlayedBy={lastPlayedBy}
+          myClientId={myClientId}
         />
       </div>
 

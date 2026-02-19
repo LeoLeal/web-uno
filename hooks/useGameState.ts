@@ -33,6 +33,7 @@ export const useGameState = () => {
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [lastRoundPoints, setLastRoundPoints] = useState<number>(0);
   const [statusBeforePause, setStatusBeforePause] = useState<GameStatus | null>(null);
+  const [lastPlayedBy, setLastPlayedBy] = useState<number | null>(null);
 
   useEffect(() => {
     if (!doc) return;
@@ -88,6 +89,9 @@ export const useGameState = () => {
 
       const statusBefore = gameStateMap.get('statusBeforePause') as GameStatus | null | undefined;
       setStatusBeforePause(statusBefore ?? null);
+
+      const lastPlayed = gameStateMap.get('lastPlayedBy') as number | undefined;
+      setLastPlayedBy(lastPlayed ?? null);
     };
 
     gameStateMap.observe(handleChange);
@@ -128,6 +132,7 @@ export const useGameState = () => {
     currentRound,
     lastRoundPoints,
     statusBeforePause,
+    lastPlayedBy,
     startGame,
     initGame,
   };

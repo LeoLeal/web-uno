@@ -175,6 +175,7 @@ export const useGameEngine = ({
       gameStateMap.set('playerCardCounts', playerCardCounts);
       gameStateMap.set('turnOrder', turnOrder);
       gameStateMap.set('lockedPlayers', lockedPlayers);
+      gameStateMap.set('lastPlayedBy', null); // Initial card is revealed, not played
 
       // Initialize multi-round game state
       if (scoreLimit !== null) {
@@ -237,6 +238,7 @@ export const useGameEngine = ({
       gameStateMap.set('playerCardCounts', playerCardCounts);
       gameStateMap.set('currentRound', newRound);
       gameStateMap.set('orphanHands', []); // Clear orphan hands
+      gameStateMap.set('lastPlayedBy', null); // Initial card is revealed, not played
       // turnOrder and lockedPlayers are preserved (not modified)
       // scores are preserved (not modified)
 
@@ -362,6 +364,9 @@ export const useGameEngine = ({
             // Remove card from hand
             const newHand = playerHand.filter((c) => c.id !== card.id);
             dealtHandsMap.set(clientIdStr, newHand);
+
+            // Track who played the card
+            gameStateMap.set('lastPlayedBy', clientId);
 
             // Mutate wild card color if chosen
             const playedCard: Card = { ...card };
