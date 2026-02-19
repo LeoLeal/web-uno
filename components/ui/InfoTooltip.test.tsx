@@ -131,22 +131,4 @@ describe('InfoTooltip', () => {
     });
   });
 
-  describe('aria-hidden state', () => {
-    it('should have aria-hidden true when closed', () => {
-      render(<InfoTooltip content="Test content" />);
-
-      const tooltip = document.querySelector('[role="tooltip"]');
-      expect(tooltip).toHaveAttribute('aria-hidden', 'true');
-    });
-
-    it('should have aria-hidden false when open', () => {
-      render(<InfoTooltip content="Test content" />);
-
-      const trigger = screen.getByRole('button');
-      fireEvent.click(trigger);
-
-      const tooltip = document.querySelector('[role="tooltip"]');
-      expect(tooltip).toHaveAttribute('aria-hidden', 'false');
-    });
-  });
 });

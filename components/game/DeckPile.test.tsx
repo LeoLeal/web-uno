@@ -41,10 +41,8 @@ describe('DeckPile', () => {
       );
 
       const deck = container.firstChild as HTMLElement;
-      // Should not throw error
+      // Should not throw error when clicking without onClick handler
       await user.click(deck);
-
-      expect(true).toBe(true);
     });
   });
 

@@ -134,9 +134,7 @@ describe('WildColorModal', () => {
   });
 
   describe('Modal Dismissal', () => {
-    it('should call onCancel when backdrop is clicked', async () => {
-      const user = userEvent.setup();
-
+    it('should call onCancel when cancel event fires on dialog', () => {
       const { container } = render(
         <WildColorModal
           isOpen={true}
@@ -145,14 +143,13 @@ describe('WildColorModal', () => {
         />
       );
 
-      // Click the backdrop (modal overlay)
-      const backdrop = container.querySelector('[role="dialog"]')?.parentElement;
-      if (backdrop) {
-        await user.click(backdrop);
+      // Simulate the cancel event on the dialog (triggered by Escape or backdrop click)
+      const dialog = container.querySelector('dialog');
+      if (dialog) {
+        dialog.dispatchEvent(new Event('cancel', { bubbles: true }));
       }
 
-      // Note: Modal component handles backdrop clicks via onClose prop
-      // which is mapped to onCancel in WildColorModal
+      expect(mockOnCancel).toHaveBeenCalled();
     });
   });
 

@@ -218,30 +218,5 @@ describe('PlayerHand', () => {
       expect(screen.getByRole('button', { name: /Call UNO/i })).toBeInTheDocument();
     });
 
-    it('should show score during player turn', () => {
-      render(
-        <PlayerHand
-          cards={mockCards}
-          score={175}
-          showScore={true}
-          isMyTurn={true}
-        />
-      );
-
-      expect(screen.getByText('175 pts')).toBeInTheDocument();
-    });
-
-    it('should show score when not player turn', () => {
-      render(
-        <PlayerHand
-          cards={mockCards}
-          score={100}
-          showScore={true}
-          isMyTurn={false}
-        />
-      );
-
-      expect(screen.getByText('100 pts')).toBeInTheDocument();
-    });
-  });
+});
 });

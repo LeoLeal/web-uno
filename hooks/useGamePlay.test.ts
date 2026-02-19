@@ -1,85 +1,122 @@
-import { describe, it, expect } from 'vitest';
-import { Card, CardColor } from '@/lib/game/cards';
+import { renderHook } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useGamePlay } from './useGamePlay';
+import { Card } from '@/lib/game/cards';
+import * as Y from 'yjs';
 
-/**
- * Tests for canPlayCard logic
- * Testing the validation rules directly without hook mocking
- */
+// Mock GameProvider
+const mockDoc = new Y.Doc();
+vi.mock('@/components/providers/GameProvider', () => ({
+  useGame: () => ({ doc: mockDoc }),
+}));
 
-// Replicate the canPlayCard logic for testing
-const canPlayCard = (card: Card, topDiscard: Card | null, activeColor: CardColor | null): boolean => {
-  if (!topDiscard) return false;
-
-  // No active color (wild first card) - any card is playable
-  if (activeColor === null) return true;
-
-  // Wild cards are always playable
-  if (card.symbol === 'wild' || card.symbol === 'wild-draw4') return true;
-
-  // Color match
-  if (card.color === activeColor) return true;
-
-  // Symbol match
-  if (card.symbol === topDiscard.symbol) return true;
-
-  // No match
-  return false;
+// Mock useGameState with controllable return values
+const mockGameState = {
+  currentTurn: 1 as number | null,
+  discardPile: [] as Card[],
+  status: 'PLAYING' as string,
 };
 
-describe('canPlayCard', () => {
-  const topDiscard: Card = { id: 'top-1', color: 'red', symbol: '5' };
+vi.mock('@/hooks/useGameState', () => ({
+  useGameState: () => mockGameState,
+}));
 
-  describe('Color match', () => {
-    it('should allow playing a card that matches the active color', () => {
-      const card: Card = { id: 'card-1', color: 'red', symbol: '7' };
-      expect(canPlayCard(card, topDiscard, 'red')).toBe(true);
-    });
+describe('useGamePlay.canPlayCard', () => {
+  it('should allow card with matching color', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() => useGamePlay(1));
 
-    it('should reject a card that does not match color or symbol', () => {
-      const card: Card = { id: 'card-2', color: 'blue', symbol: '3' };
-      expect(canPlayCard(card, topDiscard, 'red')).toBe(false);
-    });
+    const card: Card = { id: 'c1', color: 'red', symbol: '9' };
+    expect(result.current.canPlayCard(card)).toBe(true);
   });
 
-  describe('Symbol match', () => {
-    it('should allow playing a card that matches the symbol even if color differs', () => {
-      const card: Card = { id: 'card-3', color: 'green', symbol: '5' };
-      expect(canPlayCard(card, topDiscard, 'red')).toBe(true);
-    });
+  it('should allow card with matching symbol', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() => useGamePlay(1));
+
+    const card: Card = { id: 'c1', color: 'blue', symbol: '5' };
+    expect(result.current.canPlayCard(card)).toBe(true);
   });
 
-  describe('Wild cards', () => {
-    it('should always allow playing a Wild card', () => {
-      const wildCard: Card = { id: 'wild-1', symbol: 'wild' };
-      expect(canPlayCard(wildCard, topDiscard, 'red')).toBe(true);
-    });
+  it('should allow wild cards regardless of top card', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() => useGamePlay(1));
 
-    it('should always allow playing a Wild Draw Four card', () => {
-      const wildDraw4: Card = { id: 'wd4-1', symbol: 'wild-draw4' };
-      expect(canPlayCard(wildDraw4, topDiscard, 'red')).toBe(true);
-    });
+    const wild: Card = { id: 'c1', symbol: 'wild' };
+    const wildDraw4: Card = { id: 'c2', symbol: 'wild-draw4' };
+
+    expect(result.current.canPlayCard(wild)).toBe(true);
+    expect(result.current.canPlayCard(wildDraw4)).toBe(true);
   });
 
-  describe('Null active color (wild first card)', () => {
-    it('should allow any card when active color is null', () => {
-      const wildTopDiscard: Card = { id: 'wild-top', symbol: 'wild' };
-      const anyCard: Card = { id: 'any-1', color: 'blue', symbol: '8' };
+  it('should reject card with no color or symbol match', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() => useGamePlay(1));
 
-      expect(canPlayCard(anyCard, wildTopDiscard, null)).toBe(true);
-    });
-
-    it('should allow wild cards when active color is null', () => {
-      const wildTopDiscard: Card = { id: 'wild-top', symbol: 'wild' };
-      const wildCard: Card = { id: 'wild-2', symbol: 'wild' };
-
-      expect(canPlayCard(wildCard, wildTopDiscard, null)).toBe(true);
-    });
+    const card: Card = { id: 'c1', color: 'blue', symbol: '9' };
+    expect(result.current.canPlayCard(card)).toBe(false);
   });
 
-  describe('No match', () => {
-    it('should reject a card that matches neither color nor symbol', () => {
-      const card: Card = { id: 'card-4', color: 'yellow', symbol: '2' };
-      expect(canPlayCard(card, topDiscard, 'red')).toBe(false);
-    });
+  it('should allow any card when top discard has no active color (wild first card)', () => {
+    // Wild card as top discard with no color set
+    mockGameState.discardPile = [{ id: 'd1', symbol: 'wild' }];
+    const { result } = renderHook(() => useGamePlay(1));
+
+    const card: Card = { id: 'c1', color: 'green', symbol: '3' };
+    expect(result.current.canPlayCard(card)).toBe(true);
+  });
+
+  it('should reject all cards when discard pile is empty', () => {
+    mockGameState.discardPile = [];
+    const { result } = renderHook(() => useGamePlay(1));
+
+    const card: Card = { id: 'c1', color: 'red', symbol: '5' };
+    expect(result.current.canPlayCard(card)).toBe(false);
+  });
+
+  it('should allow action card with matching color', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'blue', symbol: '3' }];
+    const { result } = renderHook(() => useGamePlay(1));
+
+    const card: Card = { id: 'c1', color: 'blue', symbol: 'skip' };
+    expect(result.current.canPlayCard(card)).toBe(true);
+  });
+
+  it('should allow action card with matching symbol', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: 'skip' }];
+    const { result } = renderHook(() => useGamePlay(1));
+
+    const card: Card = { id: 'c1', color: 'green', symbol: 'skip' };
+    expect(result.current.canPlayCard(card)).toBe(true);
+  });
+});
+
+describe('useGamePlay.isMyTurn', () => {
+  it('should be true when currentTurn matches myClientId and status is PLAYING', () => {
+    mockGameState.currentTurn = 1;
+    mockGameState.status = 'PLAYING';
+    const { result } = renderHook(() => useGamePlay(1));
+    expect(result.current.isMyTurn).toBe(true);
+  });
+
+  it('should be false when currentTurn does not match', () => {
+    mockGameState.currentTurn = 2;
+    mockGameState.status = 'PLAYING';
+    const { result } = renderHook(() => useGamePlay(1));
+    expect(result.current.isMyTurn).toBe(false);
+  });
+
+  it('should be false when status is not PLAYING', () => {
+    mockGameState.currentTurn = 1;
+    mockGameState.status = 'LOBBY';
+    const { result } = renderHook(() => useGamePlay(1));
+    expect(result.current.isMyTurn).toBe(false);
+  });
+
+  it('should be false when myClientId is null', () => {
+    mockGameState.currentTurn = 1;
+    mockGameState.status = 'PLAYING';
+    const { result } = renderHook(() => useGamePlay(null));
+    expect(result.current.isMyTurn).toBe(false);
   });
 });

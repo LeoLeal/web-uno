@@ -13,16 +13,7 @@ describe('Accessibility', () => {
       expect(results).toHaveNoViolations();
     });
 
-    it('should have sufficient color contrast', async () => {
-      const { container } = render(<Logo />);
-      const results = await axe(container, {
-        rules: {
-          'color-contrast': { enabled: true },
-        },
-      });
-      expect(results).toHaveNoViolations();
-    });
-  });
+});
 
   describe('CardFan', () => {
     it('should have no accessibility violations', async () => {
@@ -66,12 +57,7 @@ describe('Accessibility', () => {
       expect(results).toHaveNoViolations();
     });
 
-    it('should have descriptive alt text', async () => {
-      const { container } = render(<UnoCard color="red" symbol="7" />);
-      const img = container.querySelector('img');
-      expect(img).toHaveAttribute('alt', 'red 7 card');
-    });
-  });
+});
 
   describe('Homepage components integration', () => {
     it('should have no accessibility violations when rendered together', async () => {

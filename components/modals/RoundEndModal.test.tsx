@@ -40,15 +40,6 @@ describe('RoundEndModal', () => {
       expect(resultText).toBeInTheDocument();
     });
 
-    it('should display points gained this round', () => {
-      render(<RoundEndModal {...defaultProps} />);
-      // Use a more specific selector for the points in the result section
-      const resultText = screen.getByText((content, element) => {
-        return element?.textContent === 'Bob wins this round and gains 50 points!';
-      });
-      expect(resultText).toBeInTheDocument();
-    });
-
     it('should display score limit', () => {
       render(<RoundEndModal {...defaultProps} />);
       expect(screen.getByText(/500 points/i)).toBeInTheDocument();
@@ -140,9 +131,10 @@ describe('RoundEndModal', () => {
   describe('Edge Cases', () => {
     it('should handle winner with 0 points gained', () => {
       render(<RoundEndModal {...defaultProps} roundPoints={0} />);
-      // Just check the component renders correctly with 0 points
-      expect(screen.getByText(/Round Complete/)).toBeInTheDocument();
-      expect(screen.getByText(/wins this round/)).toBeInTheDocument();
+      const resultText = screen.getByText((_content, element) => {
+        return element?.textContent === 'Bob wins this round and gains 0 points!';
+      });
+      expect(resultText).toBeInTheDocument();
     });
 
     it('should handle large point values', () => {
@@ -200,15 +192,18 @@ describe('RoundEndModal', () => {
 
     it('should show different winner names correctly', () => {
       render(<RoundEndModal {...defaultProps} winnerName="Alice" />);
-      // Just verify the component renders with the new winner
-      expect(screen.getByText(/Round Complete/)).toBeInTheDocument();
-      expect(screen.getByText(/wins this round/)).toBeInTheDocument();
+      const resultText = screen.getByText((_content, element) => {
+        return element?.textContent === 'Alice wins this round and gains 50 points!';
+      });
+      expect(resultText).toBeInTheDocument();
     });
 
     it('should show large round points correctly', () => {
       render(<RoundEndModal {...defaultProps} roundPoints={250} />);
-      // Just verify the component renders with large points
-      expect(screen.getByText(/Round Complete/)).toBeInTheDocument();
+      const resultText = screen.getByText((_content, element) => {
+        return element?.textContent === 'Bob wins this round and gains 250 points!';
+      });
+      expect(resultText).toBeInTheDocument();
     });
   });
 });

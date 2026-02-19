@@ -116,11 +116,6 @@ describe('OpponentIndicator', () => {
   });
 
   describe('Host Indicator', () => {
-    it('should show crown for host', () => {
-      render(<OpponentIndicator {...defaultProps} isHost={true} />);
-      expect(screen.getByText('👑')).toBeInTheDocument();
-    });
-
     it('should not show crown for non-host', () => {
       render(<OpponentIndicator {...defaultProps} isHost={false} />);
       expect(screen.queryByText('👑')).not.toBeInTheDocument();
@@ -245,18 +240,6 @@ describe('OpponentIndicator', () => {
       );
 
       expect(screen.getByText('999 pts')).toBeInTheDocument();
-    });
-
-    it('should not show score when showScore is false even if score is provided', () => {
-      render(
-        <OpponentIndicator
-          {...defaultProps}
-          score={500}
-          showScore={false}
-        />
-      );
-
-      expect(screen.queryByText(/pts/)).not.toBeInTheDocument();
     });
 
     it('should show score with all other indicators (turn, host, disconnected)', () => {

@@ -4,9 +4,8 @@ import { Card, isWildDrawFour } from '@/lib/game/cards';
 import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 
 /**
- * Tests for game engine logic (deck dealing, turn order, etc.)
- * We test the core logic directly rather than the hook to avoid
- * complex React/Yjs mocking.
+ * Tests for game engine logic (deck dealing, first card flip)
+ * Tests core logic directly using real createDeck/shuffle/isWildDrawFour.
  */
 
 describe('Game Engine Logic', () => {
@@ -14,7 +13,7 @@ describe('Game Engine Logic', () => {
     it('should deal correct number of cards to each player', () => {
       const deck = createDeck();
       shuffle(deck);
-      
+
       const playerIds = [1, 2, 3];
       const handSize = 7;
       const hands: Record<number, Card[]> = {};
@@ -72,7 +71,6 @@ describe('Game Engine Logic', () => {
 
   describe('First Card Flip', () => {
     it('should not use Wild Draw 4 as first card', () => {
-      // Simulate the first card flip logic
       const deck = createDeck();
       shuffle(deck);
 
@@ -93,7 +91,6 @@ describe('Game Engine Logic', () => {
     });
 
     it('should allow regular Wild as first card', () => {
-      // Create a deck where the first card after dealing is a Wild
       const deck = createDeck();
       // Find a wild card and put it at position where it would be the first flip
       const wildIndex = deck.findIndex(
@@ -115,199 +112,7 @@ describe('Game Engine Logic', () => {
     });
   });
 
-  describe('First Card Effects', () => {
-    it('should skip first player when first card is Skip', () => {
-      const turnOrder = [10, 20, 30];
-      const _firstCard = { id: 'card-1', color: 'red' as const, symbol: 'skip' as const };
-
-      // Skip effect: start with second player
-      const initialTurn = turnOrder[1 % turnOrder.length];
-      expect(initialTurn).toBe(20);
-    });
-
-    it('should reverse direction and start with last player when first card is Reverse', () => {
-      const turnOrder = [10, 20, 30];
-      const _firstCard = { id: 'card-1', color: 'blue' as const, symbol: 'reverse' as const };
-
-      // Reverse effect
-      const initialDirection = -1;
-      const initialTurn = turnOrder[turnOrder.length - 1];
-
-      expect(initialDirection).toBe(-1);
-      expect(initialTurn).toBe(30);
-    });
-
-    it('should deal 2 cards to first player and skip them when first card is Draw Two', () => {
-      const deck = createDeck();
-      shuffle(deck);
-
-      const turnOrder = [10, 20, 30];
-      const handSize = 7;
-      const hands: Record<number, Card[]> = {};
-      const cardCounts: Record<number, number> = {};
-
-      // Deal initial hands
-      for (const playerId of turnOrder) {
-        const hand = deck.splice(0, handSize);
-        hands[playerId] = hand;
-        cardCounts[playerId] = hand.length;
-      }
-
-      // Simulate Draw Two as first card
-      const _firstCard = { id: 'card-dt', color: 'green' as const, symbol: 'draw2' as const };
-      const firstPlayerId = turnOrder[0];
-      const drawnCards = deck.splice(0, 2);
-      hands[firstPlayerId].push(...drawnCards);
-      cardCounts[firstPlayerId] += drawnCards.length;
-      const initialTurn = turnOrder[1 % turnOrder.length];
-
-      expect(hands[firstPlayerId]).toHaveLength(9); // 7 + 2
-      expect(cardCounts[firstPlayerId]).toBe(9);
-      expect(initialTurn).toBe(20); // Second player
-    });
-
-    it('should leave Wild colorless when it is the first card', () => {
-      const firstCard: Card = { id: 'card-w', symbol: 'wild' as const };
-
-      // Wild stays colorless
-      expect(firstCard.color).toBeUndefined();
-    });
-
-    it('should not have Wild Draw Four as first card (already reshuffled)', () => {
-      // This is tested in the "First Card Flip" describe block
-      // Wild Draw Four should never appear as first card due to reshuffle logic
-      const deck = createDeck();
-      const firstCard = deck[0];
-
-      // Simulate the reshuffle logic
-      if (isWildDrawFour(firstCard)) {
-        // Would be reshuffled
-        expect(true).toBe(true); // Placeholder
-      } else {
-        expect(firstCard.symbol).not.toBe('wild-draw4');
-      }
-    });
-  });
-
-  describe('Turn Order', () => {
-    it('should set turn order based on player list order', () => {
-      const players = [
-        { clientId: 10, name: 'Host' },
-        { clientId: 20, name: 'Alice' },
-        { clientId: 30, name: 'Bob' },
-      ];
-
-      const turnOrder = players.map((p) => p.clientId);
-      expect(turnOrder).toEqual([10, 20, 30]);
-    });
-
-    it('should set first player as current turn', () => {
-      const players = [
-        { clientId: 10, name: 'Host' },
-        { clientId: 20, name: 'Alice' },
-        { clientId: 30, name: 'Bob' },
-      ];
-
-      const turnOrder = players.map((p) => p.clientId);
-      const currentTurn = turnOrder[0];
-      expect(currentTurn).toBe(10);
-    });
-
-    it('should set initial direction to forward (1)', () => {
-      const direction = 1;
-      expect(direction).toBe(1);
-    });
-  });
-
-  describe('Locked Players', () => {
-    it('should lock player list with clientId and name', () => {
-      const players = [
-        { clientId: 1, name: 'Host', isHost: true, avatar: '🐶' },
-        { clientId: 2, name: 'Alice', isHost: false, avatar: '🐱' },
-        { clientId: 3, name: 'Bob', isHost: false, avatar: '🐰' },
-      ];
-
-      const lockedPlayers = players.map((p) => ({
-        clientId: p.clientId,
-        name: p.name,
-      }));
-
-      expect(lockedPlayers).toHaveLength(3);
-      expect(lockedPlayers).toEqual([
-        { clientId: 1, name: 'Host' },
-        { clientId: 2, name: 'Alice' },
-        { clientId: 3, name: 'Bob' },
-      ]);
-    });
-
-    it('should detect late joiners correctly', () => {
-      const lockedPlayers = [
-        { clientId: 1, name: 'Host' },
-        { clientId: 2, name: 'Alice' },
-      ];
-
-      const lateJoinerClientId = 99;
-      const isLateJoiner = !lockedPlayers.some(
-        (p) => p.clientId === lateJoinerClientId
-      );
-
-      expect(isLateJoiner).toBe(true);
-    });
-
-    it('should not flag existing players as late joiners', () => {
-      const lockedPlayers = [
-        { clientId: 1, name: 'Host' },
-        { clientId: 2, name: 'Alice' },
-      ];
-
-      const existingClientId = 2;
-      const isLateJoiner = !lockedPlayers.some(
-        (p) => p.clientId === existingClientId
-      );
-
-      expect(isLateJoiner).toBe(false);
-    });
-  });
-
   describe('Player Limits', () => {
-    it(`should require at least ${MIN_PLAYERS} players to initialize`, () => {
-      const players = [
-        { clientId: 1, name: 'Host' },
-        { clientId: 2, name: 'Alice' },
-      ];
-
-      // Below minimum - should not initialize
-      expect(players.length < MIN_PLAYERS).toBe(true);
-    });
-
-    it(`should allow game with ${MIN_PLAYERS} players`, () => {
-      const players = [
-        { clientId: 1, name: 'Host' },
-        { clientId: 2, name: 'Alice' },
-        { clientId: 3, name: 'Bob' },
-      ];
-
-      expect(players.length >= MIN_PLAYERS && players.length <= MAX_PLAYERS).toBe(true);
-    });
-
-    it(`should allow game with up to ${MAX_PLAYERS} players`, () => {
-      const players = Array.from({ length: MAX_PLAYERS }, (_, i) => ({
-        clientId: i + 1,
-        name: `Player ${i + 1}`,
-      }));
-
-      expect(players.length <= MAX_PLAYERS).toBe(true);
-    });
-
-    it(`should reject more than ${MAX_PLAYERS} players`, () => {
-      const players = Array.from({ length: MAX_PLAYERS + 1 }, (_, i) => ({
-        clientId: i + 1,
-        name: `Player ${i + 1}`,
-      }));
-
-      expect(players.length > MAX_PLAYERS).toBe(true);
-    });
-
     it('should deal correct cards for minimum players', () => {
       const deck = createDeck();
       const playerIds = Array.from({ length: MIN_PLAYERS }, (_, i) => i + 1);

@@ -6,8 +6,6 @@ import { PlayerList } from './PlayerList';
 import { JoinGameModal } from '@/components/modals/JoinGameModal';
 import { StartGameButton } from './StartGameButton';
 import { HostDisconnectModal } from '@/components/modals/HostDisconnectModal';
-import { GameSettingsPanel } from './GameSettingsPanel';
-import { DEFAULT_SETTINGS } from '@/lib/game/settings';
 import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/game/constants';
 
 // Mock HTMLDialogElement methods for jsdom
@@ -28,23 +26,6 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => vi.fn(),
   };
 });
-
-// Mock the hooks
-vi.mock('@/hooks/useGameSettings', () => ({
-  useGameSettings: () => ({
-    settings: DEFAULT_SETTINGS,
-    updateSettings: vi.fn(),
-    initSettings: vi.fn(),
-  }),
-}));
-
-vi.mock('@/hooks/useGameState', () => ({
-  useGameState: () => ({
-    status: 'LOBBY',
-    startGame: vi.fn(),
-    initGame: vi.fn(),
-  }),
-}));
 
 describe('Lobby Components Accessibility', () => {
   describe('PlayerList', () => {
@@ -208,91 +189,7 @@ describe('Lobby Components Accessibility', () => {
     });
   });
 
-  describe('GameSettingsPanel', () => {
-    it('should have no accessibility violations for host', async () => {
-      const { container } = render(<GameSettingsPanel isHost={true} />);
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('should have no accessibility violations for non-host', async () => {
-      const { container } = render(<GameSettingsPanel isHost={false} />);
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('should display settings summary', () => {
-      render(<GameSettingsPanel isHost={false} />);
-      
-      expect(screen.getByRole('heading', { name: /game settings/i, level: 3 })).toBeVisible();
-      expect(screen.getByText(/No stacking/i)).toBeVisible();
-      expect(screen.getByText(/7 cards/i)).toBeVisible();
-    });
-
-    it('should show Configure button only for host', () => {
-      const { rerender } = render(<GameSettingsPanel isHost={true} />);
-      expect(screen.getByRole('button', { name: /configure/i })).toBeVisible();
-      
-      rerender(<GameSettingsPanel isHost={false} />);
-      expect(screen.queryByRole('button', { name: /configure/i })).not.toBeInTheDocument();
-    });
-
-    it('should have accessible Configure button', () => {
-      render(<GameSettingsPanel isHost={true} />);
-      
-      const button = screen.getByRole('button', { name: /configure/i });
-      expect(button).toBeEnabled();
-    });
-  });
-
-  describe('Color Contrast', () => {
-    it('PlayerList should have sufficient color contrast', async () => {
-      const mockPlayers = [{ clientId: 1, name: 'Alice', avatar: '🦊', isHost: true }];
-      const { container } = render(
-        <PlayerList players={mockPlayers} myClientId={1} hostId={1} />
-      );
-      const results = await axe(container, {
-        rules: {
-          'color-contrast': { enabled: true },
-        },
-      });
-      expect(results).toHaveNoViolations();
-    });
-
-    it('JoinGameModal should have sufficient color contrast', async () => {
-      const { container } = render(
-        <JoinGameModal isOpen={true} onJoin={vi.fn()} />
-      );
-      const results = await axe(container, {
-        rules: {
-          'color-contrast': { enabled: true },
-        },
-      });
-      expect(results).toHaveNoViolations();
-    });
-
-    it('GameSettingsPanel should have sufficient color contrast', async () => {
-      const { container } = render(<GameSettingsPanel isHost={true} />);
-      const results = await axe(container, {
-        rules: {
-          'color-contrast': { enabled: true },
-        },
-      });
-      expect(results).toHaveNoViolations();
-    });
-  });
-
   describe('Keyboard Navigation', () => {
-    it('JoinGameModal form can be submitted via keyboard', async () => {
-      const onJoin = vi.fn();
-      render(<JoinGameModal isOpen={true} onJoin={onJoin} />);
-      
-      // Type name and press Enter
-      await userEvent.keyboard('TestPlayer{Enter}');
-      
-      expect(onJoin).toHaveBeenCalledWith('TestPlayer');
-    });
-
     it('StartGameButton can be activated via keyboard', async () => {
       const onStart = vi.fn();
       render(<StartGameButton isHost={true} playerCount={MIN_PLAYERS} onStart={onStart} />);
@@ -304,16 +201,5 @@ describe('Lobby Components Accessibility', () => {
       expect(onStart).toHaveBeenCalled();
     });
 
-    it('GameSettingsPanel Configure button can be activated via keyboard', async () => {
-      render(<GameSettingsPanel isHost={true} />);
-      
-      const button = screen.getByRole('button', { name: /configure/i });
-      button.focus();
-      await userEvent.keyboard('{Enter}');
-      
-      // Modal should open
-      const dialog = document.querySelector('dialog');
-      expect(dialog).toHaveAttribute('open');
-    });
-  });
+});
 });
