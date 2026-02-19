@@ -203,19 +203,17 @@ describe('PlayerHand', () => {
       expect(screen.getByText('0 pts')).toBeInTheDocument();
     });
 
-    it('should show score alongside UNO button when applicable', () => {
+    it('should show score without rendering an UNO button', () => {
       render(
         <PlayerHand
           cards={[mockCards[0], mockCards[1]]} // 2 cards to enable UNO
           score={250}
           showScore={true}
-          onUno={vi.fn()}
         />
       );
 
       expect(screen.getByText('250 pts')).toBeInTheDocument();
-      // The button shows "UNO" (not "UNO!") when canCallUno is true and hasCalledUno is false
-      expect(screen.getByRole('button', { name: /Call UNO/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Call UNO/i })).not.toBeInTheDocument();
     });
 
 });

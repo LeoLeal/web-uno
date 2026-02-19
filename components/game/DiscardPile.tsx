@@ -3,7 +3,7 @@
 import { Card } from '@/lib/game/cards';
 import { UnoCard } from '@/components/ui/UnoCard';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 
 interface DiscardPileProps {
   cards: Card[];
@@ -16,24 +16,46 @@ interface DiscardPileProps {
 const DEFAULT_WIDTH = 80;
 const DEFAULT_HEIGHT = 120;
 
+interface CardTransform {
+  rotation: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+const transformCacheByInstance = new Map<string, Record<string, CardTransform>>();
+
+const createRandomTransform = (): CardTransform => ({
+  rotation: Math.random() * 60 - 30,
+  offsetX: Math.random() * 12 - 6,
+  offsetY: Math.random() * 12 - 6,
+});
+
 /**
  * Discard pile with stacked cards featuring random rotation/offset for organic look.
  * Shows up to the last 3 cards with the top card fully visible.
  */
 export const DiscardPile = ({ cards, className, cardWidth = DEFAULT_WIDTH, cardHeight = DEFAULT_HEIGHT }: DiscardPileProps) => {
-  // Pre-compute random transforms for visible cards (memoized to avoid re-rolling on render)
   const visibleCards = cards.slice(-3);
-  const transforms = useMemo(
-    () =>
-      visibleCards.map((_card, _i) => ({
-        rotation: Math.random() * 20 - 10,
-        offsetX: Math.random() * 6 - 3,
-        offsetY: Math.random() * 6 - 3,
-      })),
-    // Re-generate when pile length changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cards.length]
-  );
+  const instanceId = useId();
+
+  const transformsById = useMemo(() => {
+    const previousTransforms = transformCacheByInstance.get(instanceId) || {};
+    const nextTransforms: Record<string, CardTransform> = {};
+
+    for (const card of visibleCards) {
+      nextTransforms[card.id] = previousTransforms[card.id] || createRandomTransform();
+    }
+
+    transformCacheByInstance.set(instanceId, nextTransforms);
+
+    return nextTransforms;
+  }, [instanceId, visibleCards]);
+
+  useEffect(() => {
+    return () => {
+      transformCacheByInstance.delete(instanceId);
+    };
+  }, [instanceId]);
 
   if (cards.length === 0) {
     return (
@@ -50,9 +72,9 @@ export const DiscardPile = ({ cards, className, cardWidth = DEFAULT_WIDTH, cardH
   }
 
   return (
-    <div className={cn('relative', className)} style={{ width: cardWidth, height: cardHeight }}>
+      <div className={cn('relative', className)} style={{ width: cardWidth, height: cardHeight }}>
       {visibleCards.map((card, i) => {
-        const transform = transforms[i] || { rotation: 0, offsetX: 0, offsetY: 0 };
+        const transform = transformsById[card.id] || { rotation: 0, offsetX: 0, offsetY: 0 };
         const isTop = i === visibleCards.length - 1;
 
         return (
@@ -61,8 +83,7 @@ export const DiscardPile = ({ cards, className, cardWidth = DEFAULT_WIDTH, cardH
             className="absolute inset-0"
             style={{
               transform: `rotate(${transform.rotation}deg) translate(${transform.offsetX}px, ${transform.offsetY}px)`,
-              zIndex: i,
-              opacity: isTop ? 1 : 0.7,
+              zIndex: i
             }}
           >
             <UnoCard

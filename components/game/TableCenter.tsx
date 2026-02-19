@@ -33,7 +33,7 @@ export const TableCenter = ({ discardPile, className, isMyTurn, onDrawCard }: Ta
   return (
     <div
       className={cn(
-        'flex items-center justify-center gap-8 md:gap-12 pb-4 md:pb-[200px]',
+        'flex items-center justify-center gap-12 md:gap-16 pb-4 md:pb-[200px]',
         className
       )}
     >

@@ -2,14 +2,11 @@
 
 import { Card } from '@/lib/game/cards';
 import { UnoCard } from '@/components/ui/UnoCard';
-import { UnoButton } from '@/components/ui/UnoButton';
 import { cn } from '@/lib/utils';
 
 interface PlayerHandProps {
   cards: Card[];
   isMyTurn?: boolean;
-  onUno?: () => void;
-  hasCalledUno?: boolean;
   onCardClick?: (card: Card) => void;
   canPlayCard?: (card: Card) => boolean;
   score?: number;
@@ -25,8 +22,6 @@ interface PlayerHandProps {
 export const PlayerHand = ({
   cards,
   isMyTurn = false,
-  onUno,
-  hasCalledUno = false,
   onCardClick,
   canPlayCard,
   score,
@@ -34,7 +29,6 @@ export const PlayerHand = ({
   className
 }: PlayerHandProps) => {
   const cardCount = cards.length;
-  const canCallUno = cardCount === 2;
 
   /**
    * Calculate card spacing to fit within screen width.
@@ -90,15 +84,6 @@ export const PlayerHand = ({
       {isMyTurn && (
         <div className="absolute -inset-4 rounded-3xl bg-yellow-400/10 border border-yellow-400/30 animate-pulse pointer-events-none" />
       )}
-
-      {/* UNO Button - positioned above the "Your Turn!" label */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 z-20">
-        <UnoButton
-          isEnabled={canCallUno}
-          onClick={onUno || (() => {})}
-          hasCalledUno={hasCalledUno}
-        />
-      </div>
 
       <div className="flex items-end justify-center" style={{ minHeight: 140 }}>
         {cards.map((card, index) => {

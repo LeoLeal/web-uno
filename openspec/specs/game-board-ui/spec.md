@@ -54,6 +54,36 @@ The system SHALL display opponents around the edge of the viewport with circular
 - **AND** the name box has a copper border and felt-dark background
 - **AND** the name box has a higher z-index than the avatar
 
+### Requirement: Opponent UNO chat balloon
+
+The system SHALL display a "UNO!" chat balloon on opponent avatars when they have exactly 1 card.
+
+#### Scenario: Balloon appears at 1 card
+- **WHEN** an opponent's card count is exactly 1
+- **THEN** a "UNO!" mini chat balloon is displayed near their avatar
+- **AND** the balloon is always visible (not hover-triggered)
+
+#### Scenario: Balloon disappears when card count changes
+- **WHEN** an opponent's card count changes from 1 to any other number
+- **THEN** the "UNO!" chat balloon is removed
+
+#### Scenario: Balloon positioning with CSS anchor
+- **WHEN** the "UNO!" balloon is displayed
+- **THEN** the opponent's avatar element has a CSS `anchor-name` property
+- **AND** the balloon element uses `position-anchor` to anchor to the avatar
+- **AND** the balloon is positioned above and to the right of the avatar
+
+#### Scenario: Balloon fallback positioning
+- **WHEN** the browser does not support CSS anchor positioning
+- **THEN** the balloon is positioned using `position: absolute` relative to the avatar container
+- **AND** the balloon appears above and to the right of the avatar
+
+#### Scenario: Balloon styling
+- **WHEN** the "UNO!" balloon is displayed
+- **THEN** it has a speech bubble appearance with a small tail/pointer
+- **AND** it uses a contrasting background color for visibility
+- **AND** the text is bold and compact
+
 ### Requirement: Opponent Card Count
 
 The system SHALL display the number of cards each opponent holds using card back images in a fan formation.
@@ -106,8 +136,11 @@ The system SHALL display the deck and discard pile in the center of the game are
 
 - **WHEN** the game is playing
 - **THEN** the discard pile shows the top card face-up
-- **AND** previous cards are visible underneath with random rotation (±10°)
+- **AND** previous cards are visible underneath with random rotation (up to +/-30 degrees)
 - **AND** previous cards have small random position offsets (organic pile look)
+- **AND** transform values for currently visible discard cards remain stable while those cards stay visible
+- **AND** cards that leave the visible discard subset are pruned from transform history
+- **AND** cards that later re-enter visibility receive newly generated random transform values
 - **AND** on desktop (≥768px), cards are displayed at 130x195px (~60% larger)
 - **AND** on mobile (<768px), cards are displayed at 80x120px
 
