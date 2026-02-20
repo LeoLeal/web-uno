@@ -1,5 +1,19 @@
 import { getSignalingUrl } from '@/lib/config/signaling';
 
+/** Generate a UUID, with fallback for browsers lacking crypto.randomUUID */
+const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback using crypto.getRandomValues
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
+
 export interface ChatMessage {
   id: string;
   clientId: number;
@@ -41,7 +55,7 @@ export class ChatNetwork {
           if (data.type === 'publish' && data.topic === this.topicName) {
             if (data.clientId !== undefined && typeof data.text === 'string') {
               this.onMessage({
-                id: data.id || crypto.randomUUID(),
+                id: data.id || generateId(),
                 clientId: data.clientId,
                 text: data.text,
                 timestamp: data.timestamp || Date.now()
@@ -75,7 +89,7 @@ export class ChatNetwork {
 
   sendMessage(text: string) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      const msgId = crypto.randomUUID();
+      const msgId = generateId();
       const timestamp = Date.now();
       
       const payload = {

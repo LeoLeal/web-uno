@@ -129,7 +129,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
   const roundPoints = lastRoundPoints;
 
   return (
-    <main className="relative z-10 flex flex-col h-screen items-center p-4 pb-8 md:pb-4">
+    <main className="relative z-10 flex flex-col h-dvh items-center p-4 pb-8 md:pb-4">
       <div className="w-full max-w-6xl flex-1 flex flex-col">
 
         {/* Header */}

@@ -55,14 +55,15 @@ export const ChatInput = ({ onSendMessage, placeholder = "Type a chat message...
       <button
         type="button"
         onClick={handleSubmit}
+        onMouseDown={(e) => e.preventDefault()}
         disabled={!text.trim()}
         className={cn(
-          "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-xl text-(--copper-dark) hover:text-white disabled:text-white transition-colors",
+          "absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-xl text-(--copper-dark) hover:text-white disabled:text-white transition-colors",
           text.trim() ? "bg-(--copper) hover:bg-(--copper-dark)" : "bg-gray-400 cursor-not-allowed"
         )}
         aria-label="Send message"
       >
-        <SendHorizontal className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+        <SendHorizontal className="w-5 h-5 stroke-[2.5]" />
       </button>
     </div>
   );
