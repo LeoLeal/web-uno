@@ -38,8 +38,9 @@ Therefore, we need to design a chat system that is ephemeral and relies on simpl
 
 ### 4. UI Architecture: Input & Display
 
-**Decision**: Input will be a centered textarea above the player's hand. Display will reuse the `OpponentIndicator` balloon element.
-**Rationale**: Instead of a shared chat sidebar, floating balloons above avatars keep the player's eyes on the game board. We will repurpose the existing DOM structure built for the "UNO!" balloon, allowing it to accept dynamic text strings and handle fade-out animations. The "UNO!" state specifically will be modified to render text overlaid on the avatar itself, freeing up the balloon exclusively for chat context. If an opponent sends a message within 10 seconds of their previous message, the text is appended to the existing balloon. Each individual message has its own 10-second fade-out timer; when a message expires, it is removed from the balloon. If a message that will disappear is the only one remaining in the chat balloon, the balloon itself fades-out with the message.
+**Decision (In-Game)**: Input will be a centered textarea above the player's hand. Display will reuse the `OpponentIndicator` balloon element.
+**Decision (Lobby)**: Input will be fixed above the Game Settings panel so it remains in view while scrolling. Display will use the same dynamic chat balloon component, rendering over the player cards within the lobby `PlayerList` (which will be uniquely styled to a 3-per-row grid on mobile).
+**Rationale**: Instead of a shared chat sidebar, floating balloons above avatars keep the player's eyes on the game board (and player cards in the lobby). We will repurpose the existing DOM structure built for the "UNO!" balloon, allowing it to accept dynamic text strings and handle fade-out animations. The "UNO!" state specifically will be modified to render text overlaid on the avatar itself, freeing up the balloon exclusively for chat context. If an opponent sends a message within 10 seconds of their previous message, the text is appended to the existing balloon. Each individual message has its own 10-second fade-out timer; when a message expires, it is removed from the balloon. If a message that will disappear is the only one remaining in the chat balloon, the balloon itself fades-out with the message.
 
 ## Risks / Trade-offs
 

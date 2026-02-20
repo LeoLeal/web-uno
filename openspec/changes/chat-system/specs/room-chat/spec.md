@@ -1,5 +1,9 @@
 ## ADDED Requirements
 
+## Purpose
+
+Defines the text-based chat functionality that allows players to communicate during both the pre-game Lobby phase and the active game. The system relies on WebSocket pub/sub mechanics for ephemeral message delivery.
+
 ### Requirement: Connect to Chat Network
 
 The system SHALL securely establish a secondary WebSocket connection separate from the game document for ephemeral messaging.

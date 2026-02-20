@@ -10,11 +10,13 @@
 
 ## 3. UI Implementation
 
-- [ ] 3.1 Modify the existing `OpponentIndicator` component (or abstract its balloon logic) to accept dynamic chat text strings and integrate a configurable 10-second fade-out timer per message.
-- [ ] 3.2 Update `OpponentIndicator` to append new messages to an existing balloon if they arrive within 10 seconds of the previous message.
-- [ ] 3.3 Modify the "UNO!" indicator to render directly over the opponent's avatar (with the existing bounce animation) instead of using the chat balloon.
-- [ ] 3.4 Create a centered `ChatInput` textarea component, positioned above the player's hand and "Your Turn!" label.
-- [ ] 3.5 Wire the `ChatInput` to `useChatNetwork` to publish messages on submit (Enter key/button click) and immediately clear the input field.
+- [ ] 3.1 Abstract the chat balloon display logic into a reusable `ChatBalloon` component capable of handling dynamic text, 10-second fade-outs, and appending messages.
+- [ ] 3.2 Modify the existing `OpponentIndicator` component to use `ChatBalloon` for in-game messages.
+- [ ] 3.3 Update `PlayerList` in the lobby to use `ChatBalloon` over player cards for lobby messages.
+- [ ] 3.4 Update `PlayerList` grid styling to support a 3-per-row responsive layout on mobile (< 768px).
+- [ ] 3.5 Modify the "UNO!" indicator to render directly over the opponent's avatar (with the existing bounce animation) instead of using the chat balloon.
+- [ ] 3.6 Create a `ChatInput` textarea component. Implement it as a centered overlay above the player's hand during games, and as a fixed input above the `GameSettingsPanel` in the lobby.
+- [ ] 3.7 Wire the `ChatInput` to `useChatNetwork` to publish messages on submit (Enter key/button click) and immediately clear the input field.
 
 ## 4. Testing
 

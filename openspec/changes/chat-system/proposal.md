@@ -19,9 +19,10 @@ Players need a way to communicate and socialize while playing Uno. Currently, th
 ### Modified Capabilities
 
 - `game-board-ui`: Repurpose the "UNO!" balloon for general chat display with 10-second message fade-outs, and remap the "UNO!" alert to overlay directly on the avatar.
+- `lobby-management`: Implement chat functionality in the lobby, with a fixed input above the Game Settings panel, chat bubbles over player cards in the PlayerList, and a responsive 3-per-row mobile layout for player cards.
 
 ## Impact
 
-- **UI/UX**: Requires a centered textarea above the player's hand. Opponent messages will be displayed using the existing chat balloon component, which needs to be updated to support dynamic text, 10-second (configurable) fade-outs, and appending messages within a 10-second window. The "UNO!" message specifically will be changed to overlay directly on the avatar.
+- **UI/UX**: Requires a centered textarea above the player's hand during games, and a fixed input above Game Settings in the lobby. Opponent messages will be displayed using the chat balloon component over avatars (in-game) or player cards (in lobby). Chat balloons need dynamic text, 10-second fade-outs, and 10-second append windows. Lobby player cards must be updated to support a 3-per-row mobile grid layout.
 - **Networking**: Requires a secondary WebSocket connection to the signaling server for pub/sub messaging.
 - **Core Hooks**: Requires a new custom hook (e.g., `useChatNetwork`) running alongside `useRoom` to handle the lifecycle and identity binding of the secondary WebSocket connection.
