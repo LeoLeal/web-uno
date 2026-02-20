@@ -5,6 +5,7 @@ import { OpponentIndicator } from './OpponentIndicator';
 import { cn } from '@/lib/utils';
 import { getOpponentsWithUnoBubbleAppearance } from '@/lib/game/audioFeedback';
 import { speakText } from '@/lib/audio/playback';
+import type { ChatMessage } from '@/lib/websocket/ChatNetwork';
 
 interface Opponent {
   clientId: number;
@@ -22,6 +23,7 @@ interface OpponentRowProps {
   scores?: Record<number, number>;
   scoreLimit?: number | null;
   isMuted?: boolean;
+  chatMessages?: ChatMessage[];
   className?: string;
 }
 
@@ -34,6 +36,7 @@ export const OpponentRow = ({
   scores,
   scoreLimit,
   isMuted = false,
+  chatMessages = [],
   className,
 }: OpponentRowProps) => {
   const showScore = scoreLimit !== null && scoreLimit !== undefined;
@@ -49,7 +52,7 @@ export const OpponentRow = ({
   return (
     <div
       className={cn(
-        'flex items-start justify-center gap-6 md:gap-10 flex-wrap',
+        'flex items-start justify-center gap-12 gap-y-6 md:gap-10 flex-wrap',
         className
       )}
     >
@@ -65,6 +68,7 @@ export const OpponentRow = ({
           isDisconnected={opponent.isDisconnected}
           score={scores?.[opponent.clientId]}
           showScore={showScore}
+          chatMessages={chatMessages.filter(m => m.clientId === opponent.clientId)}
         />
       ))}
     </div>

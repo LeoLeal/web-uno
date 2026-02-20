@@ -54,35 +54,54 @@ The system SHALL display opponents around the edge of the viewport with circular
 - **AND** the name box has a copper border and felt-dark background
 - **AND** the name box has a higher z-index than the avatar
 
-### Requirement: Opponent UNO chat balloon
+### Requirement: Opponent UNO Indicator
 
-The system SHALL display a "UNO!" chat balloon on opponent avatars when they have exactly 1 card.
+The system SHALL display an "UNO!" indicator overlaid on opponent avatars when they have exactly 1 card.
 
-#### Scenario: Balloon appears at 1 card
+#### Scenario: Indicator appears at 1 card
+
 - **WHEN** an opponent's card count is exactly 1
-- **THEN** a "UNO!" mini chat balloon is displayed near their avatar
-- **AND** the balloon is always visible (not hover-triggered)
+- **THEN** a bold "UNO!" text indicator is displayed directly over their avatar
+- **AND** the indicator is always visible (not hover-triggered)
 
-#### Scenario: Balloon disappears when card count changes
+#### Scenario: Indicator disappears when card count changes
+
 - **WHEN** an opponent's card count changes from 1 to any other number
-- **THEN** the "UNO!" chat balloon is removed
+- **THEN** the "UNO!" indicator is removed
 
-#### Scenario: Balloon positioning with CSS anchor
-- **WHEN** the "UNO!" balloon is displayed
-- **THEN** the opponent's avatar element has a CSS `anchor-name` property
-- **AND** the balloon element uses `position-anchor` to anchor to the avatar
-- **AND** the balloon is positioned above and to the right of the avatar
+#### Scenario: Indicator styling and animation
 
-#### Scenario: Balloon fallback positioning
-- **WHEN** the browser does not support CSS anchor positioning
-- **THEN** the balloon is positioned using `position: absolute` relative to the avatar container
-- **AND** the balloon appears above and to the right of the avatar
+- **WHEN** the "UNO!" indicator is displayed
+- **THEN** it uses a highly visible styling (e.g., strong shadow or contrasting stroke) to stand out over the avatar
+- **AND** it maintains the existing bouncing animation to draw attention
 
-#### Scenario: Balloon styling
-- **WHEN** the "UNO!" balloon is displayed
-- **THEN** it has a speech bubble appearance with a small tail/pointer
-- **AND** it uses a contrasting background color for visibility
-- **AND** the text is bold and compact
+### Requirement: Opponent Chat Balloon
+
+The system SHALL display temporary chat balloons above opponent avatars when they send a message.
+
+#### Scenario: Balloon appearance on message
+
+- **WHEN** an opponent sends a chat message
+- **THEN** a chat balloon containing the message text appears above their avatar
+- **AND** the balloon uses a smooth fade-in animation (no bouncing)
+- **AND** the balloon text is easily readable against the background
+
+#### Scenario: Balloon positioning
+
+- **WHEN** the chat balloon is displayed
+- **THEN** it uses CSS anchor positioning (or fallback absolute positioning) to anchor above and slightly to the right of the avatar, pointing down toward the player
+
+#### Scenario: 10-second fade out per message
+
+- **WHEN** a chat message has been visible for the configured duration (default: 10 seconds)
+- **THEN** that specific message is removed from the balloon
+- **AND** if a message that will disappear is the only one remaining in the chat balloon, the balloon itself fades-out with the message
+
+#### Scenario: Appending messages within 10-second window
+
+- **WHEN** an opponent sends a new message within 10 seconds of their previous message
+- **THEN** the new message text is appended beneath the existing active chat balloon
+- **AND** the new message starts its own independent 10-second fade-out timer
 
 ### Requirement: Opponent Card Count
 
@@ -204,6 +223,7 @@ The system SHALL display a modal overlay when the game is paused due to player d
 - **AND** they see a message indicating the host will resolve the situation
 
 #### Scenario: Modal dismisses on resume
+
 - **WHEN** all orphan hands are resolved (replaced or removed)
 - **AND** the game status returns to `PLAYING` or `ROUND_ENDED` (restored from `statusBeforePause`)
 - **THEN** the modal closes automatically
@@ -214,16 +234,19 @@ The system SHALL display a modal overlay when the game is paused due to player d
 The system SHALL display each opponent's cumulative score next to their avatar during multi-round games.
 
 #### Scenario: Score shown below opponent name
+
 - **WHEN** the game is a multi-round game (`scoreLimit !== null`)
 - **AND** an opponent's score is available in `gameStateMap.scores`
 - **THEN** the opponent's cumulative score is displayed below their name in the `OpponentIndicator` component
 - **AND** the score is formatted as a number followed by "pts" (e.g., "42 pts")
 
 #### Scenario: Score hidden in single-round games
+
 - **WHEN** the game is a single-round game (`scoreLimit === null`)
 - **THEN** no score is displayed on opponent indicators
 
 #### Scenario: Score of zero
+
 - **WHEN** a multi-round game has just started (round 1, no rounds completed)
 - **THEN** opponent scores display "0 pts"
 
@@ -232,11 +255,13 @@ The system SHALL display each opponent's cumulative score next to their avatar d
 The system SHALL display the current player's own cumulative score in their hand area during multi-round games.
 
 #### Scenario: Player score in header area
+
 - **WHEN** the game is a multi-round game (`scoreLimit !== null`)
 - **THEN** the player's cumulative score is displayed near the turn indicator in the `PlayerHand` area
 - **AND** the score is formatted consistently with opponent scores (e.g., "42 pts")
 
 #### Scenario: Player score hidden in single-round games
+
 - **WHEN** the game is a single-round game (`scoreLimit === null`)
 - **THEN** no score is displayed in the player's hand area
 
@@ -245,11 +270,13 @@ The system SHALL display the current player's own cumulative score in their hand
 The system SHALL display a modal when a round ends in a multi-round game, showing round results and standings.
 
 #### Scenario: Round end modal appears
+
 - **WHEN** the game status changes to `ROUND_ENDED`
 - **THEN** all players see a modal displaying round results
 - **AND** the game board is visible but non-interactive behind the modal
 
 #### Scenario: Round end modal content
+
 - **WHEN** the round end modal is displayed
 - **THEN** it shows the round winner's name
 - **AND** it shows the points gained this round by the winner
@@ -257,11 +284,13 @@ The system SHALL display a modal when a round ends in a multi-round game, showin
 - **AND** it shows the configured score limit target
 
 #### Scenario: Host controls in round end modal
+
 - **WHEN** the host views the round end modal
 - **THEN** a "Next Round" button is displayed
 - **AND** clicking the button triggers the round initialization flow
 
 #### Scenario: Guest view of round end modal
+
 - **WHEN** a non-host player views the round end modal
 - **AND** they see the round results and standings
 - **AND** they do NOT see the "Next Round" button
@@ -272,6 +301,7 @@ The system SHALL display a modal when a round ends in a multi-round game, showin
 The system SHALL display final standings in the game end modal for multi-round games.
 
 #### Scenario: Multi-round game end modal
+
 - **WHEN** the game status changes to `ENDED` in a multi-round game
 - **AND** a player has reached the score limit
 - **THEN** the modal shows the overall winner's name
@@ -279,10 +309,12 @@ The system SHALL display final standings in the game end modal for multi-round g
 - **AND** the modal includes a "Back to Lobby" action
 
 #### Scenario: Single-round game end modal unchanged
+
 - **WHEN** the game status changes to `ENDED` in a single-round game (`scoreLimit === null`)
 - **THEN** the existing game end modal behavior is preserved (win/loss message, no scores)
 
 #### Scenario: Insufficient players game end modal
+
 - **WHEN** the game ends with `endType` = `INSUFFICIENT_PLAYERS`
 - **THEN** the modal displays "Game Ended" with a "Not enough players to continue" message
 - **AND** no winner is declared

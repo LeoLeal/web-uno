@@ -2,6 +2,7 @@
 
 import { Card } from '@/lib/game/cards';
 import { UnoCard } from '@/components/ui/UnoCard';
+import { ChatInput } from './ChatInput';
 import { cn } from '@/lib/utils';
 
 interface PlayerHandProps {
@@ -11,6 +12,7 @@ interface PlayerHandProps {
   canPlayCard?: (card: Card) => boolean;
   score?: number;
   showScore?: boolean;
+  onSendMessage?: (text: string) => void;
   className?: string;
 }
 
@@ -26,6 +28,7 @@ export const PlayerHand = ({
   canPlayCard,
   score,
   showScore = false,
+  onSendMessage,
   className
 }: PlayerHandProps) => {
   const cardCount = cards.length;
@@ -120,8 +123,18 @@ export const PlayerHand = ({
 
       {/* "Your turn" label */}
       {isMyTurn && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-yellow-400 text-sm font-bold uppercase tracking-widest animate-bounce">
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-yellow-400 text-sm font-bold uppercase tracking-widest animate-bounce z-40">
           Your Turn!
+        </div>
+      )}
+
+      {/* Chat Input Overlay */}
+      {onSendMessage && (
+        <div className={cn(
+          "w-full max-w-[300px] sm:max-w-xs md:max-w-md px-2 sm:px-4 absolute transition-all duration-300 z-50",
+          isMyTurn ? "bottom-[220px]" : "bottom-[220px]"
+        )}>
+          <ChatInput onSendMessage={onSendMessage} />
         </div>
       )}
 

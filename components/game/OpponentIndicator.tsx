@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { CardCountFan } from '@/components/ui/CardCountFan';
-import styles from './OpponentIndicator.module.css';
+import { ChatBalloon } from './ChatBalloon';
+import type { ChatMessage } from '@/lib/websocket/ChatNetwork';
 
 interface OpponentIndicatorProps {
   clientId: number;
@@ -14,6 +15,7 @@ interface OpponentIndicatorProps {
   isDisconnected?: boolean;
   score?: number;
   showScore?: boolean;
+  chatMessages?: ChatMessage[];
   className?: string;
 }
 
@@ -32,6 +34,7 @@ export const OpponentIndicator = ({
   isDisconnected = false,
   score,
   showScore = false,
+  chatMessages = [],
   className,
 }: OpponentIndicatorProps) => {
   const anchorName = `--opponent-avatar-${clientId}`;
@@ -68,25 +71,17 @@ export const OpponentIndicator = ({
           )}
         </div>
 
-        {/* UNO! indicator balloon - shown when player has 1 card */}
+        {/* UNO! indicator overlay - shown when player has 1 card */}
         {cardCount === 1 && (
-          <div
-            className={cn(
-              styles.unoBalloon,
-              'z-30',
-              'px-3 py-1.5 rounded-lg',
-              'bg-white',
-              'text-black font-black text-sm',
-              'shadow-lg',
-              'animate-bounce'
-            )}
-            style={{ positionAnchor: anchorName } as React.CSSProperties}
-          >
-            UNO!
-            {/* Speech bubble tail pointing down */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[8px] border-t-white border-r-[6px] border-r-transparent" />
+          <div className="absolute top-2 inset-0 flex items-center justify-center pointer-events-none z-30 animate-bounce">
+            <span className="text-white font-black text-lg tracking-widest uppercase" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.5))' }}>
+              UNO!
+            </span>
           </div>
         )}
+
+        {/* Chat Balloon */}
+        <ChatBalloon messages={chatMessages} anchorName={anchorName} />
       </div>
 
       {/* Player name - positioned to overlap with avatar bottom */}

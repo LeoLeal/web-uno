@@ -9,6 +9,7 @@ import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
 import { WildColorModal } from './WildColorModal';
 import { cn } from '@/lib/utils';
+import type { ChatMessage } from '@/lib/websocket/ChatNetwork';
 
 interface GameBoardProps {
   /** All players in the game */
@@ -43,6 +44,8 @@ interface GameBoardProps {
   onDrawCard?: () => void;
   /** Function to check if a card can be played */
   canPlayCard?: (card: Card) => boolean;
+  chatMessages?: ChatMessage[];
+  onSendMessage?: (text: string) => void;
   className?: string;
 }
 
@@ -67,6 +70,8 @@ export const GameBoard = ({
   onPlayCard,
   onDrawCard,
   canPlayCard,
+  chatMessages = [],
+  onSendMessage,
   className,
 }: GameBoardProps) => {
   const [selectedWildCard, setSelectedWildCard] = useState<Card | null>(null);
@@ -128,7 +133,7 @@ export const GameBoard = ({
     >
       {/* Opponents row */}
       <div className="pt-2 mt-4 flex-shrink-0">
-        <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} isMuted={isMuted} />
+        <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} isMuted={isMuted} chatMessages={chatMessages} />
       </div>
 
       {/* Table center — grows to fill available space, centered */}
@@ -150,6 +155,7 @@ export const GameBoard = ({
         canPlayCard={canPlayCard}
         score={myClientId !== null ? scores?.[myClientId] : undefined}
         showScore={scoreLimit !== null && scoreLimit !== undefined}
+        onSendMessage={onSendMessage}
       />
 
       {/* Wild color selection modal */}

@@ -9,6 +9,9 @@ export const MIN_PLAYERS = 3;
 /** Maximum number of players allowed in a game */
 export const MAX_PLAYERS = 10;
 
+/** Duration a chat message remains visible in milliseconds */
+export const CHAT_MESSAGE_DURATION_MS = 10000;
+
 /** Human-readable messages for player limit scenarios */
 export const PLAYER_LIMIT_MESSAGES = {
   /** Message shown when waiting for more players to reach minimum */

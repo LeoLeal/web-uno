@@ -11,6 +11,7 @@ import { useGameEngine } from '@/hooks/useGameEngine';
 import { useSessionResilience } from '@/hooks/useSessionResilience';
 import { useGamePlay } from '@/hooks/useGamePlay';
 import { useGameAudioFeedback } from '@/hooks/useGameAudioFeedback';
+import { useChatNetwork } from '@/hooks/useChatNetwork';
 import { CardColor } from '@/lib/game/cards';
 import { MAX_PLAYERS } from '@/lib/game/constants';
 import { PlayerList } from '@/components/lobby/PlayerList';
@@ -22,6 +23,7 @@ import { WaitingForPlayerModal } from '@/components/modals/WaitingForPlayerModal
 import { GameEndModal } from '@/components/modals/GameEndModal';
 import { RoundEndModal } from '@/components/modals/RoundEndModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
+import { ChatInput } from '@/components/game/ChatInput';
 import { GameBoard } from '@/components/game/GameBoard';
 import { getAvatar } from '@/lib/avatar';
 import { formatRoomId } from '@/lib/room-code';
@@ -36,6 +38,9 @@ const RoomPageContent = ({ id }: { id: string }) => {
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+
+  // Chat Network
+  const { messages: chatMessages, sendMessage } = useChatNetwork(id, myClientId, isSynced, players);
 
   // Game engine — host-only deck management and dealing (hands delivered via Yjs)
   const { initializeGame, initializeRound, deckRef } = useGameEngine({
@@ -173,7 +178,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
                 <h2 className="text-xl font-bold text-(--cream)">Lobby <span className="text-(--cream-dark) opacity-60 text-sm ml-2 align-middle inline-flex items-center justify-center gap-1"><Users className="w-4 h-4" /> {players.length}/{MAX_PLAYERS} players</span></h2>
                 {amIHost && <span className="text-xs text-yellow-500 uppercase font-bold tracking-widest border border-yellow-500/30 px-2 py-1 rounded">You are Host</span>}
               </div>
-              <PlayerList players={players} myClientId={myClientId} hostId={hostId} />
+              <PlayerList players={players} myClientId={myClientId} hostId={hostId} chatMessages={chatMessages} />
             </>
           ) : (
             <GameBoard
@@ -193,6 +198,8 @@ const RoomPageContent = ({ id }: { id: string }) => {
               onPlayCard={handlePlayCard}
               onDrawCard={handleDrawCard}
               canPlayCard={canPlayCard}
+              chatMessages={chatMessages}
+              onSendMessage={sendMessage}
             />
           )}
         </div>
@@ -200,7 +207,12 @@ const RoomPageContent = ({ id }: { id: string }) => {
         {/* Game Settings & Action Bar */}
         {status === 'LOBBY' && (
           <div className="fixed bottom-0 left-0 right-0 p-4 md:static md:p-0 bg-(--felt-dark)/90 md:bg-transparent border-t border-(--copper-border) md:border-0 backdrop-blur-md md:backdrop-blur-none z-40">
-            <div className="space-y-4 max-w-md mx-auto md:max-w-none md:mx-0">
+            <div className="space-y-4 max-w-md mx-auto md:max-w-none md:mx-0 w-full">
+              
+              <div className="w-full">
+                <ChatInput onSendMessage={sendMessage} placeholder="Chat in lobby..." />
+              </div>
+
               <GameSettingsPanel isHost={amIHost} />
               <StartGameButton
                 isHost={amIHost}
