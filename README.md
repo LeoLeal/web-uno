@@ -38,10 +38,10 @@ npm run signaling
 
 ## 🏗️ Architecture
 
-- **Topology**: Host-Authoritative P2P (Star Network).
-- **Security**: "Trusted Dealer" model. The Host holds the deck state; Guests only receive their own cards via encrypted private channels.
+- **Topology**: Host-Authoritative game logic over a Mesh P2P network.
+- **Security**: "Trusted Dealer" model (Partial). The Host solely controls and holds the private deck state in memory. However, currently, all dealt hands are synced to all peers via the shared Yjs document (clients filter and display only their own hands in the UI).
 - **Discovery**: URL-based room sharing (no central lobby listing).
-- **Resilience**: Direct peer-to-peer data sync (requires active signaling connection).
+- **Resilience**: Direct peer-to-peer data sync via Yjs CRDT (requires active signaling connection).
 
 ## 📄 Documentation
 
