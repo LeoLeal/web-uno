@@ -85,7 +85,7 @@ export const PlayerHand = ({
     <div className={cn('fixed bottom-0 left-0 right-0 flex items-end justify-center pb-8 md:pb-6', className)}>
       {/* Turn indicator glow */}
       {isMyTurn && (
-        <div className="absolute -inset-4 rounded-3xl bg-yellow-400/10 border border-yellow-400/30 animate-pulse pointer-events-none" />
+        <div className="absolute -inset-0 rounded-3xl bg-yellow-400/10 border border-yellow-400/30 animate-pulse pointer-events-none" />
       )}
 
       <div className="flex items-end justify-center" style={{ minHeight: 140 }}>
@@ -128,10 +128,10 @@ export const PlayerHand = ({
         </div>
       )}
 
-      {/* Chat Input Overlay */}
+      {/* Chat Input Overlay — desktop only. On mobile, ChatInput lives in the top Drawer. */}
       {onSendMessage && (
         <div className={cn(
-          "w-full max-w-[300px] sm:max-w-xs md:max-w-md px-2 sm:px-4 absolute transition-all duration-300 z-50",
+          "hidden md:block w-full max-w-[300px] sm:max-w-xs md:max-w-md px-2 sm:px-4 absolute transition-all duration-300 z-50",
           isMyTurn ? "bottom-[220px]" : "bottom-[220px]"
         )}>
           <ChatInput onSendMessage={onSendMessage} />

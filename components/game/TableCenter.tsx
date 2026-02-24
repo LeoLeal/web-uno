@@ -44,7 +44,7 @@ export const TableCenter = ({
   return (
     <div
       className={cn(
-        'flex items-center justify-center gap-12 md:gap-16 pb-4 md:pb-[200px]',
+        'flex items-center justify-center gap-12 md:gap-16 pb-0 md:pb-[200px]',
         className
       )}
     >

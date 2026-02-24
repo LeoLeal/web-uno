@@ -25,6 +25,7 @@ import { RoundEndModal } from '@/components/modals/RoundEndModal';
 import { GameSettingsPanel } from '@/components/lobby/GameSettingsPanel';
 import { ChatInput } from '@/components/game/ChatInput';
 import { GameBoard } from '@/components/game/GameBoard';
+import { Drawer } from '@/components/ui/Drawer';
 import { getAvatar } from '@/lib/avatar';
 import { formatRoomId } from '@/lib/room-code';
 import { GameProvider } from '@/components/providers/GameProvider';
@@ -38,9 +39,10 @@ const RoomPageContent = ({ id }: { id: string }) => {
   const { hand } = usePlayerHand({ myClientId });
   const [hasJoined, setHasJoined] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Chat Network
-  const { messages: chatMessages, sendMessage } = useChatNetwork(id, myClientId, isSynced, players);
+  // Chat Network — pass isMuted so incoming sounds respect mute state
+  const { messages: chatMessages, sendMessage } = useChatNetwork(id, myClientId, isSynced, players, isMuted);
 
   // Game engine — host-only deck management and dealing (hands delivered via Yjs)
   const { initializeGame, initializeRound, deckRef } = useGameEngine({
@@ -128,50 +130,89 @@ const RoomPageContent = ({ id }: { id: string }) => {
 
   const roundPoints = lastRoundPoints;
 
+  /**
+   * Whether the game is in a gameplay state (not lobby).
+   * Used to decide whether to show the mobile drawer.
+   */
+  const isGameplay = status === 'PLAYING' || status === 'PAUSED_WAITING_PLAYER' || status === 'ROUND_ENDED' || status === 'ENDED';
+
+  /**
+   * Send a chat message from the drawer and auto-retract.
+   * Used only on mobile (passed into the Drawer's ChatInput).
+   */
+  const handleSendFromDrawer = (text: string) => {
+    sendMessage(text);
+    setIsDrawerOpen(false);
+  };
+
+  /** Shared header JSX — rendered either inline (desktop/lobby) or inside the Drawer (mobile gameplay) */
+  const headerContent = (
+    <div className="flex justify-between items-center border-b border-(--copper-border) pb-4 mt-4 flex-shrink-0">
+      <div className="flex flex-col">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <span className="text-(--cream)">P2P Uno</span>
+          <span className="text-xs bg-(--felt-dark) px-2 py-1 rounded text-(--cream-dark) font-mono border border-(--copper-border)">BETA</span>
+        </h1>
+        <div className="text-xs text-(--cream-dark) opacity-70 font-mono mt-1 select-none cursor-pointer hover:opacity-100 transition-opacity"
+          onClick={() => navigator.clipboard.writeText(window.location.href)}>
+          Room: {formatRoomId(id)}<br />(Click to copy URL)
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${isSynced ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500'} transition-colors`} />
+          <span className="text-sm font-mono text-(--cream-dark) opacity-70 hidden sm:inline">
+            {isSynced ? 'Connected' : 'Connecting...'}
+          </span>
+        </div>
+        <button
+          onClick={() => setIsMuted((current) => !current)}
+          className="p-2 text-(--cream-dark) border border-(--copper-border) rounded-lg hover:text-(--cream) hover:border-(--copper-light) hover:bg-(--copper-light)/10 transition-all"
+          aria-label={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
+          title={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
+        >
+          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-400 border border-red-400/50 rounded-lg hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 transition-all"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Leave</span>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <main className="relative z-10 flex flex-col h-dvh items-center p-4 pb-8 md:pb-4">
+
+      {/* Mobile gameplay drawer — contains header + chat input, hidden on desktop */}
+      {isGameplay && (
+        <Drawer
+          isOpen={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          className="bg-black/60 backdrop-blur"
+        >
+          <div className="px-4 pt-2">
+            {headerContent}
+            <div className="py-3">
+              <ChatInput onSendMessage={handleSendFromDrawer} placeholder="Chat in game..." />
+            </div>
+          </div>
+        </Drawer>
+      )}
+
       <div className="w-full max-w-6xl flex-1 flex flex-col">
 
-        {/* Header */}
-        <div className="flex justify-between items-center border-b border-(--copper-border) pb-4 mt-4 flex-shrink-0">
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <span className="text-(--cream)">P2P Uno</span>
-              <span className="text-xs bg-(--felt-dark) px-2 py-1 rounded text-(--cream-dark) font-mono border border-(--copper-border)">BETA</span>
-            </h1>
-            <div className="text-xs text-(--cream-dark) opacity-70 font-mono mt-1 select-none cursor-pointer hover:opacity-100 transition-opacity"
-              onClick={() => navigator.clipboard.writeText(window.location.href)}>
-              Room: {formatRoomId(id)} (Click to copy URL)
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${isSynced ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500'} transition-colors`} />
-              <span className="text-sm font-mono text-(--cream-dark) opacity-70 hidden sm:inline">
-                {isSynced ? 'Connected' : 'Connecting...'}
-              </span>
-            </div>
-            <button
-              onClick={() => setIsMuted((current) => !current)}
-              className="p-2 text-(--cream-dark) border border-(--copper-border) rounded-lg hover:text-(--cream) hover:border-(--copper-light) hover:bg-(--copper-light)/10 transition-all"
-              aria-label={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
-              title={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
-            >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-400 border border-red-400/50 rounded-lg hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Leave</span>
-            </button>
-          </div>
+        {/* Header — visible on desktop always, and on mobile during lobby */}
+        <div className={isGameplay ? 'hidden md:block' : ''}>
+          {headerContent}
         </div>
 
         {/* Game Area */}
-        <div className="flex-1 flex flex-col min-h-0 pb-52 md:pb-0">
+        <div className="flex-1 flex flex-col min-h-0 pb-24 md:pb-0">
           {status === 'LOBBY' ? (
             <>
               <div className="mb-6 mt-4 flex items-center justify-between">

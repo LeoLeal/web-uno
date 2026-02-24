@@ -1,0 +1,62 @@
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  /* Transition applies whenever the inline-style transform changes (open/close snap) */
+  transition: transform 300ms ease-out;
+  will-change: transform;
+}
+
+.panel {
+  width: 100%;
+}
+
+.handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 0 6px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  border: none;
+  outline: none;
+  /* Copper solid background — stands out against the felt game board */
+  background-color: var(--copper-light);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  transition: background-color 150ms ease;
+}
+
+.handle:active {
+  cursor: grabbing;
+  background-color: var(--copper-light);
+}
+
+.handle:hover {
+  background-color: var(--copper-light);
+}
+
+.handleBar {
+  width: 36px;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.handleLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+

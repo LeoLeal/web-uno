@@ -126,13 +126,13 @@ export const GameBoard = ({
   return (
     <div
       className={cn(
-        'flex flex-col flex-1 min-h-0',
+        'flex flex-col flex-1 min-h-0 gap-4',
         isFrozen && 'pointer-events-none opacity-75',
         className
       )}
     >
       {/* Opponents row */}
-      <div className="pt-2 mt-4 flex-shrink-0">
+      <div className="pt-2 mt-12 md:mt-8 flex-shrink-0">
         <OpponentRow opponents={opponents} currentTurn={currentTurn} scores={scores} scoreLimit={scoreLimit} isMuted={isMuted} chatMessages={chatMessages} />
       </div>
 

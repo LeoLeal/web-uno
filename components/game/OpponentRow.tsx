@@ -52,7 +52,7 @@ export const OpponentRow = ({
   return (
     <div
       className={cn(
-        'flex items-start justify-center gap-12 gap-y-6 md:gap-10 flex-wrap',
+        'flex items-start basis-1/3 justify-center gap-12 gap-y-6 md:gap-10 flex-wrap',
         className
       )}
     >

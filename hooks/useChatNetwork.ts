@@ -1,8 +1,15 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { ChatNetwork, ChatMessage } from '@/lib/websocket/ChatNetwork';
 import { Player } from '@/hooks/useRoom';
+import { playSound } from '@/lib/audio/playback';
 
-export function useChatNetwork(roomId: string | undefined, gameClientId: number | null, isSynced: boolean, players: Player[]) {
+export function useChatNetwork(
+  roomId: string | undefined,
+  gameClientId: number | null,
+  isSynced: boolean,
+  players: Player[],
+  isMuted: boolean = false,
+) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const networkRef = useRef<ChatNetwork | null>(null);
 
@@ -11,6 +18,12 @@ export function useChatNetwork(roomId: string | undefined, gameClientId: number 
   useEffect(() => {
     playersRef.current = players;
   }, [players]);
+
+  // Keep isMuted in a ref to avoid re-creating handleMessage on every mute toggle
+  const isMutedRef = useRef<boolean>(isMuted);
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
 
   const handleMessage = useCallback((msg: ChatMessage) => {
     // Validate against game presence identities (or if it's our own message)
@@ -25,6 +38,11 @@ export function useChatNetwork(roomId: string | undefined, gameClientId: number 
       if (prev.some(m => m.id === msg.id)) return prev; // Avoid duplicates
       return [...prev, msg];
     });
+
+    // Play chat-pop sound for messages from other players (not our own)
+    if (msg.clientId !== gameClientId && !isMutedRef.current) {
+      void playSound('/sounds/chat-pop.mp3');
+    }
   }, [gameClientId]);
 
   useEffect(() => {
