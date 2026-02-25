@@ -10,6 +10,8 @@ interface DeckPileProps {
   cardHeight?: number;
   /** Whether it's the current player's turn */
   isMyTurn?: boolean;
+  /** Whether the player is allowed to draw (Force Play rule) */
+  canDraw?: boolean;
   /** Called when the deck is clicked to draw a card */
   onClick?: () => void;
 }
@@ -26,9 +28,10 @@ export const DeckPile = ({
   cardWidth = DEFAULT_WIDTH,
   cardHeight = DEFAULT_HEIGHT,
   isMyTurn = false,
+  canDraw = true,
   onClick
 }: DeckPileProps) => {
-  const canClick = isMyTurn && onClick;
+  const canClick = isMyTurn && canDraw && onClick;
 
   return (
     <div

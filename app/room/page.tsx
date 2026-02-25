@@ -51,6 +51,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
     startingHandSize: settings.startingHandSize,
     isHost: amIHost,
     scoreLimit: settings.scoreLimit,
+    forcePlay: settings.forcePlay,
   });
 
   // Session resilience — host-only disconnect handling and pause management
@@ -67,7 +68,10 @@ const RoomPageContent = ({ id }: { id: string }) => {
   });
 
   // Gameplay — action submission and validation
-  const { submitAction, canPlayCard } = useGamePlay(myClientId);
+  const { submitAction, canPlayCard, canDraw } = useGamePlay(myClientId, {
+    forcePlay: settings.forcePlay,
+    hand,
+  });
 
   useGameAudioFeedback({
     status,
@@ -238,6 +242,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
               lastPlayedBy={lastPlayedBy}
               onPlayCard={handlePlayCard}
               onDrawCard={handleDrawCard}
+              canDraw={canDraw}
               canPlayCard={canPlayCard}
               chatMessages={chatMessages}
               onSendMessage={sendMessage}

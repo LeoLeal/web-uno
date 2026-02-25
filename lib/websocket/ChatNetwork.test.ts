@@ -3,7 +3,7 @@ import { ChatNetwork } from './ChatNetwork';
 import * as configSignaling from '@/lib/config/signaling';
 
 describe('ChatNetwork', () => {
-  let mockWebSocket: any;
+  let mockWebSocket: { readyState: number; send: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn>; onopen?: () => void };
 
   beforeEach(() => {
     vi.spyOn(configSignaling, 'getSignalingUrl').mockReturnValue('ws://localhost:1234');
@@ -12,7 +12,7 @@ describe('ChatNetwork', () => {
     if (typeof globalThis.crypto === 'undefined') {
       vi.stubGlobal('crypto', { randomUUID: () => 'mock-uuid' });
     } else if (!globalThis.crypto.randomUUID) {
-      vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('mock-uuid');
+      vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('00000000-0000-0000-0000-000000000000');
     }
     
     mockWebSocket = {
@@ -29,8 +29,8 @@ describe('ChatNetwork', () => {
       return ws;
     }));
     // Also stub the OPEN constant on the WebSocket constructor if needed
-    (globalThis.WebSocket as any).OPEN = 1;
-    (globalThis.WebSocket as any).CONNECTING = 0;
+    (globalThis.WebSocket as { OPEN: number }).OPEN = 1;
+    (globalThis.WebSocket as { CONNECTING: number }).CONNECTING = 0;
   });
 
   afterEach(() => {

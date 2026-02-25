@@ -42,6 +42,8 @@ interface GameBoardProps {
   onPlayCard?: (cardId: string, chosenColor?: CardColor) => void;
   /** Handler for drawing a card */
   onDrawCard?: () => void;
+  /** Whether drawing is allowed (Force Play rule) */
+  canDraw?: boolean;
   /** Function to check if a card can be played */
   canPlayCard?: (card: Card) => boolean;
   chatMessages?: ChatMessage[];
@@ -69,6 +71,7 @@ export const GameBoard = ({
   lastPlayedBy = null,
   onPlayCard,
   onDrawCard,
+  canDraw = true,
   canPlayCard,
   chatMessages = [],
   onSendMessage,
@@ -141,6 +144,7 @@ export const GameBoard = ({
         <TableCenter
           discardPile={discardPile}
           isMyTurn={isMyTurn}
+          canDraw={canDraw}
           onDrawCard={onDrawCard}
           lastPlayedBy={lastPlayedBy}
           myClientId={myClientId}

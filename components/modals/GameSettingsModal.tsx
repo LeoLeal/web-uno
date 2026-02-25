@@ -12,6 +12,7 @@ import {
   SETTING_DESCRIPTIONS,
   BOOLEAN_SETTING_KEYS,
   BOOLEAN_SETTING_LABELS,
+  IMPLEMENTED_RULES,
   STARTING_HAND_SIZES,
   SCORE_LIMITS,
   StartingHandSize,
@@ -138,24 +139,31 @@ export const GameSettingsModal = ({
         </h3>
 
         <div className="space-y-4">
-          {BOOLEAN_SETTING_KEYS.map((key) => (
-            <div key={key} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor={`setting-${key}`}
-                  className="text-sm font-medium text-(--cream)"
-                >
-                  {BOOLEAN_SETTING_LABELS[key]}
-                </label>
-                <InfoTooltip content={SETTING_DESCRIPTIONS[key]} />
+          {BOOLEAN_SETTING_KEYS.map((key) => {
+            const isImplemented = IMPLEMENTED_RULES.has(key);
+            return (
+              <div key={key} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor={`setting-${key}`}
+                    className={`text-sm font-medium ${isImplemented ? 'text-(--cream)' : 'text-(--cream-dark) opacity-50'}`}
+                  >
+                    {BOOLEAN_SETTING_LABELS[key]}
+                    {!isImplemented && (
+                      <span className="ml-2 text-xs opacity-60 font-normal">Coming soon</span>
+                    )}
+                  </label>
+                  <InfoTooltip content={SETTING_DESCRIPTIONS[key]} />
+                </div>
+                <ToggleSwitch
+                  id={`setting-${key}`}
+                  checked={draft[key]}
+                  onChange={(value) => handleToggleChange(key, value)}
+                  disabled={!isImplemented}
+                />
               </div>
-              <ToggleSwitch
-                id={`setting-${key}`}
-                checked={draft[key]}
-                onChange={(value) => handleToggleChange(key, value)}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

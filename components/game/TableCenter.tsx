@@ -11,6 +11,8 @@ interface TableCenterProps {
   className?: string;
   /** Whether it's the current player's turn */
   isMyTurn?: boolean;
+  /** Whether drawing is allowed (Force Play rule) */
+  canDraw?: boolean;
   /** Called when the deck is clicked to draw a card */
   onDrawCard?: () => void;
   /** Client ID of the player who last played a card */
@@ -32,6 +34,7 @@ export const TableCenter = ({
   discardPile, 
   className, 
   isMyTurn, 
+  canDraw = true,
   onDrawCard,
   lastPlayedBy = null,
   myClientId = null,
@@ -54,6 +57,7 @@ export const TableCenter = ({
           cardWidth={cardWidth}
           cardHeight={cardHeight}
           isMyTurn={isMyTurn}
+          canDraw={canDraw}
           onClick={onDrawCard}
         />
         <span className="text-xs text-(--cream-dark) opacity-50 font-mono">Draw</span>

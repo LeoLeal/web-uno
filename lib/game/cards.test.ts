@@ -4,6 +4,8 @@ import {
   isWildDrawFour,
   isActionCard,
   isNumberCard,
+  isCardPlayable,
+  hasPlayableCard,
   Card,
 } from './cards';
 
@@ -114,5 +116,101 @@ describe('Card predicates', () => {
       const card: Card = { id: '8', symbol: 'wild-draw4' };
       expect(isNumberCard(card)).toBe(false);
     });
+  });
+});
+
+describe('isCardPlayable', () => {
+  it('should return false when topDiscard is null', () => {
+    const card: Card = { id: '1', color: 'red', symbol: '5' };
+    expect(isCardPlayable(card, null)).toBe(false);
+  });
+
+  it('should return true when topDiscard has no color (wild first card)', () => {
+    const card: Card = { id: '1', color: 'blue', symbol: '3' };
+    const topDiscard: Card = { id: 'd', symbol: 'wild' };
+    expect(isCardPlayable(card, topDiscard)).toBe(true);
+  });
+
+  it('should return true for wild cards regardless of top discard', () => {
+    const wild: Card = { id: '1', symbol: 'wild' };
+    const wildDraw4: Card = { id: '2', symbol: 'wild-draw4' };
+    const topDiscard: Card = { id: 'd', color: 'red', symbol: '5' };
+    expect(isCardPlayable(wild, topDiscard)).toBe(true);
+    expect(isCardPlayable(wildDraw4, topDiscard)).toBe(true);
+  });
+
+  it('should return true when card color matches top discard', () => {
+    const card: Card = { id: '1', color: 'red', symbol: '9' };
+    const topDiscard: Card = { id: 'd', color: 'red', symbol: '5' };
+    expect(isCardPlayable(card, topDiscard)).toBe(true);
+  });
+
+  it('should return true when card symbol matches top discard', () => {
+    const card: Card = { id: '1', color: 'blue', symbol: '5' };
+    const topDiscard: Card = { id: 'd', color: 'red', symbol: '5' };
+    expect(isCardPlayable(card, topDiscard)).toBe(true);
+  });
+
+  it('should return false when neither color nor symbol matches', () => {
+    const card: Card = { id: '1', color: 'blue', symbol: '9' };
+    const topDiscard: Card = { id: 'd', color: 'red', symbol: '5' };
+    expect(isCardPlayable(card, topDiscard)).toBe(false);
+  });
+
+  it('should return true for action card with matching color', () => {
+    const card: Card = { id: '1', color: 'blue', symbol: 'skip' };
+    const topDiscard: Card = { id: 'd', color: 'blue', symbol: '3' };
+    expect(isCardPlayable(card, topDiscard)).toBe(true);
+  });
+
+  it('should return true for action card with matching symbol', () => {
+    const card: Card = { id: '1', color: 'green', symbol: 'skip' };
+    const topDiscard: Card = { id: 'd', color: 'red', symbol: 'skip' };
+    expect(isCardPlayable(card, topDiscard)).toBe(true);
+  });
+});
+
+describe('hasPlayableCard', () => {
+  const topDiscard: Card = { id: 'd', color: 'red', symbol: '5' };
+
+  it('should return false for an empty hand', () => {
+    expect(hasPlayableCard([], topDiscard)).toBe(false);
+  });
+
+  it('should return false when no card in hand is playable', () => {
+    const hand: Card[] = [
+      { id: '1', color: 'blue', symbol: '9' },
+      { id: '2', color: 'green', symbol: '3' },
+    ];
+    expect(hasPlayableCard(hand, topDiscard)).toBe(false);
+  });
+
+  it('should return true when at least one card is playable by color', () => {
+    const hand: Card[] = [
+      { id: '1', color: 'blue', symbol: '9' },
+      { id: '2', color: 'red', symbol: '7' },
+    ];
+    expect(hasPlayableCard(hand, topDiscard)).toBe(true);
+  });
+
+  it('should return true when at least one card is playable by symbol', () => {
+    const hand: Card[] = [
+      { id: '1', color: 'blue', symbol: '9' },
+      { id: '2', color: 'green', symbol: '5' },
+    ];
+    expect(hasPlayableCard(hand, topDiscard)).toBe(true);
+  });
+
+  it('should return true when a wild card is in hand', () => {
+    const hand: Card[] = [
+      { id: '1', color: 'blue', symbol: '9' },
+      { id: '2', symbol: 'wild' },
+    ];
+    expect(hasPlayableCard(hand, topDiscard)).toBe(true);
+  });
+
+  it('should return false when topDiscard is null', () => {
+    const hand: Card[] = [{ id: '1', color: 'red', symbol: '5' }];
+    expect(hasPlayableCard(hand, null)).toBe(false);
   });
 });

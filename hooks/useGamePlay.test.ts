@@ -120,3 +120,50 @@ describe('useGamePlay.isMyTurn', () => {
     expect(result.current.isMyTurn).toBe(false);
   });
 });
+
+describe('useGamePlay.canDraw', () => {
+  it('should be true when forcePlay is disabled (default)', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    // Hand has a playable card but forcePlay is off
+    const { result } = renderHook(() =>
+      useGamePlay(1, {
+        forcePlay: false,
+        hand: [{ id: 'c1', color: 'red', symbol: '9' }],
+      })
+    );
+    expect(result.current.canDraw).toBe(true);
+  });
+
+  it('should be true when forcePlay is enabled but hand has no playable card', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() =>
+      useGamePlay(1, {
+        forcePlay: true,
+        hand: [{ id: 'c1', color: 'blue', symbol: '9' }],
+      })
+    );
+    expect(result.current.canDraw).toBe(true);
+  });
+
+  it('should be false when forcePlay is enabled and hand has a playable card', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() =>
+      useGamePlay(1, {
+        forcePlay: true,
+        hand: [{ id: 'c1', color: 'red', symbol: '9' }],
+      })
+    );
+    expect(result.current.canDraw).toBe(false);
+  });
+
+  it('should be false when forcePlay enabled and hand has a wild card', () => {
+    mockGameState.discardPile = [{ id: 'd1', color: 'red', symbol: '5' }];
+    const { result } = renderHook(() =>
+      useGamePlay(1, {
+        forcePlay: true,
+        hand: [{ id: 'c1', symbol: 'wild' }],
+      })
+    );
+    expect(result.current.canDraw).toBe(false);
+  });
+});

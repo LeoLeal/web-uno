@@ -7,7 +7,7 @@ describe('ChatInput', () => {
     const onSendMessage = vi.fn();
     render(<ChatInput onSendMessage={onSendMessage} />);
     
-    const input = screen.getByPlaceholderText('Type a message...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText('Type a chat message...') as HTMLTextAreaElement;
     fireEvent.change(input, { target: { value: 'Test message' } });
     expect(input.value).toBe('Test message');
     
@@ -25,7 +25,7 @@ describe('ChatInput', () => {
     const button = screen.getByRole('button', { name: /send message/i });
     expect(button).toBeDisabled();
     
-    const input = screen.getByPlaceholderText('Type a message...');
+    const input = screen.getByPlaceholderText('Type a chat message...');
     fireEvent.change(input, { target: { value: '   ' } });
     expect(button).toBeDisabled();
     

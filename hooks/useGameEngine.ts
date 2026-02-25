@@ -9,7 +9,7 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
-import { Card, isWildDrawFour, CardSymbol, PlayerAction, isWildCard } from '@/lib/game/cards';
+import { Card, isWildDrawFour, CardSymbol, PlayerAction, isWildCard, isCardPlayable, hasPlayableCard } from '@/lib/game/cards';
 import { createDeck, shuffle } from '@/lib/game/deck';
 import { Player } from '@/hooks/useRoom';
 import { calculateHandPoints } from '@/lib/game/scoring';
@@ -27,6 +27,8 @@ interface UseGameEngineOptions {
   isHost: boolean;
   /** Score limit for multi-round games (null = single round) */
   scoreLimit: number | null;
+  /** Whether Force Play house rule is enabled */
+  forcePlay?: boolean;
 }
 
 interface UseGameEngineReturn {
@@ -44,6 +46,7 @@ export const useGameEngine = ({
   startingHandSize,
   isHost,
   scoreLimit,
+  forcePlay = false,
 }: UseGameEngineOptions): UseGameEngineReturn => {
   const { doc } = useGame();
   // Host keeps the deck in memory only — never in shared state
@@ -341,14 +344,7 @@ export const useGameEngine = ({
 
           // Validation: Playability
           const topDiscard = discardPile[discardPile.length - 1];
-          const activeColor = topDiscard?.color ?? null;
-          const isPlayable =
-            activeColor === null ||
-            isWildCard(card) ||
-            card.color === activeColor ||
-            card.symbol === topDiscard?.symbol;
-
-          if (!isPlayable) {
+          if (!isCardPlayable(card, topDiscard)) {
             actionsMap.set(clientIdStr, null);
             return;
           }
@@ -483,6 +479,15 @@ export const useGameEngine = ({
             actionsMap.set(clientIdStr, null);
           });
         } else if (action.type === 'DRAW_CARD') {
+          // Force Play rule: reject draw if player has a playable card
+          if (forcePlay) {
+            const topDiscard = discardPile[discardPile.length - 1] ?? null;
+            if (hasPlayableCard(playerHand, topDiscard)) {
+              actionsMap.set(clientIdStr, null);
+              return;
+            }
+          }
+
           // Execute DRAW_CARD
           doc.transact(() => {
             const drawnCards = dealCards(1);
@@ -507,7 +512,7 @@ export const useGameEngine = ({
 
     actionsMap.observe(observer);
     return () => actionsMap.unobserve(observer);
-  }, [doc, myClientId, isHost, scoreLimit]);
+  }, [doc, myClientId, isHost, scoreLimit, forcePlay]);
 
   return { initializeGame, initializeRound, deckRef };
 };

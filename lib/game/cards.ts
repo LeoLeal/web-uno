@@ -63,6 +63,37 @@ export const isNumberCard = (card: Card): boolean =>
   Number(card.symbol) >= 0 && Number(card.symbol) <= 9 && !isNaN(Number(card.symbol));
 
 /**
+ * Checks if a card can be played against the current top discard card.
+ * Pure function shared by host validation and client pre-validation.
+ */
+export const isCardPlayable = (card: Card, topDiscard: Card | null): boolean => {
+  if (!topDiscard) return false;
+
+  const activeColor = topDiscard.color ?? null;
+
+  // No active color (wild first card) — any card is playable
+  if (activeColor === null) return true;
+
+  // Wild cards are always playable
+  if (isWildCard(card)) return true;
+
+  // Color match
+  if (card.color === activeColor) return true;
+
+  // Symbol match
+  if (card.symbol === topDiscard.symbol) return true;
+
+  return false;
+};
+
+/**
+ * Checks if a player's hand contains any playable card against the top discard.
+ * Used by Force Play rule to determine if drawing is allowed.
+ */
+export const hasPlayableCard = (hand: Card[], topDiscard: Card | null): boolean =>
+  hand.some((card) => isCardPlayable(card, topDiscard));
+
+/**
  * Player action types for the action queue system.
  * Peers submit actions to the host for validation and execution.
  */

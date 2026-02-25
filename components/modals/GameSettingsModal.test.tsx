@@ -104,7 +104,7 @@ describe('GameSettingsModal', () => {
 
       expect(screen.getByRole('radio', { name: '10' })).toHaveAttribute('aria-checked', 'true');
       expect(screen.getByRole('radio', { name: '500' })).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByRole('switch', { name: 'Draw Stacking' })).toHaveAttribute(
+      expect(document.getElementById('setting-drawStacking')).toHaveAttribute(
         'aria-checked',
         'true'
       );
@@ -133,11 +133,14 @@ describe('GameSettingsModal', () => {
     it('should toggle boolean setting when clicking switch', () => {
       render(<GameSettingsModal {...defaultProps} />);
 
-      const toggle = screen.getByRole('switch', { name: 'Draw Stacking' });
+      const toggle = document.getElementById('setting-drawStacking') as HTMLElement;
       expect(toggle).toHaveAttribute('aria-checked', 'false');
 
-      fireEvent.click(toggle);
-      expect(toggle).toHaveAttribute('aria-checked', 'true');
+      // Draw Stacking is disabled (unimplemented) — toggle the implemented Force Play instead
+      const forcePlayToggle = screen.getByRole('switch', { name: /force play/i });
+      expect(forcePlayToggle).toHaveAttribute('aria-checked', 'false');
+      fireEvent.click(forcePlayToggle);
+      expect(forcePlayToggle).toHaveAttribute('aria-checked', 'true');
     });
   });
 
@@ -146,9 +149,9 @@ describe('GameSettingsModal', () => {
       const onSave = vi.fn();
       render(<GameSettingsModal {...defaultProps} onSave={onSave} />);
 
-      // Make some changes
+      // Make some changes — toggle only the implemented Force Play rule
       fireEvent.click(screen.getByRole('radio', { name: '10' }));
-      fireEvent.click(screen.getByRole('switch', { name: 'Jump-In' }));
+      fireEvent.click(screen.getByRole('switch', { name: /force play/i }));
 
       // Save
       fireEvent.click(screen.getByText('Save Settings'));
@@ -156,7 +159,7 @@ describe('GameSettingsModal', () => {
       expect(onSave).toHaveBeenCalledWith(
         expect.objectContaining({
           startingHandSize: 10,
-          jumpIn: true,
+          forcePlay: true,
         })
       );
     });
@@ -195,7 +198,7 @@ describe('GameSettingsModal', () => {
       // Verify defaults
       expect(screen.getByRole('radio', { name: '7' })).toHaveAttribute('aria-checked', 'true');
       expect(screen.getByRole('radio', { name: '∞' })).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByRole('switch', { name: 'Draw Stacking' })).toHaveAttribute(
+      expect(document.getElementById('setting-drawStacking')).toHaveAttribute(
         'aria-checked',
         'false'
       );
@@ -227,6 +230,46 @@ describe('GameSettingsModal', () => {
       // Should have 8 tooltips (2 for discrete + 6 for boolean)
       const tooltips = container.getElementsByClassName(infoTooltipStyles.root);
       expect(tooltips.length).toBe(8);
+    });
+  });
+
+  describe('house rules disabled toggles', () => {
+    it('should disable toggles for unimplemented rules', () => {
+      render(<GameSettingsModal {...defaultProps} />);
+
+      // Unimplemented rules should be disabled (query by element ID)
+      const unimplementedIds = [
+        'setting-drawStacking',
+        'setting-jumpIn',
+        'setting-zeroSwap',
+        'setting-sevenSwap',
+        'setting-multipleCardPlay',
+      ];
+      for (const id of unimplementedIds) {
+        expect(document.getElementById(id)).toBeDisabled();
+      }
+    });
+
+    it('should NOT disable the Force Play toggle', () => {
+      render(<GameSettingsModal {...defaultProps} />);
+
+      const toggle = screen.getByRole('switch', { name: /force play/i });
+      expect(toggle).not.toBeDisabled();
+    });
+
+    it('should show "Coming soon" label for unimplemented rules', () => {
+      render(<GameSettingsModal {...defaultProps} />);
+
+      const comingSoonLabels = screen.getAllByText('Coming soon');
+      // There should be 5 "Coming soon" labels (all rules except forcePlay)
+      expect(comingSoonLabels).toHaveLength(5);
+    });
+
+    it('should NOT show "Coming soon" for Force Play', () => {
+      render(<GameSettingsModal {...defaultProps} />);
+
+      const forcePlayLabel = screen.getByText('Force Play');
+      expect(forcePlayLabel.closest('label')?.textContent).not.toContain('Coming soon');
     });
   });
 });

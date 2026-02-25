@@ -5,8 +5,15 @@
 
 import { useCallback, useMemo } from 'react';
 import { useGame } from '@/components/providers/GameProvider';
-import { Card, CardColor, PlayerAction, isWildCard } from '@/lib/game/cards';
+import { Card, CardColor, PlayerAction, isCardPlayable, hasPlayableCard } from '@/lib/game/cards';
 import { useGameState } from '@/hooks/useGameState';
+
+interface UseGamePlayOptions {
+  /** Whether the Force Play house rule is enabled */
+  forcePlay?: boolean;
+  /** Current player's hand (needed for Force Play canDraw check) */
+  hand?: Card[];
+}
 
 interface UseGamePlayReturn {
   /** Submit a player action to the action queue */
@@ -19,9 +26,15 @@ interface UseGamePlayReturn {
   activeColor: CardColor | null;
   /** Top card of the discard pile */
   topDiscard: Card | null;
+  /** Whether the current player is allowed to draw a card */
+  canDraw: boolean;
 }
 
-export const useGamePlay = (myClientId: number | null): UseGamePlayReturn => {
+export const useGamePlay = (
+  myClientId: number | null,
+  options: UseGamePlayOptions = {},
+): UseGamePlayReturn => {
+  const { forcePlay = false, hand = [] } = options;
   const { doc } = useGame();
   const { currentTurn, discardPile, status } = useGameState();
 
@@ -51,28 +64,17 @@ export const useGamePlay = (myClientId: number | null): UseGamePlayReturn => {
     [doc, myClientId]
   );
 
-  // Local pre-validation for card playability
+  // Local pre-validation for card playability (using shared utility)
   const canPlayCard = useCallback(
-    (card: Card): boolean => {
-      if (!topDiscard) return false;
-
-      // No active color (wild first card) - any card is playable
-      if (activeColor === null) return true;
-
-      // Wild cards are always playable
-      if (isWildCard(card)) return true;
-
-      // Color match
-      if (card.color === activeColor) return true;
-
-      // Symbol match
-      if (card.symbol === topDiscard.symbol) return true;
-
-      // No match
-      return false;
-    },
-    [topDiscard, activeColor]
+    (card: Card): boolean => isCardPlayable(card, topDiscard),
+    [topDiscard]
   );
+
+  // Force Play: disable draw when player has a playable card
+  const canDraw = useMemo(() => {
+    if (!forcePlay) return true;
+    return !hasPlayableCard(hand, topDiscard);
+  }, [forcePlay, hand, topDiscard]);
 
   return {
     submitAction,
@@ -80,5 +82,6 @@ export const useGamePlay = (myClientId: number | null): UseGamePlayReturn => {
     isMyTurn,
     activeColor,
     topDiscard,
+    canDraw,
   };
 };

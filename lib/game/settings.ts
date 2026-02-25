@@ -87,6 +87,15 @@ export const BOOLEAN_SETTING_LABELS: Record<BooleanSettingKey, string> = {
 };
 
 /**
+ * Set of house rule keys that have been implemented in the game engine.
+ * Rules NOT in this set are shown as disabled in the settings modal.
+ * Add a key here when its engine-side implementation is complete.
+ */
+export const IMPLEMENTED_RULES: ReadonlySet<BooleanSettingKey> = new Set<BooleanSettingKey>([
+  'forcePlay',
+]);
+
+/**
  * Generate a human-readable summary string for settings.
  */
 export const getSettingsSummary = (settings: GameSettings): string => {
