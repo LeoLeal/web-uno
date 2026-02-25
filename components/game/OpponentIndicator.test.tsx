@@ -92,6 +92,51 @@ describe('OpponentIndicator', () => {
       expect(container.querySelector('.border-yellow-400')).toBeInTheDocument();
       expect(screen.getByText('⚠️')).toBeInTheDocument();
     });
+
+    it('shows player number badge for opponents with a number', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          playerNumber={9}
+        />
+      );
+
+      expect(screen.getByText('9')).toBeInTheDocument();
+    });
+
+    it('does not show player number badge when no number is provided', () => {
+      const { container } = render(<OpponentIndicator {...defaultProps} />);
+
+      expect(container.querySelector('.-top-2.-left-2.h-6.w-6')).not.toBeInTheDocument();
+    });
+
+    it('uses highlighted badge style on current turn', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          playerNumber={7}
+          isCurrentTurn={true}
+        />
+      );
+
+      const badge = screen.getByText('7');
+      expect(badge).toHaveClass('bg-yellow-400');
+      expect(badge).toHaveClass('border-yellow-400');
+    });
+
+    it('uses subtle badge style when not current turn', () => {
+      render(
+        <OpponentIndicator
+          {...defaultProps}
+          playerNumber={8}
+          isCurrentTurn={false}
+        />
+      );
+
+      const badge = screen.getByText('8');
+      expect(badge).toHaveClass('bg-(--felt-dark)');
+      expect(badge).toHaveClass('border-(--copper-border)');
+    });
   });
 
   describe('Card Count Display', () => {

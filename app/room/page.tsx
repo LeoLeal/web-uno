@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LogOut, Users, Volume2, VolumeX } from 'lucide-react';
+import { LogOut, Shuffle, Users, Volume2, VolumeX } from 'lucide-react';
 import { useRoom } from '@/hooks/useRoom';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSettings } from '@/hooks/useGameSettings';
@@ -33,7 +33,18 @@ import { GameProvider } from '@/components/providers/GameProvider';
 const RoomPageContent = ({ id }: { id: string }) => {
   const navigate = useNavigate();
 
-  const { players, isSynced, updateMyState, myClientId, amIHost, hostId, isHostConnected, isGameFull } = useRoom(id);
+  const {
+    players,
+    isSynced,
+    updateMyState,
+    myClientId,
+    amIHost,
+    hostId,
+    isHostConnected,
+    isGameFull,
+    reorderPlayers,
+    randomizePlayers,
+  } = useRoom(id);
   const { status, currentTurn, discardPile, playerCardCounts, turnOrder, lockedPlayers, orphanHands, winner, endType, scores, lastRoundPoints, lastPlayedBy, initGame } = useGameState();
   const { settings } = useGameSettings();
   const { hand } = usePlayerHand({ myClientId });
@@ -220,10 +231,34 @@ const RoomPageContent = ({ id }: { id: string }) => {
           {status === 'LOBBY' ? (
             <>
               <div className="mb-6 mt-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-(--cream)">Lobby <span className="text-(--cream-dark) opacity-60 text-sm ml-2 align-middle inline-flex items-center justify-center gap-1"><Users className="w-4 h-4" /> {players.length}/{MAX_PLAYERS} players</span></h2>
-                {amIHost && <span className="text-xs text-yellow-500 uppercase font-bold tracking-widest border border-yellow-500/30 px-2 py-1 rounded">You are Host</span>}
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-(--cream)">
+                    Lobby{' '}
+                    <span className="text-(--cream-dark) opacity-60 text-sm ml-2 align-middle inline-flex items-center justify-center gap-1">
+                      <Users className="w-4 h-4" /> {players.length}/{MAX_PLAYERS} players
+                    </span>
+                  </h2>
+                  {amIHost && (
+                    <button
+                      type="button"
+                      onClick={randomizePlayers}
+                      className="inline-flex items-center gap-2 rounded-lg border border-(--copper-border) px-3 py-1.5 text-xs font-semibold tracking-wide text-(--cream-dark) transition-all hover:border-(--copper-light) hover:bg-(--copper-light)/10 hover:text-(--cream)"
+                    >
+                      <Shuffle className="w-3.5 h-3.5" />
+                      <span>Randomize order</span>
+                    </button>
+                  )}
+                </div>
+                {amIHost && <span className="text-xs text-yellow-500 uppercase font-bold tracking-widest border border-yellow-500/30 px-2 py-1 rounded md:inline-block hidden">You are Host</span>}
               </div>
-              <PlayerList players={players} myClientId={myClientId} hostId={hostId} chatMessages={chatMessages} />
+              <PlayerList
+                players={players}
+                myClientId={myClientId}
+                hostId={hostId}
+                chatMessages={chatMessages}
+                amIHost={amIHost}
+                onReorder={reorderPlayers}
+              />
             </>
           ) : (
             <GameBoard
@@ -231,6 +266,7 @@ const RoomPageContent = ({ id }: { id: string }) => {
               myClientId={myClientId}
               hostId={hostId}
               currentTurn={currentTurn}
+              turnOrder={turnOrder}
               hand={hand}
               discardPile={discardPile}
               playerCardCounts={playerCardCounts}

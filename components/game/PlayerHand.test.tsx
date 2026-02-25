@@ -216,5 +216,25 @@ describe('PlayerHand', () => {
       expect(screen.queryByRole('button', { name: /Call UNO/i })).not.toBeInTheDocument();
     });
 
-});
+  });
+
+  describe('Player Number Label', () => {
+    it('shows the player number label when playerNumber is provided', () => {
+      render(
+        <PlayerHand
+          cards={mockCards}
+          playerNumber={4}
+        />
+      );
+
+      expect(screen.getByText(/you are player number/i)).toBeInTheDocument();
+      expect(screen.getByText('4')).toBeInTheDocument();
+    });
+
+    it('does not show the player number label when playerNumber is missing', () => {
+      render(<PlayerHand cards={mockCards} />);
+
+      expect(screen.queryByText(/you are player number/i)).not.toBeInTheDocument();
+    });
+  });
 });

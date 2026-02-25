@@ -37,7 +37,7 @@ describe('Lobby Components Accessibility', () => {
 
     it('should have no accessibility violations', async () => {
       const { container } = render(
-        <PlayerList players={mockPlayers} myClientId={1} hostId={1} />
+        <PlayerList players={mockPlayers} myClientId={1} hostId={1} amIHost={true} onReorder={vi.fn()} />
       );
       const results = await axe(container);
       expect(results).toHaveNoViolations();
@@ -66,6 +66,31 @@ describe('Lobby Components Accessibility', () => {
     it('should indicate host status', () => {
       render(<PlayerList players={mockPlayers} myClientId={1} hostId={2} />);
       expect(screen.getByText('(Host)')).toBeVisible();
+    });
+
+    it('shows drag handles only to host view', () => {
+      const { rerender } = render(
+        <PlayerList players={mockPlayers} myClientId={1} hostId={1} amIHost={true} onReorder={vi.fn()} />
+      );
+
+      expect(screen.getAllByLabelText(/reorder/i)).toHaveLength(mockPlayers.length);
+
+      rerender(
+        <PlayerList players={mockPlayers} myClientId={2} hostId={1} amIHost={false} onReorder={vi.fn()} />
+      );
+
+      expect(screen.queryByLabelText(/reorder/i)).not.toBeInTheDocument();
+    });
+
+    it('uses the responsive grid lobby layout', () => {
+      const { container } = render(
+        <PlayerList players={mockPlayers} myClientId={1} hostId={1} amIHost={true} onReorder={vi.fn()} />
+      );
+
+      const gridContainer = container.querySelector('[class*="grid-cols-3"]');
+      expect(gridContainer).toBeTruthy();
+      expect(gridContainer?.className).toContain('md:grid-cols-4');
+      expect(gridContainer?.className).toContain('lg:grid-cols-5');
     });
   });
 

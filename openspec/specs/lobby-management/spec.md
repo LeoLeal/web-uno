@@ -98,13 +98,14 @@ The system SHALL display the Room ID in a readable format in the lobby header.
 
 ### Requirement: Lobby Presence
 
-The system SHALL display a list of all connected peers in the lobby.
+The system SHALL display a list of all connected peers in the lobby, ordered by an explicit `playerOrder` array from Yjs shared state rather than alphabetically.
 
 #### Scenario: User joins an existing lobby
 
 - **WHEN** user navigates to `/room/[room-id]`
 - **THEN** they are added to the synced player list
 - **THEN** they see their own name and the names of other connected players
+- **AND** the player list is ordered according to the `playerOrder` array in Yjs shared state
 
 ### Requirement: Game Start Conditions
 
@@ -185,12 +186,12 @@ The system SHALL display incoming chat messages over the player cards in the lob
 
 ### Requirement: Responsive Lobby Layout
 
-The system SHALL display the lobby interface effectively on both mobile and desktop viewports.
+The system SHALL display the lobby interface effectively on both mobile and desktop viewports, using a responsive CSS grid layout for the player list.
 
 #### Scenario: Mobile View
 
 - **WHEN** the viewport width is < 768px (Mobile)
-- **THEN** the player list renders as a 3-column grid (3-per-row) instead of the previous 2-column grid, making player cards smaller to fit on screen and reducing scroll distance
+- **THEN** the player list renders as a responsive grid with approximately 3 cards per row
 - **THEN** the "Start Game" button is fixed at the bottom of the screen (easy thumb access)
 
 ### Requirement: Player Name Input

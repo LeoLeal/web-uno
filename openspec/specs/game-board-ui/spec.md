@@ -8,7 +8,7 @@ Visual layout for the Uno game board showing player's hand, opponents, deck, and
 
 ### Requirement: Player Hand Display
 
-The system SHALL display the current player's cards fanned in an arc at the bottom of the screen.
+The system SHALL display the current player's cards fanned in an arc at the bottom of the screen, with a player number label.
 
 #### Scenario: Hand fan appearance
 
@@ -35,9 +35,15 @@ The system SHALL display the current player's cards fanned in an arc at the bott
 - **THEN** the hand is anchored to the bottom of the viewport
 - **AND** remains accessible regardless of screen size
 
+#### Scenario: Player number label
+
+- **WHEN** the game is in a gameplay state
+- **THEN** a centered label "You are player number N" SHALL be displayed below the card fan
+- **AND** N corresponds to the player's 1-indexed position in the turn order
+
 ### Requirement: Opponent Display
 
-The system SHALL display opponents around the edge of the viewport with circular avatars.
+The system SHALL display opponents around the edge of the viewport with circular avatars, each showing a numbered position badge at the top-left.
 
 #### Scenario: Opponent positioning
 
@@ -45,6 +51,7 @@ The system SHALL display opponents around the edge of the viewport with circular
 - **THEN** opponents are displayed in a horizontal row at the top of the game area
 - **AND** opponents are evenly spaced across the row
 - **AND** each opponent is displayed as a circular avatar
+- **AND** each opponent's avatar has a small numbered badge at its top-left indicating their turn order position
 
 #### Scenario: Opponent avatar display
 

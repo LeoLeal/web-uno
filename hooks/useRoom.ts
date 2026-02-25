@@ -12,8 +12,17 @@ export interface Player {
   avatar?: string;
 }
 
+const areNumberArraysEqual = (left: number[], right: number[]): boolean => {
+  if (left.length !== right.length) return false;
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] !== right[index]) return false;
+  }
+  return true;
+};
+
 export const useRoom = (roomId: string) => {
   const HOST_RESOLUTION_GRACE_MS = 3000;
+  const PLAYER_ORDER_REMOVAL_GRACE_MS = 5000;
   const { doc } = useGame();
   const [provider, setProvider] = useState<WebrtcProvider | null>(null);
   const [isSynced, setIsSynced] = useState(false);
@@ -25,6 +34,7 @@ export const useRoom = (roomId: string) => {
   const hasAttemptedClaim = useRef(false);
   const isExplicitCreator = useRef(false);
   const unresolvedHostTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingPlayerOrderRemovalsRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
 
   // Check for creation intent flag (sessionStorage) on mount
   useEffect(() => {
@@ -73,6 +83,13 @@ export const useRoom = (roomId: string) => {
       }
     };
 
+    const clearPendingPlayerOrderRemovals = () => {
+      pendingPlayerOrderRemovalsRef.current.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      pendingPlayerOrderRemovalsRef.current.clear();
+    };
+
     const scheduleUnresolvedHostTimeout = () => {
       if (unresolvedHostTimerRef.current) return;
 
@@ -116,7 +133,25 @@ export const useRoom = (roomId: string) => {
     // Watch for hostId changes in shared state
     const handleGameStateChange = () => {
       const currentHostId = gameState.get('hostId') as number | null | undefined;
+      const currentPlayerOrder = (gameState.get('playerOrder') as number[] | undefined) || [];
       setHostId(currentHostId);
+
+      if (currentPlayerOrder.length > 0) {
+        const orderPosition = new Map(currentPlayerOrder.map((id, index) => [id, index]));
+        setPlayers((previousPlayers) => {
+          const sorted = [...previousPlayers].sort((a, b) => {
+            const aIndex = orderPosition.get(a.clientId);
+            const bIndex = orderPosition.get(b.clientId);
+
+            if (aIndex === undefined && bIndex === undefined) return 0;
+            if (aIndex === undefined) return 1;
+            if (bIndex === undefined) return -1;
+            return aIndex - bIndex;
+          });
+
+          return sorted;
+        });
+      }
       
       // Check if host is still connected
       if (typeof currentHostId === 'number') {
@@ -212,12 +247,76 @@ export const useRoom = (roomId: string) => {
         setIsGameFull(true);
       }
 
-      // Sort: Host first, then alphabetically by name
       const currentHostId = gameState.get('hostId') as number | null | undefined;
+      const storedPlayerOrder = (gameState.get('playerOrder') as number[] | undefined) || [];
+
+      let effectivePlayerOrder = storedPlayerOrder;
+
+      if ((status === 'LOBBY' || !status) && currentHostId === myId) {
+        const activeIds = activePlayers.map((player) => player.clientId);
+        const activeIdSet = new Set(activeIds);
+
+        const deduplicatedExisting = Array.from(new Set(storedPlayerOrder));
+
+        deduplicatedExisting.forEach((id) => {
+          if (activeIdSet.has(id)) {
+            const pendingRemoval = pendingPlayerOrderRemovalsRef.current.get(id);
+            if (pendingRemoval) {
+              clearTimeout(pendingRemoval);
+              pendingPlayerOrderRemovalsRef.current.delete(id);
+            }
+            return;
+          }
+
+          if (pendingPlayerOrderRemovalsRef.current.has(id)) {
+            return;
+          }
+
+          const removalTimer = setTimeout(() => {
+            pendingPlayerOrderRemovalsRef.current.delete(id);
+
+            const latestHostId = gameState.get('hostId') as number | null | undefined;
+            const latestStatus = gameState.get('status') as string | undefined;
+            if (latestHostId !== myId || (latestStatus && latestStatus !== 'LOBBY')) {
+              return;
+            }
+
+            if (awareness.getStates().has(id)) {
+              return;
+            }
+
+            const latestPlayerOrder = (gameState.get('playerOrder') as number[] | undefined) || [];
+            if (!latestPlayerOrder.includes(id)) {
+              return;
+            }
+
+            gameState.set('playerOrder', latestPlayerOrder.filter((clientId) => clientId !== id));
+          }, PLAYER_ORDER_REMOVAL_GRACE_MS);
+
+          pendingPlayerOrderRemovalsRef.current.set(id, removalTimer);
+        });
+
+        const newIds = activeIds.filter((id) => !deduplicatedExisting.includes(id));
+        const reconciledOrder = [...deduplicatedExisting, ...newIds];
+
+        if (!areNumberArraysEqual(storedPlayerOrder, reconciledOrder)) {
+          gameState.set('playerOrder', reconciledOrder);
+          effectivePlayerOrder = reconciledOrder;
+        }
+      } else {
+        clearPendingPlayerOrderRemovals();
+      }
+
+      const orderPosition = new Map(effectivePlayerOrder.map((id, index) => [id, index]));
       activePlayers.sort((a, b) => {
-        if (a.clientId === currentHostId) return -1;
-        if (b.clientId === currentHostId) return 1;
-        return a.name.localeCompare(b.name);
+        const aIndex = orderPosition.get(a.clientId);
+        const bIndex = orderPosition.get(b.clientId);
+
+        if (aIndex === undefined && bIndex === undefined) return 0;
+        if (aIndex === undefined) return 1;
+        if (bIndex === undefined) return -1;
+
+        return aIndex - bIndex;
       });
       setPlayers(activePlayers);
       
@@ -300,6 +399,7 @@ export const useRoom = (roomId: string) => {
       gameState.unobserve(handleGameStateChange);
       awareness.off('change', handleAwarenessChange);
       clearUnresolvedHostTimer();
+      clearPendingPlayerOrderRemovals();
       newProvider.disconnect();
       newProvider.destroy();
       hasAttemptedClaim.current = false;
@@ -308,6 +408,45 @@ export const useRoom = (roomId: string) => {
 
   // Determine if I'm host by comparing hostId with my clientId
   const amIHost = myClientId !== null && typeof hostId === 'number' && hostId === myClientId;
+
+  const reorderPlayers = useCallback((orderedIds: number[]) => {
+    if (!doc || myClientId === null || hostId !== myClientId || orderedIds.length === 0) {
+      return;
+    }
+
+    const gameState = doc.getMap('gameState');
+    const knownPlayers = new Set(players.map((player) => player.clientId));
+    const dedupedOrdered = Array.from(new Set(orderedIds)).filter((id) => knownPlayers.has(id));
+    const missingPlayers = players
+      .map((player) => player.clientId)
+      .filter((id) => !dedupedOrdered.includes(id));
+
+    const nextOrder = [...dedupedOrdered, ...missingPlayers];
+    gameState.set('playerOrder', nextOrder);
+  }, [doc, hostId, myClientId, players]);
+
+  const randomizePlayers = useCallback(() => {
+    if (!doc || myClientId === null || hostId !== myClientId || players.length < 2) {
+      return;
+    }
+
+    const gameState = doc.getMap('gameState');
+    const currentOrder = ((gameState.get('playerOrder') as number[] | undefined) || players.map((player) => player.clientId))
+      .filter((id) => players.some((player) => player.clientId === id));
+    const dedupedOrder = Array.from(new Set(currentOrder));
+    const missingPlayerIds = players
+      .map((player) => player.clientId)
+      .filter((id) => !dedupedOrder.includes(id));
+    const completeOrder = [...dedupedOrder, ...missingPlayerIds];
+
+    const shuffledOrder = [...completeOrder];
+    for (let index = shuffledOrder.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffledOrder[index], shuffledOrder[swapIndex]] = [shuffledOrder[swapIndex], shuffledOrder[index]];
+    }
+
+    gameState.set('playerOrder', shuffledOrder);
+  }, [doc, hostId, myClientId, players]);
 
   return { 
     provider, 
@@ -318,6 +457,8 @@ export const useRoom = (roomId: string) => {
     amIHost,
     isHostConnected,
     isGameFull,
-    updateMyState 
+    updateMyState,
+    reorderPlayers,
+    randomizePlayers,
   };
 };

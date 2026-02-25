@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 
 interface PlayerHandProps {
   cards: Card[];
+  playerNumber?: number;
   isMyTurn?: boolean;
   onCardClick?: (card: Card) => void;
   canPlayCard?: (card: Card) => boolean;
@@ -23,6 +24,7 @@ interface PlayerHandProps {
  */
 export const PlayerHand = ({
   cards,
+  playerNumber,
   isMyTurn = false,
   onCardClick,
   canPlayCard,
@@ -142,6 +144,12 @@ export const PlayerHand = ({
       {showScore && (
         <div className="absolute -top-8 right-8 text-sm text-(--cream-dark) opacity-70 font-medium">
           {score ?? 0} pts
+        </div>
+      )}
+
+      {typeof playerNumber === 'number' && playerNumber > 0 && (
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs md:text-sm font-semibold tracking-wide text-black bg-white/70 backdrop-blur-sm px-3 py-1  rounded-[9999px]  z-50">
+          You are player number <b>{playerNumber}</b>
         </div>
       )}
     </div>

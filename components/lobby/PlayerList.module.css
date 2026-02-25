@@ -83,3 +83,42 @@
     0 2px 8px rgba(0, 0, 0, 0.2),
     0 0 16px rgba(234, 179, 8, 0.5);
 }
+
+.dragHandle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(60, 38, 20, 0.8);
+  touch-action: none;
+  cursor: grab;
+  transition: all 120ms ease;
+}
+
+.dragHandle:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 0, 0, 0.24);
+  color: rgba(60, 38, 20, 1);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.draggingSlot {
+  z-index: 60;
+}
+
+.dragging {
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.26),
+    0 0 18px rgba(107, 155, 209, 0.35);
+}

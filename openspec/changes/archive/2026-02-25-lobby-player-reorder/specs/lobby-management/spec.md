@@ -13,10 +13,10 @@ The system SHALL display a list of all connected peers in the lobby, ordered by 
 
 ### Requirement: Responsive Lobby Layout
 
-The system SHALL display the lobby interface effectively on both mobile and desktop viewports, using a flex-wrap layout for the player list.
+The system SHALL display the lobby interface effectively on both mobile and desktop viewports, using a responsive CSS grid layout for the player list.
 
 #### Scenario: Mobile View
 
 - **WHEN** the viewport width is < 768px (Mobile)
-- **THEN** the player list renders using flex-wrap with card widths that result in approximately 3 cards per row
+- **THEN** the player list renders as a responsive grid with approximately 3 cards per row
 - **THEN** the "Start Game" button is fixed at the bottom of the screen (easy thumb access)

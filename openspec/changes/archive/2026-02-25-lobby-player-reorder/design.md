@@ -45,11 +45,13 @@ Players have no way to understand or influence turn sequence. The host cannot se
 
 1. On awareness change: builds `activePlayers` list, then sorts by `playerOrder` position (instead of alphabetically).
 2. On new player join (not in `playerOrder`): host appends their clientId to `playerOrder` in Yjs.
-3. On player leave (in `playerOrder` but not in awareness): host removes their clientId from `playerOrder`.
+3. On player leave (in `playerOrder` but not in awareness): host schedules removal after a short grace period (currently 5s) and only removes if the player is still absent.
 4. On reconnection (clientId already in `playerOrder`): no change — they keep their position.
 5. Exposes `reorderPlayers(orderedIds: number[])` and `randomizePlayers()` as host-only callbacks.
 
 **Rationale:** `useRoom` already manages the player list and awareness. Adding order management here keeps the concern co-located.
+
+**Implementation note:** The grace period prevents awareness flicker from unintentionally reordering host-defined seating.
 
 ### 3. @dnd-kit for drag-and-drop
 
@@ -68,11 +70,11 @@ Players have no way to understand or influence turn sequence. The host cannot se
 
 **Rationale:** Top-right avoids collision with the crown icon (top-center) on host cards. The handle enables touch drag without conflicting with page scroll (using `@dnd-kit`'s `useSensor(TouchSensor)` with activation constraints).
 
-### 5. PlayerList layout: flex-wrap instead of CSS grid
+### 5. PlayerList layout: keep CSS grid for sortable lobby
 
-**Decision:** Change `PlayerList` from `grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5` to `flex flex-wrap` with fixed-width items.
+**Decision:** Keep `PlayerList` as a responsive CSS grid (`grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5`) while integrating sortable drag-and-drop.
 
-**Rationale:** `@dnd-kit/sortable` with `rectSortingStrategy` works well with flex-wrap layouts. The visual result is nearly identical to the current grid. Card widths will use responsive sizing to approximate the current column counts.
+**Rationale:** `@dnd-kit/sortable` supports grid layouts, so we can preserve the existing responsive structure and avoid unnecessary layout churn.
 
 ### 6. Player number badge in gameplay
 
@@ -93,10 +95,10 @@ The badge uses two visual states:
 
 ## Risks / Trade-offs
 
-**[Risk] `playerOrder` can diverge from awareness** → The host is the single writer of `playerOrder` in shared state. Non-host peers only read it. The `useRoom` hook reconciles `playerOrder` with awareness on every change: only the host writes updates, guests just consume the ordering.
+**[Risk] `playerOrder` can diverge from awareness** → The host is the single writer of `playerOrder` in shared state. Non-host peers only read it. The `useRoom` hook reconciles `playerOrder` with awareness on every change and uses a leave grace period to avoid transient disconnect churn.
 
 **[Risk] Host disconnect during reorder** → If the host disconnects mid-drag, the `playerOrder` remains in its last-committed state (Yjs durability). The HostDisconnectModal handles this scenario already.
 
 **[Risk] @dnd-kit bundle size** → `@dnd-kit` is modular. Core + sortable + utilities adds ~15-20KB gzipped. Acceptable for the functionality gained.
 
-**[Trade-off] Flex-wrap vs Grid** → Flex-wrap may produce slightly different sizing at certain breakpoints compared to the current grid. We'll use responsive card widths to match as closely as possible.
+**[Trade-off] Grid drag behavior** → Grid sortable interactions are supported, but require careful drag target handling to keep movement predictable at different breakpoints.

@@ -10,6 +10,7 @@ interface OpponentIndicatorProps {
   name: string;
   avatar: string;
   cardCount: number;
+  playerNumber?: number;
   isCurrentTurn: boolean;
   isHost?: boolean;
   isDisconnected?: boolean;
@@ -29,6 +30,7 @@ export const OpponentIndicator = ({
   name,
   avatar,
   cardCount,
+  playerNumber,
   isCurrentTurn,
   isHost = false,
   isDisconnected = false,
@@ -61,6 +63,19 @@ export const OpponentIndicator = ({
           )}
           style={{ anchorName } as React.CSSProperties}
         >
+          {typeof playerNumber === 'number' && playerNumber > 0 && (
+            <div
+              className={cn(
+                'absolute -top-2 -left-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border text-xs font-extrabold',
+                isCurrentTurn
+                  ? 'border-yellow-400 bg-yellow-400 text-(--felt-dark) shadow-[0_0_14px_rgba(250,204,21,0.65)]'
+                  : 'border-(--copper-border) bg-(--felt-dark) text-(--cream-dark)'
+              )}
+            >
+              {playerNumber}
+            </div>
+          )}
+
           {avatar}
 
           {/* Disconnect indicator overlay */}

@@ -12,6 +12,7 @@ interface Opponent {
   name: string;
   avatar: string;
   cardCount: number;
+  playerNumber?: number;
   isHost: boolean;
   isDisconnected?: boolean;
   score?: number;
@@ -63,6 +64,7 @@ export const OpponentRow = ({
           name={opponent.name}
           avatar={opponent.avatar}
           cardCount={opponent.cardCount}
+          playerNumber={opponent.playerNumber}
           isCurrentTurn={currentTurn === opponent.clientId}
           isHost={opponent.isHost}
           isDisconnected={opponent.isDisconnected}

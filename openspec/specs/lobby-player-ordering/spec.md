@@ -1,4 +1,10 @@
-## ADDED Requirements
+# Spec: Lobby Player Ordering
+
+## Purpose
+
+Define host-managed lobby ordering behavior that determines game turn order.
+
+## Requirements
 
 ### Requirement: Player Order State
 
@@ -25,7 +31,8 @@ The system SHALL maintain an explicit `playerOrder` array (`number[]` of clientI
 
 - **WHEN** a player's awareness is removed during the lobby phase
 - **AND** their clientId exists in the `playerOrder` array
-- **THEN** the host SHALL remove their clientId from `playerOrder`
+- **THEN** the host SHALL schedule removal of their clientId from `playerOrder` after a short grace period
+- **AND** if the player reconnects before the grace period ends, their position SHALL remain unchanged
 - **AND** the remaining players' relative order SHALL be preserved
 
 ### Requirement: Player List Display Order
@@ -72,7 +79,7 @@ The system SHALL provide the host with a button to randomize the player order in
 #### Scenario: Randomize button display
 
 - **WHEN** the host views the lobby
-- **THEN** a button with a shuffle icon and the label "Randomize player order" SHALL appear next to the player count in the lobby header
+- **THEN** a button with a shuffle icon and the label "Randomize order" SHALL appear next to the player count in the lobby header
 
 #### Scenario: Non-host randomize button
 
@@ -81,7 +88,7 @@ The system SHALL provide the host with a button to randomize the player order in
 
 #### Scenario: Host clicks randomize
 
-- **WHEN** the host clicks the "Randomize player order" button
+- **WHEN** the host clicks the "Randomize order" button
 - **THEN** the `playerOrder` array in Yjs SHALL be shuffled randomly
 - **AND** all connected peers SHALL see the new randomized order
 
@@ -95,12 +102,12 @@ The system SHALL use the `playerOrder` array as the basis for `turnOrder` when t
 - **THEN** the `turnOrder` SHALL be set from the current `playerOrder`
 - **AND** the first player in `turnOrder` SHALL be the first to play (subject to first-card effects)
 
-### Requirement: PlayerList Flex-Wrap Layout
+### Requirement: PlayerList Grid Layout
 
-The system SHALL render the lobby PlayerList using a flex-wrap layout instead of CSS grid to support drag-and-drop reordering.
+The system SHALL render the lobby PlayerList using a responsive CSS grid layout while supporting drag-and-drop reordering.
 
 #### Scenario: PlayerList layout
 
 - **WHEN** the lobby PlayerList is rendered
-- **THEN** player cards SHALL be displayed in a flex container with flex-wrap behavior
-- **AND** the visual appearance SHALL resemble the current responsive grid layout (approximately 3 columns on mobile, 4 on tablet, 5 on desktop)
+- **THEN** player cards SHALL be displayed in a responsive CSS grid
+- **AND** the layout SHALL render approximately 3 columns on mobile, 4 on tablet, and 5 on desktop

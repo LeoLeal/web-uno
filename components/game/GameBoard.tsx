@@ -20,6 +20,8 @@ interface GameBoardProps {
   hostId: number | null | undefined;
   /** Whose turn it is */
   currentTurn: number | null;
+  /** Locked player turn order for the current game */
+  turnOrder: number[];
   /** Current player's hand */
   hand: Card[];
   /** Cards in the discard pile */
@@ -60,6 +62,7 @@ export const GameBoard = ({
   myClientId,
   hostId,
   currentTurn,
+  turnOrder,
   hand,
   discardPile,
   playerCardCounts,
@@ -81,6 +84,7 @@ export const GameBoard = ({
 
   // Get disconnected player IDs from orphan hands
   const disconnectedIds = orphanHands.map((o) => o.originalClientId);
+  const playerNumbers = new Map(turnOrder.map((clientId, index) => [clientId, index + 1]));
 
   // Filter out self from opponents
   const opponents = players
@@ -90,6 +94,7 @@ export const GameBoard = ({
       name: p.name,
       avatar: p.avatar || '🎮',
       cardCount: playerCardCounts[p.clientId] || 0,
+      playerNumber: playerNumbers.get(p.clientId),
       isHost: typeof hostId === 'number' && p.clientId === hostId,
       isDisconnected: disconnectedIds.includes(p.clientId),
     }));
@@ -152,9 +157,10 @@ export const GameBoard = ({
       </div>
 
       {/* Player's hand - now fixed positioned in PlayerHand component */}
-      <PlayerHand
-        cards={hand}
-        isMyTurn={isMyTurn}
+        <PlayerHand
+          cards={hand}
+          playerNumber={myClientId !== null ? playerNumbers.get(myClientId) : undefined}
+          isMyTurn={isMyTurn}
         onCardClick={handleCardClick}
         canPlayCard={canPlayCard}
         score={myClientId !== null ? scores?.[myClientId] : undefined}
