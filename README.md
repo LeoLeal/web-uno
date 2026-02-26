@@ -26,7 +26,7 @@ npm run dev:web
 Run only the signaling server:
 
 ```bash
-npm run signaling
+npm run dev:signaling
 ```
 
 ## 🛠️ Technology Stack
