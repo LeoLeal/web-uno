@@ -77,6 +77,12 @@ The system SHALL allow players to send messages using a centered input field.
 - **WHEN** the player sends a chat message via the drawer on mobile
 - **THEN** the drawer automatically retracts (closes) after the message is sent
 
+#### Scenario: Virtual keyboard dismisses on mobile send
+
+- **WHEN** the player sends a chat message via the drawer on mobile
+- **THEN** the mobile chat input field loses focus
+- **AND** the virtual keyboard is dismissed
+
 #### Scenario: Sending and Clearing Input
 
 - **WHEN** the player types a message and clicks send (or presses Enter)

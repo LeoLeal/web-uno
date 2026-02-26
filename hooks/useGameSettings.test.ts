@@ -157,5 +157,28 @@ describe('useGameSettings', () => {
       const settingsMap = mockDoc.getMap('gameSettings');
       expect(settingsMap.get('scoreLimit')).toBe(null);
     });
+
+    it('should handle Infinity scoreLimit correctly', () => {
+      const settingsMap = mockDoc.getMap('gameSettings');
+      settingsMap.set('scoreLimit', Infinity);
+
+      const { result } = renderHook(() => useGameSettings());
+
+      expect(result.current.settings.scoreLimit).toBe(Infinity);
+    });
+
+    it('should set scoreLimit to Infinity via updateSettings', () => {
+      const { result } = renderHook(() => useGameSettings());
+
+      act(() => {
+        result.current.updateSettings({
+          ...DEFAULT_SETTINGS,
+          scoreLimit: Infinity,
+        });
+      });
+
+      const settingsMap = mockDoc.getMap('gameSettings');
+      expect(settingsMap.get('scoreLimit')).toBe(Infinity);
+    });
   });
 });

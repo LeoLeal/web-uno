@@ -50,7 +50,7 @@ The system SHALL calculate and credit the round winner's score from all opponent
 The system SHALL track cumulative scores per player across rounds in Yjs shared state.
 
 #### Scenario: Scores initialized on game start
-- **WHEN** the host starts a multi-round game (`scoreLimit !== null`)
+- **WHEN** the host starts a multi-round game (`scoreLimit` is a finite number or positive infinity)
 - **THEN** `gameStateMap.scores` is initialized as a `Record<number, number>` with all players' clientIds set to `0`
 
 #### Scenario: Scores not initialized for single-round games
@@ -75,21 +75,26 @@ The system SHALL track the current round number in multi-round games.
 - **THEN** `gameStateMap.currentRound` is incremented by 1
 
 ### Requirement: Score limit win condition
-The system SHALL end the game when a player's cumulative score reaches or exceeds the configured score limit.
+The system SHALL end the game when a player's cumulative score reaches or exceeds the configured numeric score limit in multi-round mode.
 
-#### Scenario: Score limit reached
+#### Scenario: Numeric score limit reached
 - **WHEN** a round ends in a multi-round game
 - **AND** the round winner's updated cumulative score is greater than or equal to `scoreLimit`
 - **THEN** `gameStateMap.status` is set to `ENDED`
 - **AND** `gameStateMap.winner` is set to the winning player's `clientId`
 - **AND** `gameStateMap.endType` is set to `WIN`
 
-#### Scenario: Score limit not reached
+#### Scenario: Numeric score limit not reached
 - **WHEN** a round ends in a multi-round game
 - **AND** no player's cumulative score has reached the `scoreLimit`
 - **THEN** `gameStateMap.status` is set to `ROUND_ENDED`
 - **AND** `gameStateMap.winner` is set to the round winner's `clientId`
 - **AND** the game awaits the host to trigger the next round
+
+#### Scenario: Infinity score limit behaves as endless using same comparison path
+- **WHEN** a round ends in a multi-round game with `scoreLimit = Infinity`
+- **THEN** the same numeric threshold comparison logic is used (`newScore >= scoreLimit`)
+- **AND** the game remains in `ROUND_ENDED` after each round because the threshold is not reached
 
 ### Requirement: Starting player rotation
 The system SHALL rotate the starting player each round in a multi-round game.

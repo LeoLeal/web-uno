@@ -8,7 +8,7 @@ The system SHALL define a GameSettings interface with all configurable options.
 
 - **WHEN** the GameSettings type is used
 - **THEN** it includes `startingHandSize` with values 5, 7, or 10
-- **AND** it includes `scoreLimit` with values 100, 200, 300, 500, or null
+- **AND** it includes `scoreLimit` with values 100, 200, 300, 500, positive infinity, or null
 - **AND** it includes boolean flags: `drawStacking`, `jumpIn`, `zeroSwap`, `sevenSwap`, `forcePlay`, `multipleCardPlay`
 
 ### Requirement: Default settings configuration
@@ -31,6 +31,12 @@ The system SHALL provide human-readable descriptions for each setting.
 - **WHEN** tooltip content is needed for a setting
 - **THEN** a description is available that explains the setting's effect
 - **AND** descriptions are concise and user-friendly
+
+#### Scenario: Score mode description clarity
+
+- **WHEN** tooltip content is shown for score limit settings
+- **THEN** the description explicitly distinguishes `Single Round` from `Infinite`
+- **AND** the description explains that `Infinite` keeps cumulative scoring without automatic match end
 
 ### Requirement: Settings stored in Yjs document
 

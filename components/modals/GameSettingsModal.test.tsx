@@ -60,9 +60,10 @@ describe('GameSettingsModal', () => {
       expect(screen.getByRole('radio', { name: '10' })).toBeInTheDocument();
     });
 
-    it('should render score limit options including infinity', () => {
+    it('should render score mode options with Single Round and infinity', () => {
       render(<GameSettingsModal {...defaultProps} />);
 
+      expect(screen.getByRole('radio', { name: 'Single Round' })).toBeInTheDocument();
       expect(screen.getByRole('radio', { name: '100' })).toBeInTheDocument();
       expect(screen.getByRole('radio', { name: '200' })).toBeInTheDocument();
       expect(screen.getByRole('radio', { name: '300' })).toBeInTheDocument();
@@ -88,8 +89,8 @@ describe('GameSettingsModal', () => {
     it('should show current score limit as selected', () => {
       render(<GameSettingsModal {...defaultProps} />);
 
-      // Default is null (∞)
-      expect(screen.getByRole('radio', { name: '∞' })).toHaveAttribute('aria-checked', 'true');
+      // Default is null (Single Round)
+      expect(screen.getByRole('radio', { name: 'Single Round' })).toHaveAttribute('aria-checked', 'true');
     });
 
     it('should reflect non-default settings', () => {
@@ -127,7 +128,16 @@ describe('GameSettingsModal', () => {
       fireEvent.click(screen.getByRole('radio', { name: '200' }));
 
       expect(screen.getByRole('radio', { name: '200' })).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByRole('radio', { name: '∞' })).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByRole('radio', { name: 'Single Round' })).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('should support selecting infinity mode independently from single round', () => {
+      render(<GameSettingsModal {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('radio', { name: '∞' }));
+
+      expect(screen.getByRole('radio', { name: '∞' })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('radio', { name: 'Single Round' })).toHaveAttribute('aria-checked', 'false');
     });
 
     it('should toggle boolean setting when clicking switch', () => {
@@ -197,7 +207,7 @@ describe('GameSettingsModal', () => {
 
       // Verify defaults
       expect(screen.getByRole('radio', { name: '7' })).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByRole('radio', { name: '∞' })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('radio', { name: 'Single Round' })).toHaveAttribute('aria-checked', 'true');
       expect(document.getElementById('setting-drawStacking')).toHaveAttribute(
         'aria-checked',
         'false'

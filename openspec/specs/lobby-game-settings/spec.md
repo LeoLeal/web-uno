@@ -19,7 +19,7 @@ The system SHALL display a Game Settings panel in the lobby that shows current g
 #### Scenario: Summary reflects actual settings
 
 - **WHEN** settings are at default values
-- **THEN** the summary displays "No stacking · 7 cards" (replacing "Standard rules")
+- **THEN** the summary displays `No stacking · 7 cards · Single Round`
 
 #### Scenario: Summary updates when settings change
 
@@ -54,7 +54,7 @@ The system SHALL open a settings configuration modal when the host clicks the Co
 
 ### Requirement: Settings modal has Deal section
 
-The GameSettingsModal SHALL have a "Deal" section with starting hand size and score limit options.
+The GameSettingsModal SHALL have a "Deal" section with starting hand size and score mode options.
 
 #### Scenario: Starting hand size selection
 
@@ -63,10 +63,13 @@ The GameSettingsModal SHALL have a "Deal" section with starting hand size and sc
 - **AND** the current value is highlighted
 - **AND** an info tooltip explains the setting
 
-#### Scenario: Score limit selection
+#### Scenario: Score mode selection
 
 - **WHEN** the host views the Deal section
-- **THEN** they see a pill button group with options 100, 200, 300, 500, and ∞
+- **THEN** they see score options including `Single Round`, 100, 200, 300, 500, and `∞`
+- **AND** `Single Round` maps to `scoreLimit = null`
+- **AND** `∞` maps to `scoreLimit = Infinity`
+- **AND** numeric values map to finite threshold multi-round mode
 - **AND** the current value is highlighted
 - **AND** an info tooltip explains the setting
 

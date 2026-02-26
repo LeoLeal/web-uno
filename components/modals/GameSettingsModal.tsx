@@ -36,7 +36,7 @@ const handSizeOptions = STARTING_HAND_SIZES.map((size) => ({
 
 const scoreLimitOptions = SCORE_LIMITS.map((limit) => ({
   value: limit,
-  label: limit === null ? '∞' : String(limit),
+  label: limit === null ? 'Single Round' : limit === Infinity ? '∞' : String(limit),
 }));
 
 /**

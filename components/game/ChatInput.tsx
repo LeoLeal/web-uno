@@ -8,9 +8,16 @@ interface ChatInputProps {
   placeholder?: string;
   className?: string;
   autoFocus?: boolean;
+  focusBehaviorOnSubmit?: 'keep' | 'blur';
 }
 
-export const ChatInput = ({ onSendMessage, placeholder = "Type a chat message...", className, autoFocus }: ChatInputProps) => {
+export const ChatInput = ({
+  onSendMessage,
+  placeholder = "Type a chat message...",
+  className,
+  autoFocus,
+  focusBehaviorOnSubmit = 'keep',
+}: ChatInputProps) => {
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -25,8 +32,11 @@ export const ChatInput = ({ onSendMessage, placeholder = "Type a chat message...
     if (trimmed) {
       onSendMessage(trimmed);
       setText('');
-      // Optional: keep focus after sending
-      inputRef.current?.focus();
+      if (focusBehaviorOnSubmit === 'blur') {
+        inputRef.current?.blur();
+      } else {
+        inputRef.current?.focus();
+      }
     }
   };
 

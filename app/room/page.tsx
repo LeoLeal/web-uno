@@ -213,7 +213,11 @@ const RoomPageContent = ({ id }: { id: string }) => {
           <div className="px-4 pt-2">
             {headerContent}
             <div className="py-3">
-              <ChatInput onSendMessage={handleSendFromDrawer} placeholder="Chat in game..." />
+              <ChatInput
+                onSendMessage={handleSendFromDrawer}
+                placeholder="Chat in game..."
+                focusBehaviorOnSubmit="blur"
+              />
             </div>
           </div>
         </Drawer>

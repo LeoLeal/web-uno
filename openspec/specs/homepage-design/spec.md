@@ -100,19 +100,20 @@ The room code input field SHALL be styled with a copper border (#8b5a2b), dark f
 
 ---
 
-### Requirement: Typography uses Playfair Display and Nunito
+### Requirement: Typography uses Nunito consistently
 
-The homepage SHALL use Playfair Display for the logo text and Nunito for all UI elements (buttons, labels, hints). Both fonts MUST be loaded via next/font/google with appropriate fallbacks.
+The homepage SHALL use Nunito for the logo text and all UI elements (buttons, labels, hints). Nunito MUST be loaded with appropriate fallbacks.
 
 #### Scenario: Fonts load correctly
 
 - **WHEN** the homepage loads
-- **THEN** the logo displays in Playfair Display and buttons display in Nunito
+- **THEN** the logo text displays in Nunito
+- **AND** buttons and other UI text display in Nunito
 
 #### Scenario: Font fallback on slow connection
 
 - **WHEN** fonts are still loading
-- **THEN** Georgia (for logo) and system sans-serif (for UI) display as fallbacks with minimal layout shift
+- **THEN** system sans-serif displays as fallback with minimal layout shift
 
 ---
 

@@ -79,7 +79,7 @@ export const RoundEndModal = ({
           </div>
           <div className="mt-3 pt-3 border-t border-(--copper-border) opacity-50">
             <p className="text-xs text-(--cream-dark)">
-              Playing to {scoreLimit} points
+              Playing to {scoreLimit === Infinity ? '∞' : scoreLimit} points
             </p>
           </div>
         </div>

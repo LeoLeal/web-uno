@@ -6,8 +6,8 @@
 export const STARTING_HAND_SIZES = [5, 7, 10] as const;
 export type StartingHandSize = (typeof STARTING_HAND_SIZES)[number];
 
-/** Valid score limits (null = single round / no limit) */
-export const SCORE_LIMITS = [100, 200, 300, 500, null] as const;
+/** Valid score limits (null = single round, Infinity = endless multi-round) */
+export const SCORE_LIMITS = [null, 100, 200, 300, 500, Infinity] as const;
 export type ScoreLimit = (typeof SCORE_LIMITS)[number];
 
 /**
@@ -16,7 +16,7 @@ export type ScoreLimit = (typeof SCORE_LIMITS)[number];
 export interface GameSettings {
   /** Number of cards each player receives at game start */
   startingHandSize: StartingHandSize;
-  /** Points needed to win. null = single round (first to empty hand wins) */
+  /** Points needed to win. null = single round; Infinity = endless multi-round */
   scoreLimit: ScoreLimit;
   /** Allow stacking +2 and +4 cards instead of drawing */
   drawStacking: boolean;
@@ -52,7 +52,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 export const SETTING_DESCRIPTIONS: Record<keyof GameSettings, string> = {
   startingHandSize: 'Number of cards each player is dealt at the start of the game.',
   scoreLimit:
-    'First player to reach this score wins. ∞ means single round—first to empty their hand wins.',
+    'Single Round ends when a player empties their hand. Numeric values end at that score. ∞ keeps rounds and cumulative scoring with no automatic end.',
   drawStacking:
     'Stack +2 and +4 cards instead of drawing. The next player who can\'t stack must draw all accumulated cards.',
   jumpIn:
@@ -115,7 +115,11 @@ export const getSettingsSummary = (settings: GameSettings): string => {
   parts.push(`${settings.startingHandSize} cards`);
 
   // 4. Score Limit
-  if (settings.scoreLimit !== null) {
+  if (settings.scoreLimit === null) {
+    parts.push('Single Round');
+  } else if (settings.scoreLimit === Infinity) {
+    parts.push('∞');
+  } else {
     parts.push(`${settings.scoreLimit} pts`);
   }
 

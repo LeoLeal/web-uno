@@ -4,7 +4,7 @@ import { getSettingsSummary, DEFAULT_SETTINGS, GameSettings } from './settings';
 describe('getSettingsSummary', () => {
   it('should return correct summary for default settings', () => {
     const result = getSettingsSummary(DEFAULT_SETTINGS);
-    expect(result).toBe('No stacking · 7 cards');
+    expect(result).toBe('No stacking · 7 cards · Single Round');
   });
 
   it('should show Stacking when drawStacking is enabled', () => {
@@ -39,10 +39,17 @@ describe('getSettingsSummary', () => {
     expect(result).toContain('500 pts');
   });
 
-  it('should not include score limit when null', () => {
+  it('should include single round label when score limit is null', () => {
     const settings: GameSettings = { ...DEFAULT_SETTINGS, scoreLimit: null };
     const result = getSettingsSummary(settings);
-    expect(result).not.toContain('pts');
+    expect(result).toContain('Single Round');
+    expect(result).not.toContain('∞');
+  });
+
+  it('should include infinity label when score limit is Infinity', () => {
+    const settings: GameSettings = { ...DEFAULT_SETTINGS, scoreLimit: Infinity };
+    const result = getSettingsSummary(settings);
+    expect(result).toContain('∞');
   });
 
   it('should reflect different hand sizes', () => {

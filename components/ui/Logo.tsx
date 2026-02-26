@@ -16,7 +16,7 @@ export const Logo = ({ className }: LogoProps) => {
     >
       {/* P2P UN text */}
       <span 
-        className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide"
+        className="font-body text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide"
         style={{ 
           color: 'var(--cream)',
           textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'

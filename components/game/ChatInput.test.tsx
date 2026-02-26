@@ -32,4 +32,30 @@ describe('ChatInput', () => {
     fireEvent.change(input, { target: { value: 'Valid' } });
     expect(button).not.toBeDisabled();
   });
+
+  it('keeps focus after send by default', () => {
+    const onSendMessage = vi.fn();
+    render(<ChatInput onSendMessage={onSendMessage} />);
+
+    const input = screen.getByPlaceholderText('Type a chat message...') as HTMLTextAreaElement;
+    input.focus();
+    fireEvent.change(input, { target: { value: 'Default focus behavior' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(onSendMessage).toHaveBeenCalledWith('Default focus behavior');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('blurs input after send when focus behavior is blur', () => {
+    const onSendMessage = vi.fn();
+    render(<ChatInput onSendMessage={onSendMessage} focusBehaviorOnSubmit="blur" />);
+
+    const input = screen.getByPlaceholderText('Type a chat message...') as HTMLTextAreaElement;
+    input.focus();
+    fireEvent.change(input, { target: { value: 'Blur this input' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(onSendMessage).toHaveBeenCalledWith('Blur this input');
+    expect(document.activeElement).not.toBe(input);
+  });
 });

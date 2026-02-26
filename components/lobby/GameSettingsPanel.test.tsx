@@ -62,6 +62,7 @@ describe('GameSettingsPanel', () => {
 
       expect(screen.getByText(/No stacking/)).toBeInTheDocument();
       expect(screen.getByText(/7 cards/)).toBeInTheDocument();
+      expect(screen.getByText(/Single Round/)).toBeInTheDocument();
     });
 
     it('should show active rules when non-default', () => {
@@ -110,6 +111,17 @@ describe('GameSettingsPanel', () => {
       render(<GameSettingsPanel isHost={false} />);
 
       expect(screen.getByText(/500 pts/)).toBeInTheDocument();
+    });
+
+    it('should show infinity marker when score limit is Infinity', () => {
+      mockSettings = {
+        ...DEFAULT_SETTINGS,
+        scoreLimit: Infinity,
+      };
+
+      render(<GameSettingsPanel isHost={false} />);
+
+      expect(screen.getByText(/∞/)).toBeInTheDocument();
     });
   });
 
